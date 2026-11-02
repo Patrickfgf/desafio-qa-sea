@@ -7,7 +7,8 @@ import copy
 import re
 from pathlib import Path
 
-CPF_PATTERN = re.compile(r"\b\d{3}\.\d{3}\.\d{3}-\d{2}\b|\b\d{11}\b")
+# Digit lookarounds (not \b) so a CPF glued to letters/underscore is still caught.
+CPF_PATTERN = re.compile(r"(?<!\d)\d{3}\.\d{3}\.\d{3}-\d{2}(?!\d)|(?<!\d)\d{11}(?!\d)")
 _ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 _CPF_DIGITS = 11
 _KEPT_TAIL = 2
@@ -57,8 +58,8 @@ def mask_employee(record: dict) -> dict:
     if not isinstance(employee, dict):
         return masked
     for field, masker in _FIELD_MASKERS.items():
-        if isinstance(employee.get(field), str):
-            employee[field] = masker(employee[field])
+        if employee.get(field) is not None:
+            employee[field] = masker(str(employee[field]))
     return masked
 
 

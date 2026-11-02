@@ -88,3 +88,25 @@ def test_scan_tree_counts_cpfs_only_in_matching_suffixes(tmp_path):
     (tmp_path / "c.png").write_text("52998224725", encoding="utf-8")
 
     assert scan_tree(tmp_path) == {"a.md": 1}
+
+
+def test_find_unmasked_cpfs_finds_cpfs_glued_to_letters():
+    assert find_unmasked_cpfs("user_52998224725 x") == ["52998224725"]
+    assert find_unmasked_cpfs("id529.982.247-25") == ["529.982.247-25"]
+
+
+def test_find_unmasked_cpfs_ignores_longer_digit_runs():
+    assert find_unmasked_cpfs("1234567890123") == []
+
+
+def test_mask_text_masks_cpf_glued_to_letters():
+    assert mask_text("id529.982.247-25") == "id529.***.***-25"
+    assert mask_text("user_52998224725") == "user_529.***.***-25"
+
+
+def test_mask_employee_masks_non_string_values():
+    record = {"state": {"employee": {"cpf": 52998224725, "rg": 1234567, "name": None}}}
+
+    employee = mask_employee(record)["state"]["employee"]
+
+    assert employee == {"cpf": "529.***.***-25", "rg": "*****67", "name": None}
