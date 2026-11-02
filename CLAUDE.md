@@ -31,7 +31,7 @@ Estas regras valem para toda tarefa.
 - Arquivos sempre em utf-8.
 - Nunca crie registro com `id` inteiro (nem envie `id` no POST): o json-server v1 compara o id da
   rota como string, e um registro de id inteiro fica inalcançável e inapagável pela API.
-- Ao depurar a listagem, leia só cards `QA-AUTO-` (ou mascare o DOM antes): imprimir o DOM
+- Ao depurar a listagem, leia só cards `QA-AUTO-` (ou mascare o DOM antes com `support.pii.mask_text`): imprimir o DOM
   inteiro joga dados de terceiros no contexto.
 
 ## Git

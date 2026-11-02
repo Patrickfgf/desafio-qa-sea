@@ -13,6 +13,7 @@ def _exchange(
     req_body: bytes | None = b'{"cpf":"52998224725"}',
     resp_body: str = '{"cpf":"52998224725"}',
     resp_headers: dict | None = None,
+    url: str = "http://x/employees",
 ) -> requests.Response:
     resp = requests.Response()
     resp.status_code = 201
@@ -21,7 +22,7 @@ def _exchange(
     resp._content = resp_body.encode("utf-8")
     request = requests.Request(
         "POST",
-        "http://x/employees",
+        url,
         headers={"Content-Type": "application/json"},
         data=req_body,
     ).prepare()
@@ -74,6 +75,45 @@ def test_format_exchange_masks_cpf_before_truncating():
     assert CPF_RAW[:6] not in text
     assert "a" * 1995 in text
     assert "tail" not in text
+
+
+@pytest.mark.parametrize(
+    "cpf",
+    [CPF_RAW, "x" + CPF_RAW + "y", "529.982.247-25"],
+    ids=["bare", "glued", "dotted"],
+)
+def test_format_exchange_masks_cpf_in_url_and_bodies(cpf):
+    resp = _exchange(
+        req_body=f'{{"cpf":"{cpf}"}}'.encode(),
+        resp_body=f'{{"cpf":"{cpf}"}}',
+        url=f"http://x/employees?state.employee.cpf={cpf}",
+    )
+
+    text = format_exchange(resp)
+
+    assert CPF_RAW not in text
+    assert "529.982.247-25" not in text
+    assert "529.982" not in text
+    assert text.splitlines()[0].count("529.***.***-25") == 1
+
+
+def test_format_exchange_masks_cpf_in_header_value():
+    resp = _exchange(resp_headers={"X-Powered-By": CPF_RAW})
+
+    assert CPF_RAW not in format_exchange(resp)
+
+
+def test_format_exchange_keeps_exactly_2000_chars_of_long_body():
+    text = format_exchange(_exchange(resp_body="b" * 2500))
+
+    assert text.splitlines()[-1] == "b" * 2000
+
+
+def test_format_exchange_skips_absent_optional_headers():
+    text = format_exchange(_exchange(resp_headers={"Content-Type": "text/plain"}))
+
+    assert "x-powered-by" not in text
+    assert "access-control" not in text
 
 
 def test_save_exchange_writes_utf8(tmp_path):

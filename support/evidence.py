@@ -1,7 +1,9 @@
 """HTTP evidence helpers: a masked, bounded text record of one request/response exchange.
 
 Bodies are masked with ``mask_text`` BEFORE truncation, so a CPF cut at the boundary can never
-leak an unmasked partial tail.
+leak an unmasked partial tail. The request line and header values are masked too. Masking is
+CPF-only (``support.pii.mask_text``): only save exchanges for ``QA-AUTO-`` records, since names
+and other fields stay raw, and JSON unicode-escaped digits are not matched.
 """
 
 from pathlib import Path
@@ -30,7 +32,7 @@ def _masked_request_body(resp: requests.Response) -> str:
 
 
 def _header_lines(headers, names: tuple[str, ...]) -> list[str]:
-    return [f"{name}: {headers[name]}" for name in names if name in headers]
+    return [mask_text(f"{name}: {headers[name]}") for name in names if name in headers]
 
 
 def format_exchange(resp: requests.Response) -> str:
@@ -40,7 +42,7 @@ def format_exchange(resp: requests.Response) -> str:
     An empty request body is shown as ``(sem corpo)``.
     """
     request = resp.request
-    lines = [f"{request.method} {request.url}"]
+    lines = [mask_text(f"{request.method} {request.url}")]
     lines += _header_lines(request.headers, _REQUEST_HEADERS)
     lines.append(_masked_request_body(resp))
     lines.append(f"HTTP {resp.status_code} {resp.reason}")
