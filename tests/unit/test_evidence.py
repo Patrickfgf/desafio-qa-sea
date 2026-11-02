@@ -1,3 +1,5 @@
+import json
+
 import pytest
 import requests
 
@@ -85,7 +87,7 @@ def test_format_exchange_masks_cpf_before_truncating():
 def test_format_exchange_masks_cpf_in_url_and_bodies(cpf):
     resp = _exchange(
         req_body=f'{{"cpf":"{cpf}"}}'.encode(),
-        resp_body=f'{{"cpf":"{cpf}"}}',
+        resp_body=f'{{"name":"QA-AUTO-x","cpf":"{cpf}"}}',
         url=f"http://x/employees?state.employee.cpf={cpf}",
     )
 
@@ -154,9 +156,7 @@ STRANGER_LEAKS = ("Joao Estranho", "RG-STRANGER-9", "1980-05-17", "11144477735",
 
 
 def _json_exchange(payload) -> requests.Response:
-    import json
-
-    return _exchange(resp_body=json.dumps(payload), url="http://x/employees")
+    return _exchange(resp_body=json.dumps(payload))
 
 
 def _assert_no_stranger(text: str) -> None:
@@ -167,8 +167,7 @@ def _assert_no_stranger(text: str) -> None:
 def test_list_keeps_ours_and_omits_third_party():
     text = format_exchange(_json_exchange([OURS, STRANGER]))
 
-    assert "QA-AUTO-Maria abc123" in text
-    assert "abcdefghijk" in text
+    assert json.dumps(OURS, ensure_ascii=False) in text
     _assert_no_stranger(text)
     assert "(1 registro(s) de terceiros omitido(s) da evidência)" in text
 
@@ -185,8 +184,8 @@ def test_single_third_party_record_becomes_only_omission_text():
     text = format_exchange(_json_exchange(STRANGER))
 
     _assert_no_stranger(text)
-    assert "state" not in text.split("HTTP 201 Created", 1)[1]
-    assert "(registro de terceiro omitido da evidência)" in text
+    assert text.splitlines()[-1] == "(registro de terceiro omitido da evidência)"
+    assert "registro(s)" not in text
 
 
 def test_ours_keeps_invalid_values_raw_and_masks_valid_cpf():
@@ -206,14 +205,8 @@ def test_ours_keeps_invalid_values_raw_and_masks_valid_cpf():
 def test_neutral_records_are_kept(neutral):
     text = format_exchange(_json_exchange([neutral, STRANGER]))
 
-    assert json_fragment(neutral) in text
+    assert json.dumps(neutral, ensure_ascii=False) in text
     _assert_no_stranger(text)
-
-
-def json_fragment(neutral: dict) -> str:
-    import json
-
-    return json.dumps(neutral, ensure_ascii=False)
 
 
 def test_non_json_body_is_still_cpf_masked():
@@ -230,4 +223,146 @@ def test_percent_encoded_cpf_in_url_is_masked():
 
     assert "529%2E982" not in first_line
     assert "529.982" not in first_line
+    assert "529.***.***-25" in first_line
+
+
+# --- fail-closed walking: shapes that must not leak a stranger ---------------------------------
+
+T = STRANGER["state"]["employee"]
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"data": STRANGER},
+        {"items": [STRANGER]},
+        {"result": STRANGER},
+        {"result": {"deep": [{"x": STRANGER}]}},
+        [[STRANGER]],
+        [{"state": {"employee": [T]}}],
+        {"state": {"employee": {}}, **T},
+        {"state": {"employee": {"name": "QA-AUTO-x"}}, "owner": STRANGER},
+        {"state": {"employee": {"name": "QA-AUTO-x"}, "owner": T}},
+        {"State": {"Employee": {"Name": "Zed", "CPF": "11144477735", "RG": "RG-STRANGER-9"}}},
+        {"Name": "Joao Estranho Silva", "birthday": "1980-05-17", "Rg": "RG-STRANGER-9"},
+        {"state": {"employee": T}, "name": "QA-AUTO-x"},
+    ],
+    ids=[
+        "data-dict",
+        "items-list",
+        "other-wrapper",
+        "deep-wrapper",
+        "nested-list",
+        "employee-list",
+        "empty-employee-plus-top-level-pii",
+        "sibling-owner",
+        "sibling-in-state",
+        "mixed-case-keys",
+        "mixed-case-bare",
+        "ours-name-theirs-employee",
+    ],
+)
+def test_unknown_shapes_never_leak_third_party(payload):
+    text = format_exchange(_json_exchange(payload))
+
+    _assert_no_stranger(text)
+    assert "Zed" not in text
+    assert "omitid" in text.splitlines()[-1]
+
+
+def test_two_omissions_are_counted_and_all_third_party_list_is_empty():
+    text = format_exchange(_json_exchange([STRANGER, STRANGER]))
+
+    _assert_no_stranger(text)
+    assert text.splitlines()[-2] == "[]"
+    assert text.splitlines()[-1] == "(2 registro(s) de terceiros omitido(s) da evidência)"
+
+
+def test_bare_unwrapped_third_party_employee_is_omitted():
+    text = format_exchange(_json_exchange(T))
+
+    _assert_no_stranger(text)
+    assert text.splitlines()[-1] == "(registro de terceiro omitido da evidência)"
+
+
+def test_double_encoded_json_is_decoded_and_filtered():
+    body = json.dumps(json.dumps(STRANGER))
+
+    text = format_exchange(_exchange(resp_body=body))
+
+    _assert_no_stranger(text)
+    assert text.splitlines()[-1] == "(registro de terceiro omitido da evidência)"
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        json.dumps(STRANGER) + " trailing garbage",
+        json.dumps(STRANGER) + "\n" + json.dumps(STRANGER),
+        "error: " + json.dumps(T),
+        "name=Joao Estranho Silva&rg=RG-STRANGER-9",
+    ],
+    ids=["trailing-garbage", "ndjson", "error-echo", "form-encoded"],
+)
+def test_unparsable_body_with_pii_keys_is_omitted(body):
+    text = format_exchange(_exchange(resp_body=body))
+
+    _assert_no_stranger(text)
+    assert "omitid" in text.splitlines()[-1]
+
+
+def test_deeply_nested_json_does_not_crash_or_leak():
+    body = "[" * 100000 + json.dumps(T) + "]" * 100000
+
+    text = format_exchange(_exchange(resp_body=body))
+
+    _assert_no_stranger(text)
+
+
+def test_json_string_body_keeps_its_quotes():
+    text = format_exchange(_exchange(resp_body='"hello"'))
+
+    assert text.splitlines()[-1] == '"hello"'
+
+
+def test_our_record_is_kept_intact_with_odd_values():
+    record = {
+        "id": "a1",
+        "extra": [1, {"k": None}],
+        "state": {
+            "employee": {
+                "name": "QA-AUTO-Odd",
+                "cpf": 12345,
+                "rg": "",
+                "birthDay": "2099-01-01",
+            }
+        },
+    }
+
+    text = format_exchange(_json_exchange([record]))
+
+    assert json.dumps([record], ensure_ascii=False) in text
+    assert "omitid" not in text
+
+
+def test_json_body_is_masked_before_truncating():
+    ours = {"name": "QA-AUTO-x", "rg": "p" * 1960, "cpf": CPF_RAW}
+    many = [ours] + [STRANGER] * 3
+
+    text = format_exchange(_json_exchange(many))
+
+    assert CPF_RAW not in text
+    assert CPF_RAW[:6] not in text
+    assert "p" * 1900 in text
+    assert text.splitlines()[-1] == "(3 registro(s) de terceiros omitido(s) da evidência)"
+    _assert_no_stranger(text)
+
+
+def test_double_percent_encoded_cpf_in_url_is_masked():
+    resp = _exchange(url="http://x/employees?cpf=529%252E982%252E247%252D25")
+
+    first_line = format_exchange(resp).splitlines()[0]
+
+    assert "529.982" not in first_line
+    assert "529%252E982" not in first_line
     assert "529.***.***-25" in first_line
