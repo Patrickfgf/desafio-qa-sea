@@ -7,6 +7,7 @@ import pytest
 
 from support.api_client import BASE_URL_DEFAULT, EmployeesClient, delete_quietly, describe
 from support.factory import as_payload, build_employee
+from support.pii import mask_report
 
 
 @pytest.fixture(scope="session")
@@ -37,9 +38,23 @@ def create_employee(api, created_ids):
 
     def _create(**overrides) -> dict:
         resp = api.create(as_payload(build_employee(**overrides)))
+        # Register for cleanup BEFORE asserting, so a failed assert cannot orphan a record.
+        try:
+            body = resp.json()
+        except ValueError:
+            body = None
+        if isinstance(body, dict) and "id" in body:
+            created_ids.append(body["id"])
         assert resp.status_code == 201, describe(resp)
-        body = resp.json()
-        created_ids.append(body["id"])
         return body
 
     return _create
+
+
+@pytest.hookimpl(hookwrapper=True, trylast=True)
+def pytest_runtest_makereport(item, call):
+    """Defense in depth: mask CPFs in failure text and captured output (terminal and HTML)."""
+    outcome = yield
+    report = outcome.get_result()
+    if report.failed:
+        mask_report(report)

@@ -68,6 +68,13 @@ def mask_text(text: str) -> str:
     return CPF_PATTERN.sub(lambda match: mask_cpf(match.group()), text)
 
 
+def mask_report(report) -> None:
+    """Mask CPFs in a pytest report's failure text and captured sections, in place."""
+    if report.longrepr is not None:
+        report.longrepr = mask_text(str(report.longrepr))
+    report.sections = [(name, mask_text(content)) for name, content in report.sections]
+
+
 def find_unmasked_cpfs(text: str) -> list[str]:
     """List every unmasked CPF (formatted or 11 bare digits) found in ``text``."""
     return CPF_PATTERN.findall(text)

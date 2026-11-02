@@ -2,7 +2,7 @@ from uuid import uuid4
 
 import pytest
 
-from support.api_client import describe
+from support.api_client import describe, mismatched_fields
 from support.factory import TEST_PREFIX, as_payload, build_employee
 
 pytestmark = pytest.mark.api
@@ -18,7 +18,7 @@ def test_create_returns_201_and_echoes_payload(api, created_ids):
     assert resp.status_code == 201, describe(resp)
     body = resp.json()
     assert "id" in body, describe(resp)
-    assert body["state"]["employee"] == sent, describe(resp)
+    assert mismatched_fields(sent, body["state"]["employee"]) == [], describe(resp)
 
 
 def test_get_by_id_returns_created_record(api, create_employee):
@@ -27,7 +27,11 @@ def test_get_by_id_returns_created_record(api, create_employee):
     resp = api.get(created["id"])
 
     assert resp.status_code == 200, describe(resp)
-    assert resp.json() == created, describe(resp)
+    got = resp.json()
+    assert got.get("id") == created["id"], describe(resp)
+    assert mismatched_fields(created["state"]["employee"], got["state"]["employee"]) == [], (
+        describe(resp)
+    )
 
 
 def test_put_replaces_record(api, create_employee):

@@ -53,10 +53,37 @@ class EmployeesClient:
 
     def find_ids_by_name(self, name: str) -> list[EmployeeId]:
         """One GET of the list, filtered client-side (never loops over the shared base)."""
-        records = self.list().json()
-        return [
-            r["id"] for r in records if r.get("state", {}).get("employee", {}).get("name") == name
-        ]
+        resp = self.list()
+        if resp.status_code != 200:
+            raise AssertionError(f"Unexpected list status: {describe(resp)}")
+        body = resp.json()
+        records = body.get("data", []) if isinstance(body, dict) else body
+        ids = []
+        for record in records:
+            employee = _employee_of(record)
+            if employee is not None and employee.get("name") == name and "id" in record:
+                ids.append(record["id"])
+        return ids
+
+
+def _employee_of(record) -> dict | None:
+    """Return ``record["state"]["employee"]`` or None when the shape is not as expected."""
+    if not isinstance(record, dict) or not isinstance(record.get("state"), dict):
+        return None
+    employee = record["state"].get("employee")
+    return employee if isinstance(employee, dict) else None
+
+
+def mismatched_fields(expected: dict, actual: dict) -> list[str]:
+    """Sorted names of keys that differ, are missing or extra; never exposes values.
+
+    Use in asserts instead of ``==`` on dicts: pytest's assertion introspection prints both
+    operands on failure, which would put raw PII in the terminal and the HTML report.
+    """
+    keys = set(expected) | set(actual)
+    return sorted(
+        k for k in keys if k not in expected or k not in actual or expected[k] != actual[k]
+    )
 
 
 def describe(resp: requests.Response) -> str:
