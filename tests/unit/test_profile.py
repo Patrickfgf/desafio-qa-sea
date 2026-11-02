@@ -3,7 +3,8 @@ from datetime import date, timedelta
 
 import pytest
 
-from scripts.profile_dataset import profile
+from scripts.profile_dataset import main, profile
+from support.api_client import EmployeesClient
 from support.cpf import is_valid_cpf
 from support.factory import as_payload, build_employee
 from support.pii import find_unmasked_cpfs
@@ -66,20 +67,61 @@ def test_profile_tolerates_malformed_third_party_records():
         {"id": 1},
         {"id": 2, "state": "oops"},
         {"id": 3, "state": {"employee": {"cpf": 123, "birthDay": "not-a-date", "name": 5}}},
+        {"id": 4, "state": {"employee": {"cpf": ""}}},
+        {"id": 5, "state": {"employee": {"cpf": "abc"}}},
+        {"id": 6, "state": {"employee": {"cpf": "²"}}},
     ]
 
     result = profile(records, TODAY)
 
-    assert result["total"] == 5
-    assert result["invalid_cpf"] == 5
+    assert result["total"] == 8
+    assert result["invalid_cpf"] == 8
     assert result["future_birthdays"] == 0
     assert result["test_prefixed"] == 0
 
 
-def test_profile_masks_cpf_inside_grouped_values():
+def test_profile_replaces_free_text_outside_the_allowlist():
+    name = "Maria Aparecida Souza"
+    employee = build_employee(role=name, activity=name, epi=name, caNumber="")
+    employee[name] = "x"
+    record = as_payload(employee)
+    record["state"]["employee"].pop("gender")
+    clean = as_payload(build_employee(role="Cargo 01", activity="", epi="protetor-auditivo"))
+
+    result = profile([record, clean], TODAY)
+
+    dumped = json.dumps(result)
+    assert "Maria" not in dumped
+    assert "Souza" not in dumped
+    assert ["<other>", 1] in result["roles"]
+    assert ["Cargo 01", 1] in result["roles"]
+    assert ["<other>", 1] in result["activities"]
+    assert ["", 1] in result["activities"]
+    assert ["<other>", 1] in result["epis"]
+    assert ["protetor-auditivo", 1] in result["epis"]
+    assert any("<unknown>" in keys for keys, _ in result["employee_key_sets"])
+
+
+def test_profile_masks_missing_and_cpf_like_grouped_values():
     record = as_payload(build_employee(role="12345678909"))
+    del record["state"]["employee"]["activity"]
 
     result = profile([record], TODAY)
 
     assert find_unmasked_cpfs(json.dumps(result)) == []
-    assert result["roles"] == [["123.***.***-09", 1]]
+    assert result["roles"] == [["<other>", 1]]
+    assert result["activities"] == [["missing", 1]]
+
+
+@pytest.mark.parametrize("payload", [{"foo": 1}, {"data": "x"}, "x", None])
+def test_main_rejects_unexpected_list_payload(payload, monkeypatch):
+    class Resp:
+        status_code = 200
+
+        def json(self):
+            return payload
+
+    monkeypatch.setattr(EmployeesClient, "list", lambda self, params=None: Resp())
+
+    with pytest.raises(RuntimeError, match="shape"):
+        main()

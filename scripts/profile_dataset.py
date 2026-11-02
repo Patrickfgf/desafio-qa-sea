@@ -1,8 +1,7 @@
 """Masked profile of the shared employee base: aggregates only, never names or raw CPFs.
 
 This is the only sanctioned way to look at the whole list. It downloads it once (one GET) and
-prints counts; grouped values pass through ``mask_text`` so a CPF typed into a free-text field
-cannot leak.
+prints counts; free-text values outside an allowlist are collapsed to ``<other>``.
 """
 
 import json
@@ -14,12 +13,17 @@ from datetime import date
 
 from support.api_client import BASE_URL_DEFAULT, EmployeesClient, describe
 from support.cpf import is_valid_cpf
-from support.factory import TEST_PREFIX
-from support.pii import mask_text
+from support.factory import ACTIVITIES, EMPLOYEE_FIELDS, EPI_LABELS, ROLES, TEST_PREFIX
 
 TOP_N = 10
 MISSING = "missing"
+OTHER = "<other>"
+UNKNOWN = "<unknown>"
 _ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+_KNOWN_KEYS = frozenset(EMPLOYEE_FIELDS)
+_ROLES = frozenset(ROLES)
+_ACTIVITIES = frozenset(ACTIVITIES)
+_EPIS = frozenset(EPI_LABELS)
 
 
 def _employee_of(record) -> dict:
@@ -46,8 +50,20 @@ def _is_future_birthday(value, today: date) -> bool:
         return False
 
 
-def _top_masked(employees: list[dict], field: str) -> list[list]:
-    counts = Counter(MISSING if field not in e else mask_text(str(e[field])) for e in employees)
+def _top_allowed(employees: list[dict], field: str, allowed: frozenset[str]) -> list[list]:
+    """Top values of ``field``; anything outside ``allowed`` (or "") is collapsed to ``<other>``.
+
+    Allowlist, not name detection: third parties write free text here, and a person's name
+    must never reach stdout.
+    """
+
+    def bucket(employee: dict) -> str:
+        if field not in employee:
+            return MISSING
+        value = employee[field]
+        return value if isinstance(value, str) and (value == "" or value in allowed) else OTHER
+
+    counts = Counter(bucket(e) for e in employees)
     return [[value, count] for value, count in counts.most_common(TOP_N)]
 
 
@@ -56,7 +72,9 @@ def profile(records: list, today: date) -> dict:
     employees = [_employee_of(r) for r in records]
     cpfs = [e.get("cpf") for e in employees]
     cpf_counts = Counter(_digits(c) for c in cpfs if isinstance(c, str) and _digits(c))
-    key_sets = Counter(tuple(sorted(mask_text(str(k)) for k in e)) for e in employees)
+    key_sets = Counter(
+        tuple(sorted(k if k in _KNOWN_KEYS else UNKNOWN for k in e)) for e in employees
+    )
     return {
         "total": len(records),
         "id_types": dict(
@@ -77,9 +95,9 @@ def profile(records: list, today: date) -> dict:
         "is_active": dict(
             Counter(MISSING if "isActive" not in e else str(e["isActive"]) for e in employees)
         ),
-        "roles": _top_masked(employees, "role"),
-        "activities": _top_masked(employees, "activity"),
-        "epis": _top_masked(employees, "epi"),
+        "roles": _top_allowed(employees, "role", _ROLES),
+        "activities": _top_allowed(employees, "activity", _ACTIVITIES),
+        "epis": _top_allowed(employees, "epi", _EPIS),
         "test_prefixed": sum(
             isinstance(e.get("name"), str) and e["name"].startswith(TEST_PREFIX) for e in employees
         ),
@@ -92,9 +110,9 @@ def main() -> None:
     if resp.status_code != 200:
         raise RuntimeError(f"Unexpected list status: {describe(resp)}")
     body = resp.json()
-    records = body.get("data", []) if isinstance(body, dict) else body
+    records = body.get("data") if isinstance(body, dict) else body
     if not isinstance(records, list):
-        raise RuntimeError(f"Unexpected list shape: {describe(resp)}")
+        raise RuntimeError("Unexpected list shape: neither an array nor {data: [...]}")
     sys.stdout.reconfigure(encoding="utf-8")
     print(json.dumps(profile(records, date.today()), ensure_ascii=False, indent=2))
 
