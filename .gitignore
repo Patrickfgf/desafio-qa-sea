@@ -19,3 +19,6 @@ Thumbs.db
 
 # Local work files (drafts, notes, raw diary)
 work/
+
+# Playwright MCP snapshots (page text may contain personal data)
+.playwright-mcp/
