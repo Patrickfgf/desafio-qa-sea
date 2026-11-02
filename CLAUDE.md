@@ -29,6 +29,10 @@ Estas regras valem para toda tarefa.
 - Nunca afirme um bug que o Patrick não reproduziu.
 - O teardown tolera 404: a base pode ser apagada ou resetada no meio da execução.
 - Arquivos sempre em utf-8.
+- Nunca crie registro com `id` inteiro (nem envie `id` no POST): o json-server v1 compara o id da
+  rota como string, e um registro de id inteiro fica inalcançável e inapagável pela API.
+- Ao depurar a listagem, leia só cards `QA-AUTO-` (ou mascare o DOM antes): imprimir o DOM
+  inteiro joga dados de terceiros no contexto.
 
 ## Git
 
