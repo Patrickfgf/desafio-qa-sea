@@ -6,7 +6,9 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
+import requests
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.remote.webdriver import WebDriver
 
 from support.api_client import delete_quietly
@@ -38,7 +40,10 @@ def driver(request: pytest.FixtureRequest) -> Iterator[WebDriver]:
         if _failed(request.node):
             _save_screenshot(drv, request.node.nodeid)
     finally:
-        drv.quit()
+        try:
+            drv.quit()
+        except WebDriverException as exc:  # a dead browser must not mask the test outcome
+            warnings.warn(f"driver.quit() failed: {type(exc).__name__}", stacklevel=1)
 
 
 @pytest.fixture
@@ -46,26 +51,22 @@ def ui_created_names(api) -> Iterator[list[str]]:
     """Names the test is about to create through the UI; matching records are deleted after.
 
     The name is recorded before saving, so cleanup runs even when the test fails midway.
-    One list GET resolves every name; only exact name matches with our prefix are deleted.
+    One list GET (find_ids_by_names) resolves every name; only exact matches with our prefix
+    are deleted.
     """
     names: list[str] = []
     yield names
     ours = {n for n in names if n.startswith(TEST_PREFIX)}
     if not ours:
         return
-    resp = api.list()
-    if resp.status_code != 200:
-        warnings.warn("Cleanup could not list records; UI-created data may remain", stacklevel=1)
+    try:
+        ids = api.find_ids_by_names(ours)
+    except (requests.RequestException, AssertionError, ValueError) as exc:
+        warnings.warn(
+            f"Cleanup could not list records ({type(exc).__name__}); UI-created data may remain",
+            stacklevel=1,
+        )
         return
-    body = resp.json()
-    records = body.get("data", []) if isinstance(body, dict) else body
-    ids = [
-        rec["id"]
-        for rec in records
-        if isinstance(rec, dict)
-        and "id" in rec
-        and ((rec.get("state") or {}).get("employee") or {}).get("name") in ours
-    ]
     leftovers = delete_quietly(api, ids)
     if leftovers:
         warnings.warn(f"Cleanup left {len(leftovers)} record(s) behind", stacklevel=1)

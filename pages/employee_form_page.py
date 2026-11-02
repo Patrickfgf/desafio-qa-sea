@@ -19,6 +19,10 @@ _GENDER_LABELS = {"masculino": "Masculino", "feminino": "Feminino"}
 _FORM = (By.CSS_SELECTOR, "form")
 _ACTIVE_SWITCH = (By.CSS_SELECTOR, "form button[role='switch']")
 _NO_EPI_CHECKBOX = (By.CSS_SELECTOR, "form .ant-checkbox-input")
+_NO_EPI_WRAPPER = (
+    By.XPATH,
+    "//form//label[contains(@class,'ant-checkbox-wrapper')][.//input[contains(@class,'ant-checkbox-input')]]",
+)
 _SAVE = (By.CSS_SELECTOR, "form button.save")
 _FILE_INPUT = (By.CSS_SELECTOR, "input#file")
 
@@ -88,7 +92,8 @@ class EmployeeFormPage:
         box = self.wait.until(EC.presence_of_element_located(_NO_EPI_CHECKBOX))
         if box.is_selected() != checked:
             # The native input is visually hidden by antd; its wrapper label takes the click.
-            self._clickable(_NO_EPI_CHECKBOX).click()
+            # Unverified against the live app: no test exercises usesEpi=False yet.
+            self._clickable(_NO_EPI_WRAPPER).click()
 
     def choose_activity(self, activity: str) -> None:
         self._choose("activity", activity)

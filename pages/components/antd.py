@@ -64,6 +64,15 @@ def select_option(
         # choosing ``label`` is a real change, as it is for a user who switches away and back.
         _pick(driver, select_root, f"@title!={_literal(label)}", timeout)
         wait.until(lambda _: not _selected(select_root, label))
+        # Let the first dropdown finish closing before the root is clicked again.
+        wait.until(
+            lambda _: (
+                select_root.find_element(By.CSS_SELECTOR, "input[role='combobox']").get_attribute(
+                    "aria-expanded"
+                )
+                == "false"
+            )
+        )
     _pick(driver, select_root, f"@title={_literal(label)}", timeout)
     wait.until(lambda _: _selected(select_root, label))
 

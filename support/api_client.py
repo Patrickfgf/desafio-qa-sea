@@ -53,6 +53,10 @@ class EmployeesClient:
 
     def find_ids_by_name(self, name: str) -> list[EmployeeId]:
         """One GET of the list, filtered client-side (never loops over the shared base)."""
+        return self.find_ids_by_names({name})
+
+    def find_ids_by_names(self, names: set[str]) -> list[EmployeeId]:
+        """Same single GET as ``find_ids_by_name``, matching any of the exact ``names``."""
         resp = self.list()
         if resp.status_code != 200:
             raise AssertionError(f"Unexpected list status: {describe(resp)}")
@@ -61,7 +65,7 @@ class EmployeesClient:
         ids = []
         for record in records:
             employee = _employee_of(record)
-            if employee is not None and employee.get("name") == name and "id" in record:
+            if employee is not None and employee.get("name") in names and "id" in record:
                 ids.append(record["id"])
         return ids
 
