@@ -51,7 +51,7 @@ def test_profile_reports_exact_aggregates_without_pii():
     assert result["future_birthdays"] == 1
     assert result["uses_epi_without_ca"] == 1
     assert result["no_epi_with_ca"] == 1
-    assert result["is_active"] == {"True": 3, "False": 1}
+    assert result["is_active"] == {"true": 3, "false": 1}
     assert result["roles"] == [["Cargo 01", 2], ["Cargo 02", 2]]
     assert result["test_prefixed"] == 4
 
@@ -82,7 +82,7 @@ def test_profile_tolerates_malformed_third_party_records():
 
 def test_profile_replaces_free_text_outside_the_allowlist():
     name = "Maria Aparecida Souza"
-    employee = build_employee(role=name, activity=name, epi=name, caNumber="")
+    employee = build_employee(role=name, activity=name, epi=name, caNumber="", isActive=name)
     employee[name] = "x"
     record = as_payload(employee)
     record["state"]["employee"].pop("gender")
@@ -99,6 +99,7 @@ def test_profile_replaces_free_text_outside_the_allowlist():
     assert ["", 1] in result["activities"]
     assert ["<other>", 1] in result["epis"]
     assert ["protetor-auditivo", 1] in result["epis"]
+    assert result["is_active"] == {"<other>": 1, "true": 1}
     assert any("<unknown>" in keys for keys, _ in result["employee_key_sets"])
 
 

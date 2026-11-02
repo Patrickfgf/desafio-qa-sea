@@ -67,6 +67,18 @@ def _top_allowed(employees: list[dict], field: str, allowed: frozenset[str]) -> 
     return [[value, count] for value, count in counts.most_common(TOP_N)]
 
 
+def _active_bucket(employee: dict) -> str:
+    """Closed enum for ``isActive``: free text from third parties never reaches the output."""
+    if "isActive" not in employee:
+        return MISSING
+    value = employee["isActive"]
+    if value is True:
+        return "true"
+    if value is False:
+        return "false"
+    return OTHER
+
+
 def profile(records: list, today: date) -> dict:
     """Pure aggregate of ``records``; tolerates any malformed third-party record."""
     employees = [_employee_of(r) for r in records]
@@ -92,9 +104,7 @@ def profile(records: list, today: date) -> dict:
         "no_epi_with_ca": sum(
             e.get("usesEpi") is False and not _is_blank(e.get("caNumber")) for e in employees
         ),
-        "is_active": dict(
-            Counter(MISSING if "isActive" not in e else str(e["isActive"]) for e in employees)
-        ),
+        "is_active": dict(Counter(_active_bucket(e) for e in employees)),
         "roles": _top_allowed(employees, "role", _ROLES),
         "activities": _top_allowed(employees, "activity", _ACTIVITIES),
         "epis": _top_allowed(employees, "epi", _EPIS),
