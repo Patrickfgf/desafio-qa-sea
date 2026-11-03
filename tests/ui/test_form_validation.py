@@ -65,14 +65,19 @@ def test_empty_ca_blocks_submit_with_native_message(driver, base_url, api, ui_cr
     raises=AssertionError,
     reason="BUG-008: CPF aceito sem validação de conteúdo",
 )
-def test_cpf_field_rejects_letters(driver, base_url, ui_created_names):
+def test_cpf_field_rejects_letters(driver, base_url, api, ui_created_names):
     emp = build_employee(isActive=True, cpf="abcdefghijk")
     ui_created_names.append(emp["name"])
     form = _open_filled_form(driver, base_url, emp)
 
     form.submit()
 
-    assert not form.wait_until_closed(), "form saved a CPF made of letters"
+    if not form.wait_until_closed():
+        return  # blocked before saving: the accepted behaviour
+    # A closed form proves nothing (BUG-024, API errors): judge the stored value, and treat
+    # "nothing saved" as a broken precondition, not as the bug.
+    stored = find_saved_record(api, emp["name"])["state"]["employee"]["cpf"]
+    assert stored != "abcdefghijk", "a CPF made of letters was stored as typed"
 
 
 @pytest.mark.xfail(
@@ -100,14 +105,17 @@ def test_formatted_cpf_is_not_silently_truncated(driver, base_url, api, ui_creat
     raises=AssertionError,
     reason="BUG-010: Data de nascimento sem validação de intervalo",
 )
-def test_birth_date_rejects_future(driver, base_url, ui_created_names):
+def test_birth_date_rejects_future(driver, base_url, api, ui_created_names):
     emp = build_employee(isActive=True, birthDay="2099-12-31")
     ui_created_names.append(emp["name"])
     form = _open_filled_form(driver, base_url, emp)
 
     form.submit()
 
-    assert not form.wait_until_closed(), "form saved a birth date in 2099"
+    if not form.wait_until_closed():
+        return  # blocked before saving: the accepted behaviour
+    stored = find_saved_record(api, emp["name"])["state"]["employee"]["birthDay"]
+    assert stored != "2099-12-31", "a birth date in 2099 was stored as typed"
 
 
 @pytest.mark.xfail(
