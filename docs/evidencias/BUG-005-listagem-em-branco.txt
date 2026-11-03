@@ -1,0 +1,17 @@
+BUG-005: Registro sem state.employee deixa a listagem em branco
+Origem: texto da verificação automatizada de 03/11/2026 (Selenium, Chrome headless), contra https://analista-teste.seatecnologia.com.br.
+Só o registro de teste desta verificação (sem state.employee, portanto sem nome e sem dado pessoal), apagado ao fim; sem captura de tela.
+Executado uma única vez e o registro apagado em seguida: o defeito deixa a tela em branco para todos os usuários, por isso NÃO é automatizado nem deve ser repetido sem necessidade.
+
+POST sem state.employee -> 201
+id retornado: 'f190' (tipo str)
+listagem renderizou (botao Adicionar visivel): True
+contador Ativos/Total: nao encontrado
+tamanho do texto do body: 0; filhos de #root: 0
+erros SEVERE no console: 3
+  console: https://analista-teste.seatecnologia.com.br/assets/index-44cc5754.js 39:160 TypeError: Cannot read properties of undefined (reading 'isActive')
+    at https://analista-teste.seatecnologia.com.br/asset
+  console: https://analista-teste.seatecnologia.com.br/assets/index-44cc5754.js 247:14220 Uncaught TypeError: Cannot read properties of undefined (reading 'isActive')
+DELETE f190 -> 200
+confirmacao ?id= : status 200, vazio=True
+leftovers: 0

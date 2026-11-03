@@ -1,0 +1,13 @@
+BUG-012: Adicionar outra atividade salva e fecha o formulário
+Origem: texto de uma verificação automatizada anterior a 03/11/2026 (Selenium, Chrome headless; o arquivo de origem não traz data), contra https://analista-teste.seatecnologia.com.br.
+Só registros próprios (nome QA-AUTO-), apagados ao fim; CPF mascarado; sem captura de tela.
+O botão é type=submit dentro do form: clicar fecha o formulário e cria 1 registro.
+
+button type attr: submit | inside form: True
+n activity-ish selects before: 0 | epiSelect: 1
+checkbox checked: False
+invalid before: []
+form closed after click: True
+records created: 1 ['75b9']
+created via UI: 200 usesEpi/activity/epi/role: {'usesEpi': False, 'activity': None, 'epi': None, 'role': '', 'isActive': False}
+leftovers after cleanup: 0

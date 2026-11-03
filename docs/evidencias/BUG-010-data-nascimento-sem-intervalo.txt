@@ -1,0 +1,28 @@
+BUG-010: Data de nascimento sem validação de intervalo
+Gerado em 03/11/2026 contra https://analista-teste.seatecnologia.com.br/employees com requests (sem credencial).
+Registros: sintéticos, nome com prefixo QA-AUTO-, apagados em seguida e confirmados por ?id=.
+CPF mascarado antes de salvar; registros de terceiros nunca entram.
+Parte da API. Esperado: 400/422 para data futura. Obtido: 201 e gravada como enviada.
+
+## POST com birthDay 2099-12-31
+POST https://analista-teste.seatecnologia.com.br/employees
+content-type: application/json
+{"state": {"employee": {"isActive": true, "name": "QA-AUTO-Mariah da Rosa 2f4b7c", "gender": "feminino", "cpf": "275.***.***-59", "birthDay": "2099-12-31", "rg": "3816427", "role": "Cargo 04", "usesEpi": true, "activity": "Ativid 05", "epi": "protetor-auditivo", "caNumber": "15901"}}}
+HTTP 201 Created
+content-type: application/json
+access-control-allow-origin: *,*
+access-control-allow-methods: GET, HEAD, PUT, PATCH, POST, DELETE
+x-powered-by: tinyhttp
+{"id": "c013", "state": {"employee": {"isActive": true, "name": "QA-AUTO-Mariah da Rosa 2f4b7c", "gender": "feminino", "cpf": "275.***.***-59", "birthDay": "2099-12-31", "rg": "3816427", "role": "Cargo 04", "usesEpi": true, "activity": "Ativid 05", "epi": "protetor-auditivo", "caNumber": "15901"}}}
+
+
+Limpeza: 1 registro(s) criado(s), apagado(s); restantes confirmados por ?id=: 0
+
+## Parte da interface
+Origem: texto da verificação automatizada de 03/11/2026 (Selenium, Chrome headless). Campo type=date sem min nem max; os 4 casos gravam a data como digitada.
+input type=date min='' max='' required='true'
+case a via=setter want=2099-12-31 input.value='2099-12-31' stored='2099-12-31' records=1
+case b via=setter want=0001-01-01 input.value='0001-01-01' stored='0001-01-01' records=1
+case c via=keyboard want=2099-12-31 input.value='2099-12-31' stored='2099-12-31' records=1
+case d via=keyboard want=0001-01-01 input.value='0001-01-01' stored='0001-01-01' records=1
+cleanup: created_ids=4 delete_leftovers=0 still_listed=0

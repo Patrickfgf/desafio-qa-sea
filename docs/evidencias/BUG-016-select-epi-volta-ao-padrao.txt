@@ -1,0 +1,19 @@
+BUG-016: Select de EPI volta ao padrão ao digitar o CA
+Origem: texto da verificação automatizada de 03/11/2026 (Selenium, Chrome headless), contra https://analista-teste.seatecnologia.com.br.
+Só registros próprios (nome QA-AUTO-), apagados ao fim; CPF mascarado; sem captura de tela.
+O select passa a exibir 'Capacete de segurança' depois de digitar o CA, mas o valor gravado é o escolhido.
+
+[apos RG] epi exibido='Capacete de segurança'
+[apos escolher Cargo 03] epi exibido='Capacete de segurança'
+[apos escolher Ativid 03] epi exibido='Capacete de segurança'
+[apos escolher Luvas] epi exibido='Luvas descartáveis'
+[apos digitar CA] epi exibido='Capacete de segurança'
+selects exibidos antes de salvar: {'role': 'Cargo 03', 'activity': 'Ativid 03', 'epi': 'Capacete de segurança'}
+POSTs capturados: 1; do nosso registro: 1
+POST body.state.employee chaves: activity, birthDay, caNumber, cpf, epi, gender, isActive, name, rg, role, usesEpi
+POST epi='luvas-descartaveis' role='Cargo 03' activity='Ativid 03' usesEpi=False 'id' in POST=False
+registros com o nome exato: 1
+GET id=b081 status=200 epi='luvas-descartaveis' role='Cargo 03' activity='Ativid 03' usesEpi=False keys=['activity', 'birthDay', 'caNumber', 'cpf', 'epi', 'gender', 'isActive', 'name', 'rg', 'role', 'usesEpi']
+DELETE id=b081 -> 200
+GET ?id=b081 -> 200, 0 registros
+sobras: 0

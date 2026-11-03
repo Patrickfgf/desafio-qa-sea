@@ -1,0 +1,14 @@
+BUG-003: Listagem exibe o CPF completo no card
+Origem: texto da verificação automatizada de 03/11/2026 (Selenium, Chrome headless), contra https://analista-teste.seatecnologia.com.br.
+Só registros próprios (nome QA-AUTO-), apagados ao fim; CPF mascarado; sem captura de tela.
+Só o card do registro de teste. O CPF abaixo foi mascarado para o arquivo; na tela os 11 dígitos aparecem sem asterisco (contains '*'=False).
+
+POST status=201
+id type=str
+card cpf text (masked for file): 578.***.***-52
+shown digit count=11; contains '*'=False
+equals full formatted CPF of the record=True
+equals full raw digits=True
+card role/activity present: role=True activity=True
+confirm gone id=bc8d: status=200 matches=0
+leftovers=0

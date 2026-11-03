@@ -1,0 +1,12 @@
+BUG-007: Anexo do ASO não é enviado nem persistido
+Origem: texto de uma verificação automatizada anterior a 03/11/2026 (Selenium, Chrome headless; o arquivo de origem não traz data), contra https://analista-teste.seatecnologia.com.br.
+Só registros próprios (nome QA-AUTO-), apagados ao fim; CPF mascarado; sem captura de tela.
+O único POST é application/json, sem multipart, e o registro não guarda referência ao arquivo.
+
+file input value after pick: aso-sintetico.pdf
+page shows name: True
+POST https://analista-teste.seatecnologia.com.br/employees CT=application/json len=197 hasMultipart=False
+postData keys: ['isActive', 'name', 'gender', 'cpf', 'birthDay', 'rg', 'role', 'usesEpi', 'caNumber']
+GET record keys: ['id', 'state'] employee keys: ['isActive', 'name', 'gender', 'cpf', 'birthDay', 'rg', 'role', 'usesEpi', 'caNumber']
+any file-ish text in record: False
+leftovers after cleanup: 0

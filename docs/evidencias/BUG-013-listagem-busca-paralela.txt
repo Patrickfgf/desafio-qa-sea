@@ -1,0 +1,89 @@
+BUG-013: Listagem busca dados em paralelo ao POST e fica velha
+Origem: texto da verificação automatizada de 03/11/2026 (Selenium, Chrome headless), contra https://analista-teste.seatecnologia.com.br.
+Só registros próprios (nome QA-AUTO-), apagados ao fim; CPF mascarado; sem captura de tela.
+4 tentativas: o GET sai junto com o POST; em 1 de 4 o card não aparece sem recarregar. Só contadores agregados; nenhum cartão de terceiros.
+
+=== trial 1 ===
+Load inicial: contador Ativos 2/4
+  [carga] SEND GET /employees
+  [carga] RESP GET -> 200
+Card antes de salvar existe: False
+Rede durante abrir/preencher formulário (antes de Salvar): []
+Spans com o nome exato (sem reload): 1
+Rede desde o clique em Salvar (apenas /employees):
+  SEND GET /employees
+  SEND POST /employees
+  RESP GET -> 200
+  RESP POST -> 201
+Card visível sem reload (espera de 8s): True
+Contador sem reload: Ativos 3/5 (antes 2/4)
+POSTs: 1; GETs enviados depois do POST: 0; GETs enviados antes do POST (pós-clique): 1
+Após reload: card presente=True; contador Ativos 3/5
+Spans com o nome exato (após reload): 1
+  [reload] SEND GET /employees
+  [reload] RESP GET -> 200
+Registros criados encontrados por nome exato: 1
+Leftovers: 0
+=== trial 2 ===
+Load inicial: contador Ativos 2/4
+  [carga] SEND GET /employees
+  [carga] RESP GET -> 200
+Card antes de salvar existe: False
+Rede durante abrir/preencher formulário (antes de Salvar): []
+Spans com o nome exato (sem reload): 0
+Rede desde o clique em Salvar (apenas /employees):
+  SEND GET /employees
+  SEND POST /employees
+  RESP GET -> 200
+  RESP POST -> 201
+Card visível sem reload (espera de 8s): False
+Contador sem reload: Ativos 2/4 (antes 2/4)
+POSTs: 1; GETs enviados depois do POST: 0; GETs enviados antes do POST (pós-clique): 1
+Após reload: card presente=True; contador Ativos 3/5
+Spans com o nome exato (após reload): 1
+  [reload] SEND GET /employees
+  [reload] RESP GET -> 200
+Registros criados encontrados por nome exato: 1
+Leftovers: 0
+=== trial 3 ===
+Load inicial: contador Ativos 2/4
+  [carga] SEND GET /employees
+  [carga] RESP GET -> 200
+Card antes de salvar existe: False
+Rede durante abrir/preencher formulário (antes de Salvar): []
+Spans com o nome exato (sem reload): 1
+Rede desde o clique em Salvar (apenas /employees):
+  SEND GET /employees
+  SEND POST /employees
+  RESP GET -> 200
+  RESP POST -> 201
+Card visível sem reload (espera de 8s): True
+Contador sem reload: Ativos 3/5 (antes 2/4)
+POSTs: 1; GETs enviados depois do POST: 0; GETs enviados antes do POST (pós-clique): 1
+Após reload: card presente=True; contador Ativos 3/5
+Spans com o nome exato (após reload): 1
+  [reload] SEND GET /employees
+  [reload] RESP GET -> 200
+Registros criados encontrados por nome exato: 1
+Leftovers: 0
+=== trial 4 ===
+Load inicial: contador Ativos 2/4
+  [carga] SEND GET /employees
+  [carga] RESP GET -> 200
+Card antes de salvar existe: False
+Rede durante abrir/preencher formulário (antes de Salvar): []
+Spans com o nome exato (sem reload): 1
+Rede desde o clique em Salvar (apenas /employees):
+  SEND GET /employees
+  SEND POST /employees
+  RESP POST -> 201
+  RESP GET -> 200
+Card visível sem reload (espera de 8s): True
+Contador sem reload: Ativos 3/5 (antes 2/4)
+POSTs: 1; GETs enviados depois do POST: 0; GETs enviados antes do POST (pós-clique): 1
+Após reload: card presente=True; contador Ativos 3/5
+Spans com o nome exato (após reload): 1
+  [reload] SEND GET /employees
+  [reload] RESP GET -> 200
+Registros criados encontrados por nome exato: 1
+Leftovers: 0

@@ -1,0 +1,30 @@
+BUG-008: CPF aceito sem validação de conteúdo
+Gerado em 03/11/2026 contra https://analista-teste.seatecnologia.com.br/employees com requests (sem credencial).
+Registros: sintéticos, nome com prefixo QA-AUTO-, apagados em seguida e confirmados por ?id=.
+CPF mascarado antes de salvar; registros de terceiros nunca entram.
+Esperado: 400/422. Obtido: 201 e o valor é gravado como enviado.
+
+## POST com cpf com letras (abcdefghijk)
+POST https://analista-teste.seatecnologia.com.br/employees
+content-type: application/json
+{"state": {"employee": {"isActive": true, "name": "QA-AUTO-Vin\u00edcius Jesus 5d932d", "gender": "masculino", "cpf": "abcdefghijk", "birthDay": "1991-10-09", "rg": "1561990", "role": "Cargo 05", "usesEpi": true, "activity": "Ativid 03", "epi": "capacete-de-seguran\u00e7a", "caNumber": "07904"}}}
+HTTP 201 Created
+content-type: application/json
+access-control-allow-origin: *,*
+access-control-allow-methods: GET, HEAD, PUT, PATCH, POST, DELETE
+x-powered-by: tinyhttp
+{"id": "921b", "state": {"employee": {"isActive": true, "name": "QA-AUTO-Vinícius Jesus 5d932d", "gender": "masculino", "cpf": "abcdefghijk", "birthDay": "1991-10-09", "rg": "1561990", "role": "Cargo 05", "usesEpi": true, "activity": "Ativid 03", "epi": "capacete-de-segurança", "caNumber": "07904"}}}
+
+## POST com cpf de 11 dígitos e dígito verificador errado
+POST https://analista-teste.seatecnologia.com.br/employees
+content-type: application/json
+{"state": {"employee": {"isActive": true, "name": "QA-AUTO-Mirella Cavalcanti 4fd956", "gender": "masculino", "cpf": "637.***.***-43", "birthDay": "2005-03-21", "rg": "7312621", "role": "Cargo 03", "usesEpi": true, "activity": "Ativid 02", "epi": "protetor-auditivo", "caNumber": "34336"}}}
+HTTP 201 Created
+content-type: application/json
+access-control-allow-origin: *,*
+access-control-allow-methods: GET, HEAD, PUT, PATCH, POST, DELETE
+x-powered-by: tinyhttp
+{"id": "f374", "state": {"employee": {"isActive": true, "name": "QA-AUTO-Mirella Cavalcanti 4fd956", "gender": "masculino", "cpf": "637.***.***-43", "birthDay": "2005-03-21", "rg": "7312621", "role": "Cargo 03", "usesEpi": true, "activity": "Ativid 02", "epi": "protetor-auditivo", "caNumber": "34336"}}}
+
+
+Limpeza: 2 registro(s) criado(s), apagado(s); restantes confirmados por ?id=: 0

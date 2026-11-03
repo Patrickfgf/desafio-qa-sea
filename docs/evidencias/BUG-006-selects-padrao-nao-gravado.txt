@@ -1,0 +1,12 @@
+BUG-006: Selects exibem padrão que não é gravado ao salvar
+Origem: texto de uma verificação automatizada anterior a 03/11/2026 (Selenium, Chrome headless; o arquivo de origem não traz data), contra https://analista-teste.seatecnologia.com.br.
+Só registros próprios (nome QA-AUTO-), apagados ao fim; CPF mascarado; sem captura de tela.
+Sem tocar nos selects, role/activity/epi não são gravados (role vazio); tocando, são gravados.
+
+shown selects: ['Cargo 01', 'Ativid 01', 'Capacete de segurança']
+untouched {"isActive": false, "name": "QA-AUTO-V-CAND-03-untouched-4ae5", "gender": "masculino", "cpf": "529.***.***-25", "birthDay": "1990-01-01", "rg": "1234567", "role": "", "usesEpi": false, "caNumber": "12345"}
+shown selects: ['Cargo 01', 'Ativid 01', 'Capacete de segurança']
+touched {"isActive": false, "name": "QA-AUTO-V-CAND-03-touched-4ae5", "gender": "masculino", "cpf": "529.***.***-25", "birthDay": "1990-01-01", "rg": "1234567", "role": "Cargo 02", "usesEpi": false, "activity": "Ativid 02", "caNumber": "12345"}
+leftover before delete: ['d90c', '36ac']
+not deleted: []
+remaining: [[], []]

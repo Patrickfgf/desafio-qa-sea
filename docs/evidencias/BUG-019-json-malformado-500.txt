@@ -1,0 +1,18 @@
+BUG-019: JSON malformado devolve 500 em vez de 400
+Gerado em 03/11/2026 contra https://analista-teste.seatecnologia.com.br/employees com requests (sem credencial).
+Registros: sintéticos, nome com prefixo QA-AUTO-, apagados em seguida e confirmados por ?id=.
+CPF mascarado antes de salvar; registros de terceiros nunca entram.
+Esperado: 400. Obtido: 500 com mensagem crua do parser. Nada é criado (corpo nunca vazio).
+
+## POST com corpo 'not json' e Content-Type application/json
+POST https://analista-teste.seatecnologia.com.br/employees
+content-type: application/json
+not json
+HTTP 500 Internal Server Error
+access-control-allow-origin: *
+access-control-allow-methods: GET, HEAD, PUT, PATCH, POST, DELETE
+x-powered-by: tinyhttp
+Unexpected token o in JSON at position 1
+
+
+Limpeza: 0 registro(s) criado(s), apagado(s); restantes confirmados por ?id=: 0
