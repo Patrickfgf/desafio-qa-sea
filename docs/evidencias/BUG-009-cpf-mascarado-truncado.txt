@@ -1,15 +1,15 @@
 BUG-009: CPF digitado com máscara é truncado sem aviso
 Origem: texto da verificação automatizada de 03/11/2026 (Selenium, Chrome headless), contra https://analista-teste.seatecnologia.com.br.
 Só registros próprios (nome QA-AUTO-), apagados ao fim; CPF mascarado; sem captura de tela.
-[formatted] = CPF com pontos e traço digitado tecla a tecla; [bare] = controle com 11 caracteres. CPF mascarado no arquivo.
+[formatted] = CPF com pontos e traço digitado tecla a tecla; [bare] = controle com 11 caracteres. CPF sempre mascarado ou descrito; nenhum dígito do CPF truncado é reproduzido.
 
 [formatted] input maxlength attr='11' type='text'
-[formatted] typed='155.***.***-24' (14 chars) -> field value='155.690.462' (11 chars)
+[formatted] typed='155.***.***-24' (14 chars) -> field value=first 11 chars of the typed CPF (9 digits + 2 dots; last 2 digits and dash lost) (11 chars)
 [formatted] error elements in form before save=0
 [formatted] alerts/messages after save=[]
-[formatted] card cpf displayed='155.690.462'
+[formatted] card cpf displayed=same 11-char truncated value (9 digits + 2 dots)
 [formatted] records found by exact name=1
-[formatted] stored cpf='155.690.462' (len 11) ; expected full='155.***.***-24'
+[formatted] stored cpf=same 11-char truncated value (len 11) ; expected full='155.***.***-24'
 [bare] input maxlength attr='11' type='text'
 [bare] typed='155.***.***-24' (11 chars) -> field value='155.***.***-24' (11 chars)
 [bare] error elements in form before save=0

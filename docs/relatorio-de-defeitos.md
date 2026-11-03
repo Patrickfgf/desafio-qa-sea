@@ -1,8 +1,8 @@
 # Relatório de defeitos
 
-> **Status:** todo defeito abaixo foi verificado por automação (Selenium e requests, em 03/11/2026). A coluna "Reproduzido à mão" registra a reprodução manual, hoje **pendente** para todos (o que não for reproduzido sai do relatório, junto com o teste e a evidência). Nenhum defeito é afirmado como reproduzido à mão antes disso.
+> **Status:** todo defeito abaixo foi verificado por automação (Selenium e requests). A verificação é de 03/11/2026, exceto BUG-001, BUG-006, BUG-007 e BUG-012, que vêm de uma verificação automatizada anterior, sem data registrada. A coluna "Reproduzido à mão" registra a reprodução manual, hoje **pendente** para todos (o que não for reproduzido sai do relatório, junto com o teste e a evidência). Nenhum defeito é afirmado como reproduzido à mão antes disso.
 
-**Ambiente de todos os defeitos:** `https://analista-teste.seatecnologia.com.br/` (interface e `/employees`), 03/11/2026, Chrome headless (interface) e `requests` (API). Base compartilhada: só registros sintéticos com nome `QA-AUTO-`, apagados em seguida. CPF sempre mascarado (`123.***.***-09`) nas evidências.
+**Ambiente de todos os defeitos:** `https://analista-teste.seatecnologia.com.br/` (interface e `/employees`), 03/11/2026 (BUG-001, BUG-006, BUG-007 e BUG-012: verificação anterior, sem data), Chrome headless (interface) e `requests` (API). Base compartilhada: só registros sintéticos com nome `QA-AUTO-`, apagados em seguida. CPF mascarado (`123.***.***-09`) ou descrito, nunca em claro, nas evidências.
 
 ## Escalas
 
@@ -56,7 +56,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 ### BUG-001 — Checkbox não usa EPI grava usesEpi invertido
 
 - **Categoria:** funcional (tela → payload). **Severidade:** Alta. **Prioridade:** P1.
-- **Ambiente:** interface, 03/11/2026, Chrome headless.
+- **Ambiente:** interface, verificação automatizada anterior (sem data registrada), Chrome headless.
 - **Pré-condições:** lista aberta; registro de teste com nome `QA-AUTO-`.
 - **Passos:**
   1. Clicar em "Adicionar Funcionário" e preencher os campos obrigatórios com dados fictícios.
@@ -137,7 +137,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 ### BUG-006 — Selects exibem padrão que não é gravado ao salvar
 
 - **Categoria:** funcional (tela → payload). **Severidade:** Média. **Prioridade:** P2.
-- **Ambiente:** interface, 03/11/2026, Chrome headless.
+- **Ambiente:** interface, verificação automatizada anterior (sem data registrada), Chrome headless.
 - **Pré-condições:** registro de teste; nenhum select tocado.
 - **Passos:**
   1. Abrir o formulário; os selects mostram "Cargo 01", "Ativid 01" e "Capacete de segurança".
@@ -151,7 +151,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 ### BUG-007 — Anexo do ASO não é enviado nem persistido
 
 - **Categoria:** funcional (tela → payload). **Severidade:** Média. **Prioridade:** P2.
-- **Ambiente:** interface, 03/11/2026, Chrome headless.
+- **Ambiente:** interface, verificação automatizada anterior (sem data registrada), Chrome headless.
 - **Pré-condições:** arquivo `.pdf` sintético pequeno.
 - **Passos:**
   1. No formulário, escolher o arquivo em "Atestado de Saúde Ocupacional (opcional)"; o nome aparece.
@@ -222,7 +222,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 ### BUG-012 — Adicionar outra atividade salva e fecha o formulário
 
 - **Categoria:** funcional (formulário). **Severidade:** Média. **Prioridade:** P2.
-- **Ambiente:** interface, 03/11/2026, Chrome headless.
+- **Ambiente:** interface, verificação automatizada anterior (sem data registrada), Chrome headless.
 - **Pré-condições:** formulário preenchido; nome `QA-AUTO-`.
 - **Passos:**
   1. Preencher o formulário.
