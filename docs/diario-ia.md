@@ -13,7 +13,7 @@ Um prompt como "faz o desafio" devolve código plausível e um relatório confia
 | `brainstorming` | Perguntas e alternativas com trade-off até um design aprovado, antes do código | Limites do ambiente compartilhado definidos antes do primeiro request (erro 2) |
 | `writing-plans` | Tasks pequenas, teste primeiro, resultado esperado, checkpoint humano | 15 tasks; cada PR cabe numa revisão |
 | *Subagent-driven development* | Um agente implementa cada task, outro revisa | CPF no relatório do pytest (erro 3); print fail-open (erro 6) |
-| Verificação adversarial | Exploradores propõem; verificadores tentam refutar (19 dos 26 defeitos) | Severidade inflada em 14 candidatos (erro 4) |
+| Verificação adversarial | Exploradores propõem; verificadores tentam refutar (18 dos 26 defeitos) | Severidade inflada em 14 candidatos (erro 4) |
 | Modelo por tarefa | Haiku extrai, Sonnet implementa e verifica, Opus faz a revisão final | Revisão final: 1 CRITICAL e 4 HIGH, todos tratados |
 | `/resume` e `/end-session` | Log diário no meu Obsidian: feito, pendências, decisões | Troquei de máquina (Windows → Mac) sem perder estado |
 
@@ -23,7 +23,7 @@ A IA também leu os bugs e testes de um repositório público de 2025 do mesmo d
 
 ## O que a IA errou e como foi corrigido
 
-Seleção de 9 das 20 entradas do diário bruto.
+Seleção de 10 das 21 entradas do diário bruto.
 
 1. Tratou "upload de ASO" como fato, vindo de pesquisa externa. Pego por subagente revisor. Design §4.
 2. Sugeriu e-mail à empresa para aprovar os limites do teste. Pego por mim. Design §11.
