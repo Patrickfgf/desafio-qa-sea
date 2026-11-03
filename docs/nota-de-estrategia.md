@@ -6,7 +6,7 @@ O prazo era até quarta 04/11. O trabalho registrado no git vai de 31/10 a 03/11
 
 ## O que priorizei e por quê
 
-Montei um mapa de risco (`docs/plano-de-testes.md`, seção 3) cruzando impacto e probabilidade. Fui a fundo em três áreas: o que a tela grava contra o que o usuário vê, privacidade (CPF completo na tela e na API) e validação de CPF e data. O resto ficou em "testar leve", com um ou dois testes que documentam o comportamento. Controle de acesso tem severidade Alta, mas ficou leve: a ausência de autenticação é binária, e um teste por método já prova. As decisões dos portões foram tomadas pela IA por delegação em 03/11 (ver `docs/diario-ia.md`).
+A IA propôs e decidiu o mapa de risco (`docs/plano-de-testes.md`, seção 3) e o corte, por delegação minha em 03/11 (ver `docs/diario-ia.md`); eu revisei. ⟪PATRICK: confirme depois de revisar o mapa⟫ O mapa cruza impacto e probabilidade. Foi a fundo em três áreas: o que a tela grava contra o que o usuário vê, privacidade (CPF completo na tela e na API) e validação de CPF e data. O resto ficou em "testar leve", com um ou dois testes que documentam o comportamento. Controle de acesso tem severidade Alta, mas ficou leve: a ausência de autenticação é binária, e um teste por método já prova.
 
 ## O que não testei e por quê
 

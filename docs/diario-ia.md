@@ -1,6 +1,8 @@
 # Diário de uso de IA
 
-Em 03/11 as decisões dos portões foram delegadas à IA e registradas num log de decisões (DEC-01 a DEC-17). ⟪PATRICK: confirme depois da reprodução manual: cada defeito do relatório foi reproduzido por mim à mão antes da entrega⟫
+Ponteiros de seção remetem a notas internas, disponíveis na conversa ao vivo; onde há, prefiro o sha do commit.
+
+Em 03/11 eu deleguei à IA as decisões que o plano reservava a mim: o corte de risco, a severidade e a prioridade finais, o texto do "não testei" e a estrutura do PR. A IA as registrou num log de decisões (DEC-01 a DEC-21) que eu valido. Rodar a Task 12 foi decisão minha. ⟪PATRICK: confirme depois da reprodução manual: cada defeito do relatório foi reproduzido por mim à mão antes da entrega⟫
 
 ## Onde e para quê
 
@@ -21,15 +23,15 @@ Seleção de 9 das 20 entradas do diário bruto.
 2. Sugeriu e-mail à empresa para aprovar os limites do teste. Pego por mim. Design §11.
 3. `assert body == sent` fazia o pytest imprimir CPF no relatório. Pego por subagente revisor. Commits e312b75 → a8f1c64.
 4. Severidade inflada em 14 candidatos. Pego por verificação adversarial. Exploração §3.2 e §5.1.
-5. Um explorador criou 4 registros com `id` inteiro, inapagáveis. Pego pelo próprio explorador e pela checagem de sobras. Exploração §7.3.
-6. A redação do print de falha escondia só cards de 3 divs (fail-open). Pego por 3 revisores independentes. Commits 766723a → 4ad8e1d.
-7. Um script de sondagem imprimiu o DOM da listagem, com dados de terceiros no contexto da IA. Pego por autorrelato do implementador. Sem artefato: autorrelato; a regra hoje está no CLAUDE.md (seção Regras de código, última linha).
+5. Um explorador criou 4 registros com `id` inteiro, inapagáveis. Pego pela checagem de sobras. Exploração §7.3.
+6. A redação do print de falha escondia só cards de 3 divs (fail-open). Pego por 3 revisores. Commits 766723a → 4ad8e1d.
+7. Um script de sondagem imprimiu o DOM da listagem, com dados de terceiros no contexto da IA. Pego por autorrelato do implementador. Sem artefato; a regra está no CLAUDE.md.
 8. O plano prometia conferir por `?id=` após o DELETE, mas o código não fazia. Pego por crítico de completude. Commit a829cdd.
-9. Um verificador enviou um POST vazio e deixou a listagem em branco por segundos. Pego por agente de triagem (Opus), confirmado pelo Claude. Registro apagado; regra nova nos briefs. DEC-13 (registro 4643, apagado e confirmado por `?id=`).
+9. Um verificador enviou um POST vazio e deixou a listagem em branco por segundos. Pego pela triagem. Registro 4643 apagado e confirmado por `?id=`; regra nova nos briefs (DEC-13).
 
 ## Guarda-corpos
 
 - `CLAUDE.md`: só registros `QA-AUTO-`, só dados sintéticos, sem payload executável, sem carga, nada fora de `/` e `/employees`.
 - Guarda de PII: `support/pii.py` mascara CPF, e o teste `guard` falha se `docs/` tiver CPF sem máscara.
-- Verificação adversarial: um segundo agente tentou refutar 19 dos 24 defeitos; BUG-016, BUG-019 e BUG-022 a 024 só têm a execução de quem os achou e o teste xfail, e dependem da reprodução manual.
+- Verificação adversarial: um segundo agente tentou refutar 19 dos 23 defeitos; BUG-016, BUG-019, BUG-023 e BUG-024 só têm a execução de quem os achou e o teste xfail, e dependem da reprodução manual.
 - Portões humanos: reprodução manual dos defeitos, edição final destes textos e a mudança pequena do Portão 3.
