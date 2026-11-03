@@ -1,0 +1,40 @@
+BUG-004: API cria, altera e apaga registros sem autenticação
+Gerado em 03/11/2026 contra https://analista-teste.seatecnologia.com.br/employees com requests (sem credencial).
+Registros: sintéticos, nome com prefixo QA-AUTO-, apagados em seguida e confirmados por ?id=.
+CPF mascarado antes de salvar; registros de terceiros nunca entram.
+Esperado: 401/403 nas três escritas. Obtido: sucesso nas três.
+
+## POST /employees sem credencial
+POST https://analista-teste.seatecnologia.com.br/employees
+content-type: application/json
+{"state": {"employee": {"isActive": true, "name": "QA-AUTO-Davi Souza 969740", "gender": "masculino", "cpf": "683.***.***-04", "birthDay": "1988-11-28", "rg": "1437191", "role": "Cargo 01", "usesEpi": true, "activity": "Ativid 03", "epi": "capacete-de-seguran\u00e7a", "caNumber": "48124"}}}
+HTTP 201 Created
+content-type: application/json
+access-control-allow-origin: *,*
+access-control-allow-methods: GET, HEAD, PUT, PATCH, POST, DELETE
+x-powered-by: tinyhttp
+{"id": "156b", "state": {"employee": {"isActive": true, "name": "QA-AUTO-Davi Souza 969740", "gender": "masculino", "cpf": "683.***.***-04", "birthDay": "1988-11-28", "rg": "1437191", "role": "Cargo 01", "usesEpi": true, "activity": "Ativid 03", "epi": "capacete-de-segurança", "caNumber": "48124"}}}
+
+## PUT /employees/{id} sem credencial
+PUT https://analista-teste.seatecnologia.com.br/employees/156b
+content-type: application/json
+{"state": {"employee": {"isActive": true, "name": "QA-AUTO-Melina Silva d377c3", "gender": "feminino", "cpf": "132.***.***-02", "birthDay": "1980-01-10", "rg": "3396315", "role": "Cargo 01", "usesEpi": true, "activity": "Ativid 04", "epi": "capacete-de-seguran\u00e7a", "caNumber": "99138"}}}
+HTTP 200 OK
+content-type: application/json
+access-control-allow-origin: *,*
+access-control-allow-methods: GET, HEAD, PUT, PATCH, POST, DELETE
+x-powered-by: tinyhttp
+{"state": {"employee": {"isActive": true, "name": "QA-AUTO-Melina Silva d377c3", "gender": "feminino", "cpf": "132.***.***-02", "birthDay": "1980-01-10", "rg": "3396315", "role": "Cargo 01", "usesEpi": true, "activity": "Ativid 04", "epi": "capacete-de-segurança", "caNumber": "99138"}}, "id": "156b"}
+
+## DELETE /employees/{id} sem credencial
+DELETE https://analista-teste.seatecnologia.com.br/employees/156b
+(sem corpo)
+HTTP 200 OK
+content-type: application/json
+access-control-allow-origin: *,*
+access-control-allow-methods: GET, HEAD, PUT, PATCH, POST, DELETE
+x-powered-by: tinyhttp
+{"state": {"employee": {"isActive": true, "name": "QA-AUTO-Melina Silva d377c3", "gender": "feminino", "cpf": "132.***.***-02", "birthDay": "1980-01-10", "rg": "3396315", "role": "Cargo 01", "usesEpi": true, "activity": "Ativid 04", "epi": "capacete-de-segurança", "caNumber": "99138"}}, "id": "156b"}
+
+
+Limpeza: 1 registro(s) criado(s), apagado(s); restantes confirmados por ?id=: 0

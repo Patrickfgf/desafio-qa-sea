@@ -1,4 +1,7 @@
-"""UI fixtures: headless Chrome, redacted screenshot on failure, failure-proof cleanup."""
+"""UI fixtures: headless Chrome, redacted screenshot on failure, failure-proof cleanup.
+
+Registered as a plugin from the root conftest, so tests/ui and tests/cross share them.
+"""
 
 import re
 import warnings
@@ -11,7 +14,7 @@ from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.remote.webdriver import WebDriver
 
-from support.api_client import delete_quietly
+from support.api_client import PreconditionError, delete_quietly
 from support.factory import TEST_PREFIX
 from support.screenshots import redact_page
 
@@ -30,10 +33,23 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo[None]):
 
 @pytest.fixture
 def driver(request: pytest.FixtureRequest) -> Iterator[WebDriver]:
+    yield from _browser(request, network_log=False)
+
+
+@pytest.fixture
+def network_driver(request: pytest.FixtureRequest) -> Iterator[WebDriver]:
+    """Same browser as ``driver`` with Chrome's performance log on (event order, no bodies)."""
+    yield from _browser(request, network_log=True)
+
+
+def _browser(request: pytest.FixtureRequest, *, network_log: bool) -> Iterator[WebDriver]:
     options = webdriver.ChromeOptions()
     options.add_argument("--headless=new")
     options.add_argument("--window-size=1366,900")
     options.add_argument("--lang=pt-BR")
+    if network_log:
+        options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
+        options.set_capability("goog:perfLoggingPrefs", {"enableNetwork": True})
     drv = webdriver.Chrome(options=options)  # Selenium Manager resolves chromedriver
     yield drv
     try:
@@ -61,7 +77,7 @@ def ui_created_names(api) -> Iterator[list[str]]:
         return
     try:
         ids = api.find_ids_by_names(ours)
-    except (requests.RequestException, AssertionError, ValueError) as exc:
+    except (requests.RequestException, PreconditionError, AssertionError, ValueError) as exc:
         warnings.warn(
             f"Cleanup could not list records ({type(exc).__name__}); UI-created data may remain",
             stacklevel=1,

@@ -22,3 +22,6 @@ work/
 
 # Playwright MCP snapshots (page text may contain personal data)
 .playwright-mcp/
+
+# Claude Code agent worktrees (local only)
+.claude/

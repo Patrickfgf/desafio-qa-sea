@@ -1,0 +1,18 @@
+BUG-017: Adicionar EPI não tem ação nem foco por teclado
+Origem: texto da verificação automatizada de 03/11/2026 (Selenium, Chrome headless), contra https://analista-teste.seatecnologia.com.br.
+Só registros próprios (nome QA-AUTO-), apagados ao fim; CPF mascarado; sem captura de tela.
+Clicar não muda a contagem de selects nem dispara requisição; o elemento é um span sem tabindex nem role.
+
+capture_check_page_load_requests: 15 (prova que o log de rede captura)
+no_epi_checkbox_checked: False
+span_info: {"ancestors": ["DIV:", "DIV:", "DIV:", "DIV:"], "ariaDisabled": null, "closestInteractive": false, "cls": "addEPI", "cursor": "auto", "pointerEvents": "auto", "reactProps": ["className", "children"], "role": null, "tabIndexProp": -1, "tabindex": null, "tag": "SPAN", "text": "Adicionar EPI"}
+counts_before: {'addEpi': 1, 'caInputs': 1, 'epiLabels': 1, 'formHtmlLen': 6308, 'inputs': 12, 'selects': 3}
+counts_after: {'addEpi': 1, 'caInputs': 1, 'epiLabels': 1, 'formHtmlLen': 6308, 'inputs': 12, 'selects': 3}
+requests_after_click: []
+form_still_open: True
+activeElement_after_click: BODY.
+addEPI_reached_by_tab: False
+focus_call_took_effect: False
+control_save_button_focusable: True
+control_counts_after_checkbox: {'addEpi': 0, 'caInputs': 0, 'epiLabels': 0, 'formHtmlLen': 3589, 'inputs': 9, 'selects': 1}
+requests_total_in_form_phase_incl_control: []

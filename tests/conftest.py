@@ -5,7 +5,12 @@ import warnings
 
 import pytest
 
-from support.api_client import BASE_URL_DEFAULT, EmployeesClient, delete_quietly, describe
+from support.api_client import (
+    BASE_URL_DEFAULT,
+    EmployeesClient,
+    delete_quietly,
+    require_status,
+)
 from support.factory import as_payload, build_employee
 from support.pii import mask_report
 
@@ -45,7 +50,7 @@ def create_employee(api, created_ids):
             body = None
         if isinstance(body, dict) and "id" in body:
             created_ids.append(body["id"])
-        assert resp.status_code == 201, describe(resp)
+        require_status(resp, 201)
         return body
 
     return _create

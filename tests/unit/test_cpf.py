@@ -16,3 +16,12 @@ def test_accepts_valid_cpf_with_or_without_mask(cpf):
 )
 def test_rejects_invalid_cpf(cpf):
     assert not is_valid_cpf(cpf)
+
+
+def test_returns_false_instead_of_raising_on_none():
+    assert is_valid_cpf(None) is False
+
+
+def test_rejects_non_ascii_digits():
+    arabic_indic = "".join(chr(0x0660 + int(d)) for d in "52998224725")
+    assert is_valid_cpf(arabic_indic) is False

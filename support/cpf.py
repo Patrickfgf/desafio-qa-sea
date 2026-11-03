@@ -2,9 +2,8 @@
 
 import re
 
-_CPF_DIGITS = 11
-_FORMATTED = re.compile(r"\d{3}\.\d{3}\.\d{3}-\d{2}")
-_BARE = re.compile(r"\d{11}")
+_FORMATTED = re.compile(r"[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2}")
+_BARE = re.compile(r"[0-9]{11}")
 
 
 def _check_digit(digits: str) -> int:
@@ -15,11 +14,16 @@ def _check_digit(digits: str) -> int:
     return 0 if remainder == 10 else remainder
 
 
-def is_valid_cpf(cpf: str) -> bool:
-    """True for a masked (``529.982.247-25``) or bare-digit CPF with correct check digits."""
+def is_valid_cpf(cpf: str | None) -> bool:
+    """True for a dotted (``NNN.NNN.NNN-NN``) or bare 11-digit CPF with correct check digits.
+
+    ASCII digits only; ``None`` and any non-string input return False instead of raising.
+    """
+    if not isinstance(cpf, str):
+        return False
     if not (_FORMATTED.fullmatch(cpf) or _BARE.fullmatch(cpf)):
         return False
-    digits = re.sub(r"\D", "", cpf)
+    digits = re.sub(r"[^0-9]", "", cpf)
     if len(set(digits)) == 1:
         return False
     return digits[9] == str(_check_digit(digits[:9])) and digits[10] == str(

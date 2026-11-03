@@ -8,8 +8,13 @@ import re
 from pathlib import Path
 
 # Digit lookarounds (not \b) so a CPF glued to letters/underscore is still caught.
-CPF_PATTERN = re.compile(r"(?<!\d)\d{3}\.\d{3}\.\d{3}-\d{2}(?!\d)|(?<!\d)\d{11}(?!\d)")
-_ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+# Formatted: 123.456.789-09, 123456789-09, 123.456.789/09 (dots optional; "-" or "/" before the
+# check digits). Bare: 11 digits. ASCII digits only; a dot before the last pair is not accepted,
+# so dotted numbers such as 192.168.100.12 are left alone.
+CPF_PATTERN = re.compile(
+    r"(?<![0-9])[0-9]{3}\.?[0-9]{3}\.?[0-9]{3}[-/][0-9]{2}(?![0-9])|(?<![0-9])[0-9]{11}(?![0-9])"
+)
+_ISO_DATE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
 _CPF_DIGITS = 11
 _KEPT_TAIL = 2
 _DEFAULT_SUFFIXES = (".md", ".txt", ".json", ".html")
@@ -17,7 +22,7 @@ _DEFAULT_SUFFIXES = (".md", ".txt", ".json", ".html")
 
 def mask_cpf(cpf: str) -> str:
     """Keep the first three and last two digits of a full CPF; mask anything else entirely."""
-    digits = re.sub(r"\D", "", cpf)
+    digits = re.sub(r"[^0-9]", "", cpf)
     if len(digits) != _CPF_DIGITS:
         return "*" * len(cpf)
     return f"{digits[:3]}.***.***-{digits[-_KEPT_TAIL:]}"

@@ -1,0 +1,28 @@
+BUG-020: CORS inválido (*,*) e POST text/plain aceito
+Gerado em 03/11/2026 contra https://analista-teste.seatecnologia.com.br/employees com requests (sem credencial).
+Registros: sintéticos, nome com prefixo QA-AUTO-, apagados em seguida e confirmados por ?id=.
+CPF mascarado antes de salvar; registros de terceiros nunca entram.
+O efeito do valor duplicado num navegador não foi observado (dúvida em aberto).
+
+## OPTIONS /employees com Origin https://evil.example
+OPTIONS https://analista-teste.seatecnologia.com.br/employees
+(sem corpo)
+HTTP 204 No Content
+access-control-allow-origin: *,*
+access-control-allow-methods: GET, HEAD, PUT, PATCH, POST, DELETE
+x-powered-by: tinyhttp
+
+
+## POST text/plain com JSON válido e Origin https://evil.example
+POST https://analista-teste.seatecnologia.com.br/employees
+content-type: text/plain
+{"state": {"employee": {"isActive": true, "name": "QA-AUTO-Ana Silveira aaadfa", "gender": "masculino", "cpf": "189.***.***-25", "birthDay": "1973-01-16", "rg": "2908085", "role": "Cargo 04", "usesEpi": true, "activity": "Ativid 01", "epi": "capacete-de-seguran\u00e7a", "caNumber": "37161"}}}
+HTTP 201 Created
+content-type: application/json
+access-control-allow-origin: *,*
+access-control-allow-methods: GET, HEAD, PUT, PATCH, POST, DELETE
+x-powered-by: tinyhttp
+{"id": "654d", "state": {"employee": {"isActive": true, "name": "QA-AUTO-Ana Silveira aaadfa", "gender": "masculino", "cpf": "189.***.***-25", "birthDay": "1973-01-16", "rg": "2908085", "role": "Cargo 04", "usesEpi": true, "activity": "Ativid 01", "epi": "capacete-de-segurança", "caNumber": "37161"}}}
+
+
+Limpeza: 1 registro(s) criado(s), apagado(s); restantes confirmados por ?id=: 0

@@ -2,7 +2,7 @@
 
 Alvo: sistema de cadastro de trabalhadores para segurança do trabalho, com interface web (cadastro em etapas e listagem) e API REST em `/employees`. Não há documentação formal; este plano parte do comportamento observado.
 
-> **Status: corte de risco decidido em 03/11/2026** (seção 3) e escalas de severidade e prioridade fixadas (seção 3.1). Os comportamentos citados aqui como observados vêm da exploração automatizada; o relatório de defeitos só traz o que foi reproduzido à mão.
+> **Status: corte de risco decidido em 03/11/2026** (seção 3) e escalas de severidade e prioridade fixadas (seção 3.1). Os comportamentos citados aqui como observados vêm da exploração automatizada; cada defeito do relatório traz o status da reprodução manual; o que não for reproduzido à mão sai antes da entrega, junto com o teste e a evidência.
 
 ## 1. Escopo
 
@@ -40,11 +40,11 @@ Sem documentação, todo "comportamento esperado" abaixo é **inferência** (ró
 11. O `id` é gerado pelo servidor e é único (duplicata deveria dar 409).
 12. Os registros existentes na base contam como dado potencialmente real, mesmo sem prova de que sejam.
 
-**Dúvidas com checagem dirigida** (resolvidas na reprodução manual, antes de virar asserção)
+**Dúvidas com checagem dirigida** (checadas por automação em 03/11; a reprodução manual confirma ou derruba cada uma)
 
-- O select de EPI grava o valor escolhido? Duas observações divergiram.
-- Com o checkbox desmarcado e CA/EPI vazios, o usuário real vê a mensagem nativa de campo obrigatório, ou o formulário simplesmente não salva?
-- Um registro sem `state.employee` quebra a listagem?
+- O select de EPI grava o valor escolhido? Duas observações divergiram. Resultado automatizado de 03/11 (D1): sim, em 2 execuções o corpo do POST e o GET por id trazem o `epi` escolhido; depois de digitar o CA o select volta a exibir o padrão, mas grava o escolhido. Reprodução manual pendente.
+- Com o checkbox desmarcado e CA/EPI vazios, o usuário real vê a mensagem nativa de campo obrigatório, ou o formulário simplesmente não salva? Resultado automatizado de 03/11 (D2): a validação nativa bloqueia o envio com "Preencha este campo." (foco no CA, 0 requisições, 0 registros); o balão foi inferido do estado de validação, não visto. Reprodução manual pendente.
+- Um registro sem `state.employee` quebra a listagem? Resultado automatizado de 03/11 (D3): sim, em 1 carga o POST sem `state.employee` dá 201 e a listagem fica em branco, com `TypeError` no console. Reprodução manual pendente.
 
 **Dúvidas que ficam em aberto** (não verificáveis dentro dos limites da seção 8; nenhuma vira defeito sem reprodução)
 
@@ -52,7 +52,7 @@ Sem documentação, todo "comportamento esperado" abaixo é **inferência** (ró
 - Proxies cacheiam dados pessoais por causa de `cache-control: public`? Exigiria um proxy no caminho.
 - Há dado real na base e com qual base legal? Desconhecido; por isso a premissa 12.
 - A base caiu de milhares para poucos registros em menos de uma hora: foi um DELETE sem autenticação? Compatível com o que se observou, não provado.
-- Escrita em registro de `id` numérico também dá 404? Só a leitura foi observada; provar exigiria criar id numérico, o que não faço.
+- Escrita em registro de `id` numérico também dá 404? As escritas foram observadas só pelo explorador; o verificador reproduziu a leitura. Não repito, porque exigiria criar id numérico, o que não faço.
 - Qual o comportamento pretendido de "Próximo passo" e do switch "A etapa está concluída?" Sem especificação.
 
 ## 3. Mapa de risco
@@ -104,12 +104,12 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio, e as du
   | Checkbox "não usa EPI" | CA preenchido | Esperado em `usesEpi` | Esperado em `caNumber` | Observado na exploração |
   |---|---|---|---|---|
   | desmarcado | sim | `true` | CA informado | grava `false` |
-  | desmarcado | não | (formulário não salva) | n/a | sem mensagem visível em headless |
+  | desmarcado | não | (formulário não salva) | n/a | a validação nativa bloqueia o envio com "Preencha este campo." e nenhuma requisição é enviada (checagem D2, automatizada em 03/11; reprodução manual pendente) |
   | marcado | campo some | `false` | vazio | grava `true` e `caNumber: ""` |
 
 - **Cruzamento tela × API.** Criar pela tela e conferir na API os campos gravados; criar pela API e conferir na listagem; comparar o corpo do POST com o que o GET devolve depois; inativar e verificar que o funcionário some da tela mas continua na API.
 - **Leitura estática do bundle como fonte de hipóteses.** A leitura do JavaScript da página gera hipóteses (por exemplo, defaults só visuais, botão sem `type`, arquivo nunca enviado). Hipótese não é achado: cada uma é confirmada ou derrubada no sistema rodando. Uma delas foi derrubada em parte: um botão que se supunha inerte, na verdade, salva o cadastro.
-- **Verificação independente de cada achado antes do relatório.** Todo defeito é reproduzido por um segundo caminho (outro script, ou outra ferramenta) e depois à mão por quem assina o relatório. Se não reproduz, sai do relatório e o teste é corrigido ou removido. Nenhum defeito entra no relatório sem essa reprodução.
+- **Verificação independente de cada achado antes do relatório.** Todo defeito é reproduzido por um segundo caminho (outro script, ou outra ferramenta) e, antes da entrega, à mão por quem assina o relatório. O que não reproduz sai do relatório, e o teste é corrigido ou removido. Enquanto a reprodução manual não acontece, o relatório marca o defeito como pendente.
 
 ## 5. Automatizado × manual
 
@@ -119,13 +119,13 @@ A suíte usa marcadores do pytest: `unit`, `api`, `security`, `ui`, `cross` e `g
 |---|---|---|
 | `unit` | funções puras: validação de CPF, fábrica de dados sintéticos, máscara de dados pessoais, perfil agregado da base | existe |
 | `guard` | varre `docs/` e falha se houver CPF sem máscara | existe |
-| `api` | ciclo CRUD num registro próprio; contrato (schema) do registro criado; round-trip de nome com acento | existe (parcial) |
-| `api` (negativos) | CPF, datas, obrigatórios, valores permitidos; os que a API aceita viram `xfail` com o id do defeito | planejado |
-| `security` | escrita sem autenticação (1 teste por método), exposição de dados pessoais, CORS e cabeçalhos | planejado |
-| `ui` | cadastro feliz, formulário "no escuro", botões, listagem (Page Objects sobre o Ant Design) | existe (parcial: cadastro feliz) |
-| `cross` | criar pela tela e conferir na API, criar pela API e conferir na listagem, inativar | planejado |
+| `api` | ciclo CRUD num registro próprio; contrato (schema) do registro criado; round-trip de nome com acento | existe |
+| `api` (negativos) | CPF, datas, obrigatórios, valores permitidos; os que a API aceita viram `xfail` com o id do defeito | existe |
+| `security` | escrita sem autenticação (1 teste por método), exposição de dados pessoais, CORS e cabeçalhos | existe |
+| `ui` | cadastro feliz, formulário "no escuro", botões, listagem (Page Objects sobre o Ant Design) | existe (cadastro, validações e controles do formulário, atualização da listagem) |
+| `cross` | criar pela tela e conferir na API, criar pela API e conferir na listagem, inativar | existe |
 
-Na última coleta (`uv run pytest --collect-only -q`, 03/11/2026) a suíte tinha 107 testes coletados, ainda sem testes de `cross` e `security`.
+Na última coleta (`uv run pytest --collect-only -q`, 03/11/2026) a suíte tinha 168 testes coletados (unit 114, api 18, ui 16, security 9, cross 10, guard 1).
 
 **Por que automatizar:** regressão barata do que já se sabe (CRUD, contrato, máscara), e cada defeito confirmado vira um `xfail(strict=True, raises=AssertionError)` com o id do defeito: a suíte fica verde e documenta o bug, e se alguém o corrigir o teste passa a falhar, avisando que o plano precisa ser atualizado.
 

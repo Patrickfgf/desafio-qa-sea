@@ -4,8 +4,16 @@ import pytest
 import requests
 from _pytest.reports import TestReport
 
-from support.api_client import EmployeesClient, delete_quietly, describe, mismatched_fields
+from support.api_client import (
+    EmployeesClient,
+    PreconditionError,
+    delete_quietly,
+    describe,
+    mismatched_fields,
+    require_status,
+)
 from support.pii import mask_report
+from tests.conftest import create_employee
 
 pytestmark = pytest.mark.unit
 
@@ -144,7 +152,7 @@ def test_find_ids_by_names_keeps_exact_client_side_match():
 
 
 def test_find_ids_by_name_raises_on_non_200():
-    with pytest.raises(AssertionError, match="500"):
+    with pytest.raises(PreconditionError, match="500"):
         _list_client(500, {"error": "x"}).find_ids_by_name("a")
 
 
@@ -172,3 +180,24 @@ def test_mask_report_masks_failure_text_and_captured_sections():
     assert "52998224725" not in str(report.longrepr)
     assert "529.***.***-25" in str(report.longrepr)
     assert report.sections == [("Captured stdout", "529.***.***-25")]
+
+
+def test_require_status_raises_precondition_error_that_xfail_cannot_swallow():
+    with pytest.raises(PreconditionError, match="500") as caught:
+        require_status(_json_response(500, {"error": "x"}), 201)
+
+    assert not isinstance(caught.value, AssertionError)
+
+
+def test_create_employee_with_server_error_raises_precondition_not_assertion():
+    class StubApi:
+        def create(self, payload):
+            return _json_response(500, {"error": "x"})
+
+    ids: list = []
+    create = create_employee.__wrapped__(StubApi(), ids)
+
+    with pytest.raises(PreconditionError) as caught:
+        create()
+
+    assert not isinstance(caught.value, AssertionError)

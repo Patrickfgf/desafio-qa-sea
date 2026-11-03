@@ -1,0 +1,21 @@
+BUG-015: Funcionário novo nasce Inativo por padrão
+Origem: texto da verificação automatizada de 03/11/2026 (Selenium, Chrome headless), contra https://analista-teste.seatecnologia.com.br.
+Só registros próprios (nome QA-AUTO-), apagados ao fim; CPF mascarado; sem captura de tela.
+[default] = salvar sem tocar no switch; [control] = ligar o switch. Contadores de ativos são agregados.
+
+[default] switch initial aria-checked=false
+[default] counter before filter: ativos 2/5
+[default] card visible with 'Ver apenas ativos' on: False
+[default] card visible after 'Limpar filtros': True
+[default] API records matching exact name: 1
+[default] stored isActive=False id_type=str
+[control] switch initial aria-checked=false
+[control] switch after toggle aria-checked=true
+[control] counter before filter: ativos 3/6
+[control] card visible with 'Ver apenas ativos' on: True
+[control] card visible after 'Limpar filtros': True
+[control] API records matching exact name: 1
+[control] stored isActive=True id_type=str
+cleanup id=0321 delete=200 still_present=False
+cleanup id=2145 delete=200 still_present=False
+leftovers: 0
