@@ -274,7 +274,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 - **Ambiente:** interface, checagem de cobertura de 03/11/2026, Chrome headless. **Pré-condições:** formulário preenchido com registro de teste `QA-AUTO-`.
 - **Passos:** (1) abrir "+ Adicionar Funcionário" e preencher tudo; (2) com o cursor no campo Nº do CA (ou em Nome), apertar Enter, sem clicar em "Salvar"; (3) olhar a rede e conferir por nome exato se algo foi gravado.
 - **Esperado:** Enter salva como o botão "Salvar", ou não faz nada; nunca descarta os dados em silêncio (premissa 2).
-- **Obtido:** o formulário fecha, a listagem volta, nenhuma requisição é enviada e nada é gravado (3 de 3 execuções). Causa provável: o primeiro botão `type=submit` do formulário é a seta de voltar, sem `type="button"`. Há contorno: clicar em "Salvar".
+- **Obtido:** o formulário fecha, a listagem volta, nenhum POST é enviado e nada é gravado (3 de 3 execuções). Causa provável: o primeiro botão `type=submit` do formulário é a seta de voltar, sem `type="button"`. Há contorno: clicar em "Salvar".
 - **Evidência:** [BUG-024](evidencias/BUG-024-enter-descarta-cadastro.txt) · [print](evidencias/ui/BUG-024.png) · [vídeo](evidencias/ui/BUG-024.mp4) (vem da checagem de cobertura de 03/11)
 - **Teste automatizado:** `tests/ui/test_form_controls.py::test_enter_in_text_field_does_not_discard_the_form`.
 
