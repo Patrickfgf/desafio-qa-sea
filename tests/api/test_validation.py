@@ -15,7 +15,7 @@ from support.factory import TEST_PREFIX, as_payload, build_employee
 pytestmark = pytest.mark.api
 
 REJECTED = (400, 422)
-SYMBOLS_ONLY_CA = "@!#$&&$#"  # inert text that only looks odd (EXT-01)
+SYMBOLS_ONLY_CA = "@!#$&&$#"  # inert text that only looks odd (BUG-025)
 INVALID_CPF_CHECKSUM = "52998224726"  # valid CPF 52998224725 with a wrong last check digit
 UNSENT_FIELDS = (
     "name",
@@ -206,7 +206,7 @@ def test_malformed_json_returns_400(api, created_ids):
 @pytest.mark.xfail(
     strict=True,
     raises=AssertionError,
-    reason="EXT-01: Número do CA aceita caracteres especiais",
+    reason="BUG-025: Número do CA aceita caracteres especiais",
 )
 def test_create_rejects_symbols_in_ca_number(api, created_ids):
     resp = _post_and_register(
