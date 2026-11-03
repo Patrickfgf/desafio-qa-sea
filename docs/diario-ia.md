@@ -2,18 +2,22 @@
 
 Ponteiros de seção remetem a notas internas, disponíveis na conversa; onde há, uso o sha do commit.
 
-Em 03/11 eu deleguei à IA as decisões que o plano reservava a mim: o corte de risco, a severidade e a prioridade finais, o texto do "não testei" e a estrutura dos PRs. A IA as registrou num log de decisões (DEC-01 a DEC-21) que eu valido. Rodar a Task 12 foi decisão minha. ⟪PATRICK: confirme depois da reprodução manual: cada defeito do relatório foi reproduzido por mim à mão antes da entrega⟫
+Defini a tese da entrega. A arquitetura e a stack saíram de uma discussão conjunta enquanto montávamos o design e o plano: a IA propôs e comparou as alternativas (Selenium, Playwright e Cypress), eu questionei e aprovei o design antes de qualquer código, inclusive os três portões humanos e a separação entre rascunhos e entrega. Em 03/11 eu deleguei à IA as decisões que o plano reservava a mim: o corte de risco, a severidade e a prioridade finais, o texto do "não testei" e a estrutura dos PRs. A IA as registrou num log de decisões (DEC-01 a DEC-23) que eu valido. Rodar a Task 12 foi decisão minha. ⟪PATRICK: confirme depois da reprodução manual: cada defeito do relatório foi reproduzido por mim à mão antes da entrega⟫
 
-## Onde e para quê
+## Método: por que não um prompt único
 
-| Etapa | O que a IA fez |
-|---|---|
-| Design e plano | Rascunhou design, plano de testes e mapa de risco |
-| Exploração | Exploradores propuseram defeitos; verificadores tentaram refutá-los |
-| Automação | Escreveu e revisou os testes, os Page Objects e a evidência mascarada |
-| Triagem e relatório | Cruzou candidatos, severidades e evidências |
-| Cobertura 2025 | Extraiu só nomes de áreas de um repo antigo; as áreas faltantes foram exploradas do zero |
-| Documentos | Redigiu estes textos e o README |
+Um prompt como "faz o desafio" devolve código plausível e um relatório confiante, sem como saber o que é verdade. Usei *skills*, roteiros que o agente segue passo a passo (as três primeiras do pacote Superpowers; `/resume` e `/end-session` são minhas). Cada uma força uma etapa que um prompt solto pula, e cada etapa pegou erro real (números da lista abaixo):
+
+| Skill ou prática | O que faz | O que pegou aqui |
+|---|---|---|
+| `brainstorming` | Perguntas e alternativas com trade-off até um design aprovado, antes do código | Limites do ambiente compartilhado definidos antes do primeiro request (erro 2) |
+| `writing-plans` | Tasks pequenas, teste primeiro, resultado esperado, checkpoint humano | 15 tasks; cada PR cabe numa revisão |
+| *Subagent-driven development* | Um agente implementa cada task, outro revisa | CPF no relatório do pytest (erro 3); print fail-open (erro 6) |
+| Verificação adversarial | Exploradores propõem; verificadores tentam refutar (19 dos 23 defeitos) | Severidade inflada em 14 candidatos (erro 4) |
+| Modelo por tarefa | Haiku extrai, Sonnet implementa e verifica, Opus faz a revisão final | Revisão final: 1 CRITICAL e 4 HIGH, todos tratados |
+| `/resume` e `/end-session` | Log diário no meu Obsidian: feito, pendências, decisões | Troquei de máquina (Windows → Mac) sem perder estado |
+
+Humano no circuito: reproduzi à mão cada defeito e fiz uma sessão exploratória própria, procurando o que a IA não achou. ⟪PATRICK: resultado da sessão exploratória⟫
 
 ## O que a IA errou e como foi corrigido
 
@@ -31,7 +35,5 @@ Seleção de 9 das 20 entradas do diário bruto.
 
 ## Guarda-corpos
 
-- `CLAUDE.md`: só registros `QA-AUTO-`, só dados sintéticos, sem payload executável, sem carga, nada fora de `/` e `/employees`.
-- Guarda de PII: `support/pii.py` mascara CPF, e o teste `guard` falha se `docs/` tiver CPF sem máscara.
-- Verificação adversarial: um segundo agente tentou refutar 19 dos 23 defeitos; BUG-016, BUG-019, BUG-023 e BUG-024 só têm a execução de quem os achou e o teste xfail, e dependem da reprodução manual.
-- Portões humanos: reprodução manual dos defeitos, edição final destes textos e a mudança pequena do Portão 3.
+- `CLAUDE.md`: só registros `QA-AUTO-`, só dados sintéticos, sem payload executável, sem carga, nada fora de `/` e `/employees`. O teste `guard` falha se `docs/` tiver CPF sem máscara (`support/pii.py`).
+- BUG-016, BUG-019, BUG-023 e BUG-024 não passaram pelo verificador: têm a execução de quem os achou, o teste xfail e a minha reprodução.
