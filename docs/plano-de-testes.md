@@ -2,7 +2,7 @@
 
 Alvo: sistema de cadastro de trabalhadores para segurança do trabalho, com interface web (cadastro em etapas e listagem) e API REST em `/employees`. Não há documentação formal; este plano parte do comportamento observado.
 
-> **Status: rascunho.** A coluna "Decisão proposta" do mapa de risco (seção 3) é uma proposta, à espera do corte de quem assina o plano. A escala de severidade da seção 3.1 também.
+> **Status: corte de risco decidido em 03/11/2026** (seção 3) e escalas de severidade e prioridade fixadas (seção 3.1). Os comportamentos citados aqui como observados vêm da exploração automatizada; o relatório de defeitos só traz o que foi reproduzido à mão.
 
 ## 1. Escopo
 
@@ -40,24 +40,30 @@ Sem documentação, todo "comportamento esperado" abaixo é **inferência** (ró
 11. O `id` é gerado pelo servidor e é único (duplicata deveria dar 409).
 12. Os registros existentes na base contam como dado potencialmente real, mesmo sem prova de que sejam.
 
-**Dúvidas em aberto**
+**Dúvidas com checagem dirigida** (resolvidas na reprodução manual, antes de virar asserção)
 
-- O select de EPI grava o valor escolhido? Duas observações divergiram; precisa de checagem dirigida antes de virar asserção.
+- O select de EPI grava o valor escolhido? Duas observações divergiram.
 - Com o checkbox desmarcado e CA/EPI vazios, o usuário real vê a mensagem nativa de campo obrigatório, ou o formulário simplesmente não salva?
 - Um registro sem `state.employee` quebra a listagem?
-- O `access-control-allow-origin: *,*` bloqueia leitura cross-origin num navegador? E proxies cacheiam dados pessoais por causa de `cache-control: public`? Não observado.
-- Há dado real na base e com qual base legal? Desconhecido.
-- Qual o comportamento pretendido de "Próximo passo" e do switch "A etapa está concluída?"
+
+**Dúvidas que ficam em aberto** (não verificáveis dentro dos limites da seção 8; nenhuma vira defeito sem reprodução)
+
+- O `access-control-allow-origin: *,*` bloqueia leitura cross-origin num navegador? Exigiria uma página de outra origem.
+- Proxies cacheiam dados pessoais por causa de `cache-control: public`? Exigiria um proxy no caminho.
+- Há dado real na base e com qual base legal? Desconhecido; por isso a premissa 12.
+- A base caiu de milhares para poucos registros em menos de uma hora: foi um DELETE sem autenticação? Compatível com o que se observou, não provado.
+- Escrita em registro de `id` numérico também dá 404? Só a leitura foi observada; provar exigiria criar id numérico, o que não faço.
+- Qual o comportamento pretendido de "Próximo passo" e do switch "A etapa está concluída?" Sem especificação.
 
 ## 3. Mapa de risco
 
-> **A coluna "Decisão proposta" é uma proposta, à espera do corte do dono do plano.** Legenda: **testar a fundo** = vários casos e camadas (UI e API), com prioridade no relatório; **testar leve** = 1 ou 2 testes que documentam o comportamento (`xfail` quando é defeito); **não testar** = só registrar.
+Legenda: **testar a fundo** = vários casos e camadas (UI e API), com prioridade no relatório; **testar leve** = 1 ou 2 testes que documentam o comportamento (`xfail` quando é defeito); **não testar** = só registrar. A decisão mede quantos casos ainda trazem informação nova, não a gravidade: a gravidade de cada defeito vai para o relatório (seção 3.1).
 
-| Área | Impacto | Probabilidade | Risco | Decisão proposta | Por quê |
+| Área | Impacto | Probabilidade | Risco | Decisão | Por quê |
 |---|---|---|---|---|---|
 | Mapeamento tela → payload no cadastro (`usesEpi`, defaults dos selects, `isActive` inicial, anexo de ASO) | Alto | Alta | Alto | testar a fundo | dado de segurança do trabalho gravado diferente do que o usuário vê, em todo cadastro; o teste compara o digitado com o GET |
 | Privacidade/LGPD: CPF completo na tela e na API, inativos servidos | Alto | Alta | Alto | testar a fundo | dado pessoal sem máscara e sem autenticação nas duas camadas |
-| Controle de acesso: escrita sem autenticação | Alto | Alta | Alto | testar leve | propriedade binária e arquitetural; 1 teste por método documenta, mais casos não agregam |
+| Controle de acesso: escrita sem autenticação | Alto | Alta | Alto | testar leve | propriedade binária e arquitetural: 1 teste por método prova a ausência de autenticação, e mais casos não mudam a conclusão. A severidade continua Alta no relatório |
 | Validação de CPF e de data (tela e API) | Médio | Alta | Médio-alto | testar a fundo | casos-limite clássicos, baratos de parametrizar na API; o truncamento de CPF com máscara só aparece pela tela |
 | Contrato e schema da API (forma, obrigatórios, valores permitidos, campos extras) | Médio | Alta | Médio | testar leve | uma causa raiz (API sem schema): poucos casos representativos, sem dezenas de `xfail` iguais |
 | Botões do formulário ("Adicionar outra atividade", "Adicionar EPI") | Médio | Alta | Médio | testar leve | 1 teste por botão; o salvamento prematuro é observável pela rede |
@@ -71,16 +77,22 @@ Sem documentação, todo "comportamento esperado" abaixo é **inferência** (ró
 | Controles sem efeito, acessibilidade, layout de nome longo | Baixo | Alta | Baixo | não testar | sem especificação do comportamento pretendido; baixo impacto no fluxo de cadastro |
 | Carga, força bruta, injeção, caminhos fora de `/employees` | n/a | n/a | n/a | não testar | proibido pelos limites da seção 8 |
 
-### 3.1 Escala de severidade (proposta)
+### 3.1 Escalas de severidade e prioridade
 
 Severidade é o impacto técnico; prioridade é a urgência de negócio, e as duas ficam separadas no relatório.
 
-| Nível | Critério |
+| Severidade | Critério |
 |---|---|
 | Crítica | perda ou exposição de dados em larga escala, sem pré-condição |
 | Alta | dado gravado ou exposto de forma errada em fluxo principal, ou controle de acesso ausente |
 | Média | comportamento incorreto com contorno, ou efeito limitado a clientes da API |
 | Baixa | cosmético, usabilidade, má prática sem dano demonstrado |
+
+| Prioridade | Critério |
+|---|---|
+| P1 | corrigir primeiro: afeta todo cadastro ou expõe dados pessoais |
+| P2 | corrigir na sequência: afeta parte dos usuários ou os clientes da API |
+| P3 | pode esperar: baixo impacto no fluxo |
 
 ## 4. Técnicas
 
@@ -89,7 +101,7 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio, e as du
 - **Valor-limite.** CPF: 10, 11 e 12 caracteres (a tela tem `minlength` e `maxlength` de 11). Datas de nascimento: hoje, amanhã, ano 0001, 1900, 2099, 9999-12-31, 30 de fevereiro, formato `dd/mm/aaaa`, vazio. Nome: vazio, só espaços, 300 caracteres sem espaço.
 - **Tabela de decisão `usesEpi` × checkbox × `caNumber`.** Mostra o que a tela deveria gravar contra o que grava. "Esperado" vem da premissa 1.
 
-  | Checkbox "não usa EPI" | CA preenchido | Esperado em `usesEpi` | Esperado em `caNumber` | Comportamento da tela |
+  | Checkbox "não usa EPI" | CA preenchido | Esperado em `usesEpi` | Esperado em `caNumber` | Observado na exploração |
   |---|---|---|---|---|
   | desmarcado | sim | `true` | CA informado | grava `false` |
   | desmarcado | não | (formulário não salva) | n/a | sem mensagem visível em headless |
@@ -110,10 +122,10 @@ A suíte usa marcadores do pytest: `unit`, `api`, `security`, `ui`, `cross` e `g
 | `api` | ciclo CRUD num registro próprio; contrato (schema) do registro criado; round-trip de nome com acento | existe (parcial) |
 | `api` (negativos) | CPF, datas, obrigatórios, valores permitidos; os que a API aceita viram `xfail` com o id do defeito | planejado |
 | `security` | escrita sem autenticação (1 teste por método), exposição de dados pessoais, CORS e cabeçalhos | planejado |
-| `ui` | cadastro feliz, formulário "no escuro", botões, listagem (Page Objects sobre o Ant Design) | planejado |
+| `ui` | cadastro feliz, formulário "no escuro", botões, listagem (Page Objects sobre o Ant Design) | existe (parcial: cadastro feliz) |
 | `cross` | criar pela tela e conferir na API, criar pela API e conferir na listagem, inativar | planejado |
 
-Na última coleta (`uv run pytest --collect-only -q`) a suíte tinha 54 testes coletados, ainda sem testes de `ui`, `cross` e `security`.
+Na última coleta (`uv run pytest --collect-only -q`, 03/11/2026) a suíte tinha 107 testes coletados, ainda sem testes de `cross` e `security`.
 
 **Por que automatizar:** regressão barata do que já se sabe (CRUD, contrato, máscara), e cada defeito confirmado vira um `xfail(strict=True, raises=AssertionError)` com o id do defeito: a suíte fica verde e documenta o bug, e se alguém o corrigir o teste passa a falhar, avisando que o plano precisa ser atualizado.
 
@@ -138,8 +150,8 @@ Na última coleta (`uv run pytest --collect-only -q`) a suíte tinha 54 testes c
 | Risco | Mitigação |
 |---|---|
 | Base compartilhada e volátil: registro some no meio do teste, contagem muda | cada teste cria e apaga o próprio dado; o teardown tolera 404; nenhuma asserção sobre total |
-| Registros com `id` numérico não são alcançáveis por id (GET, PUT, PATCH e DELETE dão 404), então não podem ser apagados por nós | os testes nunca criam id numérico; id numérico só em leitura. Alguns registros de teste com esse perfil ficaram na base durante a exploração e dependem do dono do ambiente |
-| Teardown que trata 404 como "apagado" esconde sobra quando o id é numérico | conferir por `?id=` depois do DELETE |
+| Registros com `id` numérico não são alcançáveis por id (GET, PUT, PATCH e DELETE dão 404), então não podem ser apagados por nós | os testes nunca criam id numérico; id numérico só em leitura. Quatro registros de teste com esse perfil (prefixo `QA-AUTO-E2-`) ficaram na base durante a exploração; os ids vão ao dono do ambiente junto com a entrega, para remoção |
+| Teardown que trata 404 como "apagado" esconde sobra quando o id é numérico | no 404, conferir por `?id=`: se o registro ainda aparece, ou se não dá para confirmar, conta como sobra e gera aviso |
 | Dados pessoais vazando por mensagem de assert, relatório HTML, artefato de CI ou evidência | `describe()` nas asserções, em vez do corpo cru; máscara antes de salvar; teste de guarda varre `docs/`; artefatos com retenção de 7 dias |
 | O CI escreve no ambiente compartilhado | roda só em `push` e `pull_request` para `main` e em disparo manual; escreve só registros `QA-AUTO-` e os apaga |
 | Listar a base inteira a cada busca (1,4 MB, sem paginação) | buscar por id ou por nome exato no servidor (`?state.employee.name=`); não há filtro por prefixo |
