@@ -1,6 +1,6 @@
 BUG-001: Checkbox não usa EPI grava usesEpi invertido
 Origem: texto de uma verificação automatizada anterior a 03/11/2026 (Selenium, Chrome headless; o arquivo de origem não traz data), contra https://analista-teste.seatecnologia.com.br.
-Só registros próprios (nome QA-AUTO-), apagados ao fim; CPF mascarado; sem captura de tela.
+Só registros próprios (nome QA-AUTO-), apagados ao fim; CPF mascarado; demais campos são constantes sintéticas da fábrica de testes; sem captura de tela.
 Leitura: marcado grava usesEpi=true; desmarcado grava usesEpi=false (esperado: o contrário).
 
 ticked checkbox initial checked: False

@@ -1,6 +1,10 @@
 # Relatório de defeitos
 
-> **Status:** todo defeito abaixo foi verificado por automação (Selenium e requests). A verificação é de 03/11/2026, exceto BUG-001, BUG-006, BUG-007 e BUG-012, que vêm de uma verificação automatizada anterior, sem data registrada. A coluna "Reproduzido à mão" registra a reprodução manual, hoje **pendente** para todos (o que não for reproduzido sai do relatório, junto com o teste e a evidência). Nenhum defeito é afirmado como reproduzido à mão antes disso. BUG-022, BUG-023 e BUG-024 vêm da checagem de cobertura de 03/11/2026 (candidatos explorados do zero) e seguem a mesma regra.
+> **Status:** todo defeito abaixo foi verificado por automação (Selenium e requests). A verificação é de 03/11/2026, exceto BUG-001, BUG-006, BUG-007 e BUG-012, que vêm de uma verificação automatizada anterior, sem data registrada. A coluna "Reproduzido à mão" registra a reprodução manual, hoje **pendente** para todos (o que não for reproduzido sai do relatório, junto com o teste e a evidência). Nenhum defeito é afirmado como reproduzido à mão antes disso. BUG-023 e BUG-024 vêm da checagem de cobertura de 03/11/2026 e seguem a mesma regra.
+>
+> **Nota de cobertura:** as áreas do BUG-023 e do BUG-024 vieram da lista de áreas de um repositório público de 2025 (só os nomes das áreas) e foram exploradas do zero. O BUG-022 (título da aba) foi retirado: a área veio dessa mesma lista, e o único achado possível nela é o valor do título, que o outro repositório já confere.
+>
+> **Como as evidências foram geradas:** por scripts de verificação não versionados, que usam `support.evidence` e o mascaramento do repositório; as evidências de interface foram copiadas dos logs dessas verificações.
 
 **Ambiente de todos os defeitos:** `https://analista-teste.seatecnologia.com.br/` (interface e `/employees`), 03/11/2026 (BUG-001, BUG-006, BUG-007 e BUG-012: verificação anterior, sem data), Chrome headless (interface) e `requests` (API). Base compartilhada: só registros sintéticos com nome `QA-AUTO-`, apagados em seguida. CPF mascarado (`123.***.***-09`) ou descrito, nunca em claro, nas evidências.
 
@@ -47,7 +51,6 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio (as mesm
 | BUG-019 | JSON malformado devolve 500 em vez de 400 | Tratamento de erro | Baixa | P3 | `tests/api/test_validation.py::test_malformed_json_returns_400` | pendente |
 | BUG-020 | CORS inválido (*,*) e POST text/plain aceito | Segurança | Baixa | P3 | `tests/security/test_security.py::test_cors_allow_origin_is_single_value` | pendente |
 | BUG-021 | Sem cabeçalhos de segurança e com x-powered-by | Segurança | Baixa | P3 | `tests/security/test_security.py::test_security_headers_present` | pendente |
-| BUG-022 | Título da aba é o do template Vite | Usabilidade | Baixa | P3 | `tests/ui/test_page_metadata.py::test_page_title_identifies_the_app` | pendente |
 | BUG-023 | Obrigatórios aceitam só espaços | Validação (tela) | Baixa | P3 | `tests/ui/test_form_validation.py::test_required_fields_reject_whitespace_only` | pendente |
 
 Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na razão. Quando a tabela cita um teste, os demais do mesmo defeito estão na seção dele. Cada premissa de "esperado" abaixo é inferência (sem documentação do sistema); as premissas estão em `plano-de-testes.md`, seção 2.
@@ -128,7 +131,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
   2. Abrir a listagem uma única vez.
   3. Apagar o registro com `DELETE /employees/<id>` e confirmar por `?id=`.
 - **Esperado:** a listagem ignora o registro malformado, ou a API o rejeita.
-- **Obtido:** POST 201; a tela desmonta (corpo vazio, sem contador, o botão "Adicionar" some), com `TypeError ... reading 'isActive'` no console. Vale para todos os usuários enquanto o registro existir.
+- **Obtido:** POST 201; a tela desmonta (corpo vazio, `#root` sem filhos, sem contador), com `TypeError ... reading 'isActive'` no console (a evidência registra 3 erros SEVERE, dois deles `TypeError` listados). A mesma evidência marca o botão "Adicionar" como visível no instante da checagem; a triagem o descreve sumindo depois. ⟪PATRICK: confirme na reprodução manual se o botão some e quantos erros aparecem⟫ Vale para todos os usuários enquanto o registro existir.
 - **Evidência:** [BUG-005](evidencias/BUG-005-listagem-em-branco.txt) (da verificação automatizada de 03/11; não reexecutada para o relatório).
 - **Teste automatizado:** manual, por decisão: cada execução do CI deixaria a tela em branco para terceiros, e o registro não carrega o prefixo `QA-AUTO-`.
 - **Observação:** um POST com corpo vazio também cria um registro `{id}` (não verificado como gatilho da tela em branco).
@@ -244,9 +247,9 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 - **Passos:**
   1. Salvar um cadastro novo, observando a rede.
   2. Verificar se o card aparece sem recarregar.
-  3. Repetir 3 ou 4 vezes.
+  3. Repetir 4 vezes.
 - **Esperado:** a listagem é buscada depois do POST terminar.
-- **Obtido:** o `GET /employees` sai junto com o POST, e a lista fica velha em cerca de 1 de 3 a 4 salvamentos (n = 6; só indicativo). Recarregando, o card aparece.
+- **Obtido:** o `GET /employees` sai junto com o POST, e a lista ficou velha em 1 de 4 tentativas da evidência (só indicativo). Recarregando, o card aparece.
 - **Evidência:** [BUG-013](evidencias/BUG-013-listagem-busca-paralela.txt)
 - **Teste automatizado:** `tests/ui/test_form_controls.py::test_listing_refetch_happens_after_post_completes` (só a ordem de rede, que é constante).
 - **Observação:** a forma literal "nenhum GET depois do POST, lista sempre velha" foi refutada; este é o defeito reformulado.
@@ -273,105 +276,53 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 - **Esperado:** Enter salva como o botão "Salvar", ou não faz nada; nunca descarta os dados em silêncio (premissa 2).
 - **Obtido:** o formulário fecha, a listagem volta, nenhuma requisição é enviada e nada é gravado (3 de 3 execuções). Causa provável: o primeiro botão `type=submit` do formulário é a seta de voltar, sem `type="button"`. Há contorno: clicar em "Salvar".
 - **Evidência:** [BUG-024](evidencias/BUG-024-enter-descarta-cadastro.txt) (vem da checagem de cobertura de 03/11)
-- **Reproduzido à mão:** pendente.
 - **Teste automatizado:** `tests/ui/test_form_controls.py::test_enter_in_text_field_does_not_discard_the_form`.
 
 ---
 
-## Prioridade P3
+## Defeitos de baixa prioridade (P3)
+
+Severidade Baixa e prioridade P3 em todos; as premissas de "esperado" estão em `plano-de-testes.md`, seção 2. Sem passo a passo completo: cada item traz o que acontece, como ver, a evidência e o teste.
 
 ### BUG-015 — Funcionário novo nasce Inativo por padrão
 
-- **Categoria:** funcional (tela → payload). **Severidade:** Baixa. **Prioridade:** P3.
-- **Ambiente:** interface, 03/11/2026, Chrome headless. **Pré-condições:** nome `QA-AUTO-`.
-- **Passos:** (1) abrir o formulário e salvar sem tocar no switch de ativo; (2) olhar o card com "Ver apenas ativos" e ler `isActive` por `?id=`.
-- **Esperado:** nascer ativo ou com estado explícito (premissa 9).
-- **Obtido:** `isActive: false`; o card some com o filtro ligado. Controle (switch ligado) funciona.
-- **Evidência:** [BUG-015](evidencias/BUG-015-novo-nasce-inativo.txt)
-- **Teste automatizado:** `tests/cross/test_ui_vs_api.py::test_new_employee_defaults_to_active`.
+Categoria: funcional (tela → payload). Salvar sem tocar no switch grava `isActive: false` e o card some com "Ver apenas ativos"; com o switch ligado funciona. Como ver: salvar um cadastro sem mexer no switch e ler `isActive` por `?id=` (interface, 03/11/2026).
+Evidência: [BUG-015](evidencias/BUG-015-novo-nasce-inativo.txt). Teste: `tests/cross/test_ui_vs_api.py::test_new_employee_defaults_to_active`.
 
 ### BUG-016 — Select de EPI volta ao padrão ao digitar o CA
 
-- **Categoria:** usabilidade. **Severidade:** Baixa. **Prioridade:** P3.
-- **Ambiente:** interface, 03/11/2026, Chrome headless. **Pré-condições:** formulário aberto.
-- **Passos:** (1) escolher "Luvas descartáveis" no select de EPI; (2) digitar o CA; (3) olhar o select.
-- **Esperado:** continuar mostrando "Luvas descartáveis" (premissa 2).
-- **Obtido:** volta a exibir "Capacete de segurança"; o valor gravado continua o escolhido (2 de 2 execuções, numa só ordem de preenchimento).
-- **Evidência:** [BUG-016](evidencias/BUG-016-select-epi-volta-ao-padrao.txt)
-- **Teste automatizado:** `tests/ui/test_form_controls.py::test_epi_select_keeps_choice_after_typing_ca`.
+Categoria: usabilidade. Depois de escolher "Luvas descartáveis" e digitar o CA, o select volta a mostrar "Capacete de segurança"; o valor gravado continua o escolhido (2 de 2 execuções, numa só ordem de preenchimento). Como ver: escolher o EPI, digitar o CA, olhar o select (interface, 03/11/2026).
+Evidência: [BUG-016](evidencias/BUG-016-select-epi-volta-ao-padrao.txt). Teste: `tests/ui/test_form_controls.py::test_epi_select_keeps_choice_after_typing_ca`.
 
 ### BUG-017 — Adicionar EPI não tem ação nem foco por teclado
 
-- **Categoria:** funcional (formulário). **Severidade:** Baixa. **Prioridade:** P3.
-- **Ambiente:** interface, 03/11/2026, Chrome headless. **Pré-condições:** formulário aberto, checkbox "não usa EPI" desmarcado.
-- **Passos:** (1) clicar em "Adicionar EPI"; (2) contar os selects de EPI e observar a rede; (3) percorrer o formulário com Tab.
-- **Esperado:** surgir outro bloco de EPI (premissa 10); o controle ser alcançável por teclado.
-- **Obtido:** contagem inalterada, nenhuma requisição, formulário aberto; o elemento é um `span` sem `tabindex` nem `role`, fora da ordem de Tab.
-- **Evidência:** [BUG-017](evidencias/BUG-017-adicionar-epi-inerte.txt)
-- **Teste automatizado:** `tests/ui/test_form_controls.py::test_add_epi_adds_another_epi_block` (a parte de teclado é acessibilidade, só observação).
+Categoria: funcional (formulário). O clique em "Adicionar EPI" não cria outro bloco nem envia requisição; o elemento é um `span` sem `tabindex` nem `role`, fora da ordem de Tab. Como ver: com o checkbox "não usa EPI" desmarcado, clicar e contar os selects de EPI (interface, 03/11/2026).
+Evidência: [BUG-017](evidencias/BUG-017-adicionar-epi-inerte.txt). Teste: `tests/ui/test_form_controls.py::test_add_epi_adds_another_epi_block` (o teclado é acessibilidade, só observação).
 
 ### BUG-018 — Paginação inconsistente em casos-limite
 
-- **Categoria:** contrato da API. **Severidade:** Baixa. **Prioridade:** P3.
-- **Ambiente:** `/employees`, 03/11/2026, `requests`. **Pré-condições:** registro de teste e filtro por `id`.
-- **Passos:** `GET /employees?id=<id>&_page=2&_per_page=1` e `_page=999`.
-- **Esperado:** página além do fim devolve `data` vazio.
-- **Obtido:** devolve a última página (1 item). Também: `_page=0` ou `abc` devolve array puro; `_per_page=-1` dá `pages` negativo e o último item some.
-- **Evidência:** [BUG-018](evidencias/BUG-018-paginacao-limites.txt)
-- **Teste automatizado:** `tests/api/test_validation.py::test_pagination_beyond_last_page_returns_empty_data`.
+Categoria: contrato da API. `_page=2` e `_page=999` com `_per_page=1` devolvem a última página em vez de `data` vazio; `_page=0` ou `abc` devolve array puro; `_per_page=-1` dá `pages` negativo. Como ver: `GET /employees?id=<id>&_page=999&_per_page=1` com registro próprio (03/11/2026, `requests`).
+Evidência: [BUG-018](evidencias/BUG-018-paginacao-limites.txt). Teste: `tests/api/test_validation.py::test_pagination_beyond_last_page_returns_empty_data`.
 
 ### BUG-019 — JSON malformado devolve 500 em vez de 400
 
-- **Categoria:** tratamento de erro. **Severidade:** Baixa. **Prioridade:** P3.
-- **Ambiente:** `/employees`, 03/11/2026, `requests`. **Pré-condições:** nenhuma; nada é criado (nunca usar corpo vazio).
-- **Passos:** `POST /employees` com corpo `not json` e `Content-Type: application/json`.
-- **Esperado:** 400.
-- **Obtido:** 500 com a mensagem crua do parser, sem `Content-Type`.
-- **Evidência:** [BUG-019](evidencias/BUG-019-json-malformado-500.txt)
-- **Teste automatizado:** `tests/api/test_validation.py::test_malformed_json_returns_400`.
+Categoria: tratamento de erro. O 500 vem com a mensagem crua do parser, sem `Content-Type`. Como ver: `POST /employees` com corpo `not json` e `Content-Type: application/json`; nada é criado (nunca usar corpo vazio) (03/11/2026, `requests`).
+Evidência: [BUG-019](evidencias/BUG-019-json-malformado-500.txt). Teste: `tests/api/test_validation.py::test_malformed_json_returns_400`.
 
 ### BUG-020 — CORS inválido (*,*) e POST text/plain aceito
 
-- **Categoria:** segurança. **Severidade:** Baixa. **Prioridade:** P3.
-- **Ambiente:** `/employees`, 03/11/2026, `requests`. **Pré-condições:** registro de teste.
-- **Passos:** (1) `OPTIONS /employees` com `Origin: https://evil.example`; (2) `POST` com `Content-Type: text/plain` e JSON válido, com o mesmo `Origin`; (3) apagar o registro.
-- **Esperado:** `access-control-allow-origin` com valor único válido; `text/plain` rejeitado (415).
-- **Obtido:** `*,*` (valor duplicado, inválido) e 204; o POST `text/plain` devolve 201 e grava como JSON.
-- **Evidência:** [BUG-020](evidencias/BUG-020-cors-invalido.txt)
-- **Testes automatizados:** `tests/security/test_security.py::test_cors_allow_origin_is_single_value`, `::test_create_rejects_non_json_content_type`.
-- **Observação:** o efeito do `*,*` num navegador não foi observado (ver "Observações do ambiente").
+Categoria: segurança. `OPTIONS` com `Origin` externo devolve `access-control-allow-origin: *,*` (duplicado, inválido) e 204; o POST `text/plain` devolve 201 e grava como JSON. O efeito do `*,*` num navegador não foi observado. Como ver: `OPTIONS` e `POST text/plain` com registro `QA-AUTO-`, apagado depois (03/11/2026, `requests`).
+Evidência: [BUG-020](evidencias/BUG-020-cors-invalido.txt). Testes: `tests/security/test_security.py::test_cors_allow_origin_is_single_value`, `::test_create_rejects_non_json_content_type`.
 
 ### BUG-021 — Sem cabeçalhos de segurança e com x-powered-by
 
-- **Categoria:** segurança. **Severidade:** Baixa. **Prioridade:** P3.
-- **Ambiente:** `/` e `/employees`, 03/11/2026, `requests`. **Pré-condições:** nenhuma; nada é criado.
-- **Passos:** `HEAD /employees` e `HEAD /`; conferir os cabeçalhos.
-- **Esperado:** CSP, HSTS, X-Frame-Options, X-Content-Type-Options e Referrer-Policy presentes; sem `x-powered-by`.
-- **Obtido:** os cinco ausentes e `x-powered-by: tinyhttp`. Em `/`, `cache-control: no-store,public`.
-- **Evidência:** [BUG-021](evidencias/BUG-021-sem-cabecalhos-de-seguranca.txt)
-- **Teste automatizado:** `tests/security/test_security.py::test_security_headers_present`.
-
-### BUG-022 — Título da aba é o do template Vite
-
-- **Categoria:** usabilidade. **Severidade:** Baixa. **Prioridade:** P3.
-- **Ambiente:** interface, checagem de cobertura de 03/11/2026, Chrome headless. **Pré-condições:** nenhuma; nada é criado.
-- **Passos:** (1) abrir `/`; (2) ler o título da aba (`document.title`).
-- **Esperado:** título que identifique a aplicação (premissa inferida, sem requisito escrito).
-- **Obtido:** `Vite + React + TS`; também `<html lang="en">` e ícone `/vite.svg` (2 execuções por curl e 2 por Selenium).
-- **Evidência:** [BUG-022](evidencias/BUG-022-titulo-da-aba-template-vite.txt) (vem da checagem de cobertura de 03/11)
-- **Reproduzido à mão:** pendente.
-- **Teste automatizado:** `tests/ui/test_page_metadata.py::test_page_title_identifies_the_app`.
+Categoria: segurança. Faltam CSP, HSTS, X-Frame-Options, X-Content-Type-Options e Referrer-Policy, e há `x-powered-by: tinyhttp`; em `/`, `cache-control: no-store,public`. Como ver: `HEAD /` e `HEAD /employees`; nada é criado (03/11/2026, `requests`).
+Evidência: [BUG-021](evidencias/BUG-021-sem-cabecalhos-de-seguranca.txt). Teste: `tests/security/test_security.py::test_security_headers_present`.
 
 ### BUG-023 — Obrigatórios aceitam só espaços
 
-- **Categoria:** validação (tela). **Severidade:** Baixa. **Prioridade:** P3.
-- **Ambiente:** interface, checagem de cobertura de 03/11/2026, Chrome headless. **Pré-condições:** formulário aberto; registro de teste `QA-AUTO-`, apagado em seguida.
-- **Passos:** (1) preencher o cadastro com tudo válido, mas RG com 3 espaços (depois CA com 3 espaços, depois CPF com 11 espaços, um caso por vez); (2) clicar em "Salvar"; (3) ler o registro gravado por nome exato.
-- **Esperado:** campo obrigatório só com espaços é tratado como vazio: bloqueia com "Preencha este campo." ou é aparado antes de gravar.
-- **Obtido:** os três casos salvam e a API grava os espaços (2 de 2 execuções). O `required` nativo só exige "não vazio". Mesma família do BUG-008 e do BUG-011 (sem validação de conteúdo).
-- **Evidência:** [BUG-023](evidencias/BUG-023-obrigatorios-aceitam-espacos.txt) (vem da checagem de cobertura de 03/11)
-- **Reproduzido à mão:** pendente.
-- **Teste automatizado:** `tests/ui/test_form_validation.py::test_required_fields_reject_whitespace_only` (um caso por campo).
+Categoria: validação (tela). RG com 3 espaços, CA com 3 espaços e CPF com 11 espaços salvam, e a API grava os espaços (2 de 2 execuções); o `required` nativo só exige "não vazio". Mesma família do BUG-008 e do BUG-011. Como ver: preencher o cadastro `QA-AUTO-` com um desses campos só de espaços, um caso por vez, e ler o registro por nome exato (checagem de cobertura de 03/11/2026).
+Evidência: [BUG-023](evidencias/BUG-023-obrigatorios-aceitam-espacos.txt). Teste: `tests/ui/test_form_validation.py::test_required_fields_reject_whitespace_only` (um caso por campo).
 
 ---
 
@@ -379,5 +330,5 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 
 - **Base volátil.** Em 31/10 a base passou de 3.698 para 2 registros em menos de 1 hora, sem ação nossa. Compatível com um `DELETE` sem autenticação (BUG-004), mas a causa não é demonstrável. Um registro próprio também sumiu em segundos. Por isso cada teste cria e apaga o próprio dado, e o teardown tolera 404.
 - **`id` de tipo misto.** O servidor gera `id` string de 4 hexadecimais, mas aceita `id` do cliente (inteiro ou texto) e mantém o tipo. Registro com `id` inteiro aparece em `?id=` e na listagem, mas `GET`, `PUT`, `PATCH` e `DELETE` em `/employees/<id>` dão 404. Os testes nunca criam `id` inteiro. Os 4 órfãos abaixo foram criados de propósito por um explorador para testar a H10, antes de a regra existir; ficaram inapagáveis pela API.
-- **Quatro órfãos nossos.** Quatro registros `QA-AUTO-E2` com `id` inteiro, criados na fase exploratória (ver acima), ficaram inalcançáveis e inapagáveis pela API. Não há como removê-los por outra rota sem enumerar ids (proibido). O e-mail de entrega oferece os ids ao dono do ambiente para remoção.
+- **Quatro órfãos nossos.** Quatro registros `QA-AUTO-E2` com `id` inteiro, criados na fase exploratória (ver acima), ficaram inalcançáveis e inapagáveis pela API. Não há como removê-los por outra rota sem enumerar ids (proibido). O e-mail de entrega vai oferecer os ids ao dono do ambiente para remoção.
 - **Dúvidas em aberto (não viram defeito sem reprodução).** (1) O `access-control-allow-origin: *,*` bloqueia leitura cross-origin num navegador? Exigiria uma página de outra origem. (2) Proxies cacheiam dados pessoais por causa de `cache-control: public`? Exigiria um proxy no caminho. (3) Há dado real na base e com qual base legal? Desconhecido; por isso os registros de terceiros são tratados como reais e só aparecem aqui em agregados.
