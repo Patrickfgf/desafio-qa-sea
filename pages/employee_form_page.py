@@ -53,6 +53,7 @@ class EmployeeFormPage:
     def __init__(self, driver: WebDriver, base_url: str, timeout: float = 10):
         self.driver = driver
         self.base_url = base_url
+        self.timeout = timeout
         self.wait = WebDriverWait(driver, timeout)
         self.wait.until(EC.visibility_of_element_located(_FORM))
 
@@ -192,7 +193,7 @@ class EmployeeFormPage:
         Defaults to the same deadline ``save()`` allows for the POST and re-render, so a slow
         environment cannot make a "save was blocked" check pass by timing alone.
         """
-        deadline = self.wait._timeout if timeout is None else timeout
+        deadline = self.timeout if timeout is None else timeout
         try:
             WebDriverWait(self.driver, deadline).until(EC.invisibility_of_element_located(_FORM))
         except TimeoutException:
