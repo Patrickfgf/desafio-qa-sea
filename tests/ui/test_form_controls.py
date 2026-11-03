@@ -99,3 +99,28 @@ def test_add_epi_adds_another_epi_block(driver, base_url):
     assert form.wait_for_epi_select_count_above(before), (
         f"EPI select count stayed at {form.epi_select_count()} (was {before})"
     )
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="BUG-024: Enter descarta o cadastro sem salvar",
+)
+def test_enter_in_text_field_does_not_discard_the_form(driver, base_url, api, ui_created_names):
+    emp = build_employee(isActive=True)
+    ui_created_names.append(emp["name"])  # registered before the keystroke that may submit
+    form = EmployeeListPage(driver, base_url).open().click_add().fill(emp)
+
+    form.press_enter_in("caNumber")
+
+    # Acceptable outcomes: the form stays open, or Enter saved the record (like "Salvar").
+    if not form.wait_until_closed():
+        return
+    try:
+        WebDriverWait(driver, NETWORK_WAIT_SECONDS).until(
+            lambda _: api.find_ids_by_name(emp["name"])
+        )
+    except TimeoutException:
+        pass
+    stored = len(api.find_ids_by_name(emp["name"]))
+    assert stored > 0, "Enter closed the form without sending or saving anything"

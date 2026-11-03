@@ -108,3 +108,28 @@ def test_birth_date_rejects_future(driver, base_url, ui_created_names):
     form.submit()
 
     assert not form.wait_until_closed(), "form saved a birth date in 2099"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="BUG-023: Obrigatórios aceitam só espaços",
+)
+@pytest.mark.parametrize(
+    ("field", "blank"),
+    [("rg", " " * 3), ("caNumber", " " * 3), ("cpf", " " * 11)],
+    ids=["rg", "ca-number", "cpf"],
+)
+def test_required_fields_reject_whitespace_only(
+    driver, base_url, api, ui_created_names, field, blank
+):
+    emp = build_employee(isActive=True, usesEpi=True, **{field: blank})
+    ui_created_names.append(emp["name"])
+    form = _open_filled_form(driver, base_url, emp)
+
+    form.submit()
+
+    if not form.wait_until_closed():
+        return  # blocked before submit: the accepted behaviour
+    stored = find_saved_record(api, emp["name"])["state"]["employee"].get(field) or ""
+    assert stored.strip(), f"{field} was saved as whitespace only (length {len(stored)})"

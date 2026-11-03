@@ -7,6 +7,7 @@ from typing import Self
 
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
@@ -197,6 +198,10 @@ class EmployeeFormPage:
         except TimeoutException:
             return False
         return True
+
+    def press_enter_in(self, name: str) -> None:
+        """Press Enter in the named text input: the browser's implicit form submission."""
+        self._clickable(_field(name)).send_keys(Keys.ENTER)
 
     def submit(self) -> None:
         """Click "Salvar" without waiting; the browser may block it with native validation."""
