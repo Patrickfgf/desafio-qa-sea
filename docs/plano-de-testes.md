@@ -40,7 +40,7 @@ Sem documentação, todo "comportamento esperado" abaixo é **inferência** (ró
 11. O `id` é gerado pelo servidor e é único (duplicata deveria dar 409).
 12. Os registros existentes na base contam como dado potencialmente real, mesmo sem prova de que sejam.
 
-**Dúvidas com checagem dirigida** (resolvidas na reprodução manual, antes de virar asserção)
+**Dúvidas com checagem dirigida** (checadas por automação em 03/11; a reprodução manual confirma ou derruba cada uma)
 
 - O select de EPI grava o valor escolhido? Duas observações divergiram. Resultado automatizado de 03/11 (D1): sim, em 2 execuções o corpo do POST e o GET por id trazem o `epi` escolhido; depois de digitar o CA o select volta a exibir o padrão, mas grava o escolhido. Reprodução manual pendente.
 - Com o checkbox desmarcado e CA/EPI vazios, o usuário real vê a mensagem nativa de campo obrigatório, ou o formulário simplesmente não salva? Resultado automatizado de 03/11 (D2): a validação nativa bloqueia o envio com "Preencha este campo." (foco no CA, 0 requisições, 0 registros); o balão foi inferido do estado de validação, não visto. Reprodução manual pendente.
@@ -52,7 +52,7 @@ Sem documentação, todo "comportamento esperado" abaixo é **inferência** (ró
 - Proxies cacheiam dados pessoais por causa de `cache-control: public`? Exigiria um proxy no caminho.
 - Há dado real na base e com qual base legal? Desconhecido; por isso a premissa 12.
 - A base caiu de milhares para poucos registros em menos de uma hora: foi um DELETE sem autenticação? Compatível com o que se observou, não provado.
-- Escrita em registro de `id` numérico também dá 404? Só a leitura foi observada; provar exigiria criar id numérico, o que não faço.
+- Escrita em registro de `id` numérico também dá 404? As escritas foram observadas só pelo explorador; o verificador reproduziu a leitura. Não repito, porque exigiria criar id numérico, o que não faço.
 - Qual o comportamento pretendido de "Próximo passo" e do switch "A etapa está concluída?" Sem especificação.
 
 ## 3. Mapa de risco
