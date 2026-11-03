@@ -141,3 +141,22 @@ def test_required_fields_reject_whitespace_only(
         return  # blocked before submit: the accepted behaviour
     stored = find_saved_record(api, emp["name"])["state"]["employee"].get(field) or ""
     assert stored.strip(), f"{field} was saved as whitespace only (length {len(stored)})"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="EXT-01: Número do CA aceita caracteres especiais",
+)
+def test_ca_number_field_rejects_symbols(driver, base_url, api, ui_created_names):
+    symbols = "@!#$&&$#"  # inert text that only looks odd
+    emp = build_employee(isActive=True, usesEpi=True, caNumber=symbols)
+    ui_created_names.append(emp["name"])
+    form = _open_filled_form(driver, base_url, emp)
+
+    form.submit()
+
+    if not form.wait_until_closed():
+        return  # blocked before saving: the accepted behaviour
+    stored = find_saved_record(api, emp["name"])["state"]["employee"].get("caNumber")
+    assert stored != symbols, "a CA number made of symbols was stored as typed"

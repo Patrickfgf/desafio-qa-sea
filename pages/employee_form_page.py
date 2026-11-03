@@ -161,6 +161,28 @@ class EmployeeFormPage:
         root = self.wait.until(EC.presence_of_element_located(_select_of(label_for)))
         return root.find_element(*_SELECTED_ITEM).get_attribute("title") or ""
 
+    def option_titles(self, label_for: str) -> list[str]:
+        """Titles of every option of the select tied to ``label[for=label_for]``; picks nothing.
+
+        The dropdown is found through the combobox's ``aria-controls`` listbox id, which belongs
+        to this select only (see ``pages.components.antd``), and is closed again with Escape.
+        """
+        root = self.wait.until(EC.presence_of_element_located(_select_of(label_for)))
+        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", root)
+        combobox = root.find_element(By.CSS_SELECTOR, "input[role='combobox']")
+        listbox_id = combobox.get_attribute("aria-controls")
+        self.wait.until(EC.element_to_be_clickable(root)).click()
+        options = (
+            By.XPATH,
+            f"//div[@id='{listbox_id}']/ancestor::div[contains(@class,'ant-select-dropdown')]"
+            "[not(contains(@class,'ant-select-dropdown-hidden'))]"
+            "//div[contains(@class,'ant-select-item-option')]",
+        )
+        self.wait.until(EC.presence_of_element_located(options))
+        titles = [e.get_attribute("title") or "" for e in self.driver.find_elements(*options)]
+        combobox.send_keys(Keys.ESCAPE)
+        return titles
+
     def epi_select_count(self) -> int:
         return len(self.driver.find_elements(*_EPI_LABELS))
 
