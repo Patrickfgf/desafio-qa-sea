@@ -1,0 +1,49 @@
+[project]
+name = "desafio-qa-sea"
+version = "0.1.0"
+description = "Test automation (pytest, Selenium 4, requests) for an employee-registration web app and its REST API"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "faker>=40.44.0",
+    "jsonschema>=4.26.0",
+    "pytest>=9.2.0",
+    "pytest-html>=4.2.0",
+    "requests>=2.34.2",
+    "selenium>=4.52.0",
+]
+
+[tool.uv]
+# A test suite, not a library: nothing to build or install as a package.
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Repo root on sys.path so tests can import support/ and pages/.
+pythonpath = ["."]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--html=reports/report.html",
+    "--self-contained-html",
+]
+markers = [
+    "unit: pure-function tests, no network or browser",
+    "api: REST API tests against /employees",
+    "security: input-handling and security-oriented tests",
+    "ui: browser tests driven by Selenium",
+    "cross: tests that cross-check UI and API behaviour",
+    "guard: repository guards (e.g. no unmasked PII under docs/)",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "PT"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.17.3",
+]

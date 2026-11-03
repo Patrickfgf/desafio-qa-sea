@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Employee record",
+  "type": "object",
+  "required": ["id", "state"],
+  "properties": {
+    "id": { "type": ["string", "integer"] },
+    "state": {
+      "type": "object",
+      "required": ["employee"],
+      "properties": {
+        "employee": {
+          "type": "object",
+          "required": [
+            "isActive", "name", "gender", "cpf", "birthDay", "rg",
+            "role", "usesEpi", "activity", "epi", "caNumber"
+          ],
+          "properties": {
+            "isActive": { "type": "boolean" },
+            "name": { "type": "string" },
+            "gender": { "type": "string", "enum": ["masculino", "feminino"] },
+            "cpf": { "type": "string" },
+            "birthDay": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+            "rg": { "type": "string" },
+            "role": { "type": "string" },
+            "usesEpi": { "type": "boolean" },
+            "activity": { "type": "string" },
+            "epi": { "type": "string" },
+            "caNumber": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}
