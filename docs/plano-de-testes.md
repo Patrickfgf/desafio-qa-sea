@@ -119,13 +119,13 @@ A suíte usa marcadores do pytest: `unit`, `api`, `security`, `ui`, `cross` e `g
 |---|---|---|
 | `unit` | funções puras: validação de CPF, fábrica de dados sintéticos, máscara de dados pessoais, perfil agregado da base | existe |
 | `guard` | varre `docs/` e falha se houver CPF sem máscara | existe |
-| `api` | ciclo CRUD num registro próprio; contrato (schema) do registro criado; round-trip de nome com acento | existe (parcial) |
-| `api` (negativos) | CPF, datas, obrigatórios, valores permitidos; os que a API aceita viram `xfail` com o id do defeito | planejado |
-| `security` | escrita sem autenticação (1 teste por método), exposição de dados pessoais, CORS e cabeçalhos | planejado |
-| `ui` | cadastro feliz, formulário "no escuro", botões, listagem (Page Objects sobre o Ant Design) | existe (parcial: cadastro feliz) |
-| `cross` | criar pela tela e conferir na API, criar pela API e conferir na listagem, inativar | planejado |
+| `api` | ciclo CRUD num registro próprio; contrato (schema) do registro criado; round-trip de nome com acento | existe |
+| `api` (negativos) | CPF, datas, obrigatórios, valores permitidos; os que a API aceita viram `xfail` com o id do defeito | existe |
+| `security` | escrita sem autenticação (1 teste por método), exposição de dados pessoais, CORS e cabeçalhos | existe |
+| `ui` | cadastro feliz, formulário "no escuro", botões, listagem (Page Objects sobre o Ant Design) | existe (cadastro, validações e controles do formulário, atualização da listagem) |
+| `cross` | criar pela tela e conferir na API, criar pela API e conferir na listagem, inativar | existe |
 
-Na última coleta (`uv run pytest --collect-only -q`, 03/11/2026) a suíte tinha 107 testes coletados, ainda sem testes de `cross` e `security`.
+Na última coleta (`uv run pytest --collect-only -q`, 03/11/2026) a suíte tinha 157 testes coletados (unit 108, api 18, ui 12, security 9, cross 9, guard 1).
 
 **Por que automatizar:** regressão barata do que já se sabe (CRUD, contrato, máscara), e cada defeito confirmado vira um `xfail(strict=True, raises=AssertionError)` com o id do defeito: a suíte fica verde e documenta o bug, e se alguém o corrigir o teste passa a falhar, avisando que o plano precisa ser atualizado.
 
