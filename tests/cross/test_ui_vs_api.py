@@ -6,13 +6,15 @@ Every UI-created name is registered in ``ui_created_names`` BEFORE saving.
 
 import json
 import re
+from uuid import uuid4
 
 import pytest
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
 from pages.employee_list_page import EmployeeListPage
 from support.api_client import mismatched_fields
-from support.factory import build_employee
+from support.factory import TEST_PREFIX, build_employee
 from support.records import find_saved_record
 
 pytestmark = pytest.mark.cross
@@ -177,3 +179,18 @@ def test_inactive_employee_hidden_with_active_filter(driver, base_url, create_em
     WebDriverWait(driver, 10).until(lambda _: page.find_card(inactive["name"]) is None)
 
     assert page.find_card(active["name"]) is not None, "active employee vanished under the filter"
+
+
+def test_listing_renders_name_markup_as_text(driver, base_url, create_employee):
+    # Inert markup (allowed by the plan): the card must show it literally, not interpret it.
+    token = uuid4().hex[:8]
+    name = f"{TEST_PREFIX}markup-{token}-<b>qa</b>"
+    create_employee(name=name)
+    EmployeeListPage(driver, base_url).open()
+    # Only our card: the token is unique to this run, so no one else's record can match.
+    name_span = (By.XPATH, f"//span[contains(text(), '{token}')]")
+
+    span = WebDriverWait(driver, 10).until(lambda d: d.find_element(*name_span))
+
+    assert span.get_attribute("textContent").strip() == name, "card does not show the literal name"
+    assert not span.find_elements(By.TAG_NAME, "b"), "card rendered the name as HTML (<b> element)"
