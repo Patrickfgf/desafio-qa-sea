@@ -10,14 +10,33 @@ from support.pii import mask_report
 pytestmark = pytest.mark.unit
 
 
+def _json_response(status: int, body) -> requests.Response:
+    resp = requests.Response()
+    resp.status_code = status
+    resp._content = json.dumps(body).encode()
+    resp.url = "http://x/employees"
+    resp.request = requests.Request("GET", "http://x/employees").prepare()
+    return resp
+
+
 class FakeClient:
-    def __init__(self, statuses: dict):
+    """DELETE answers from ``statuses``; ``?id=`` lookups answer from ``still_listed``."""
+
+    def __init__(self, statuses: dict, still_listed: dict | None = None, list_status: int = 200):
         self._statuses = statuses
+        self._still_listed = still_listed or {}
+        self._list_status = list_status
+        self.list_params: list[dict | None] = []
 
     def delete(self, employee_id):
         resp = requests.Response()
         resp.status_code = self._statuses[employee_id]
         return resp
+
+    def list(self, params=None):
+        self.list_params.append(params)
+        employee_id = (params or {}).get("id")
+        return _json_response(self._list_status, self._still_listed.get(employee_id, []))
 
 
 def test_url_for_accepts_int_and_str_ids():
@@ -35,6 +54,27 @@ def test_delete_quietly_ignores_already_deleted():
     assert leftovers == [3]
 
 
+def test_delete_quietly_confirms_404_by_id_filter():
+    client = FakeClient({"a1": 200, "b2": 404})
+
+    delete_quietly(client, ["a1", "b2"])
+
+    assert client.list_params == [{"id": "b2"}]
+
+
+def test_delete_quietly_flags_404_when_record_is_still_listed():
+    # json-server v1 answers 404 on /employees/7 for an int id, yet ?id=7 still finds it.
+    client = FakeClient({7: 404}, still_listed={7: [{"id": 7}]})
+
+    assert delete_quietly(client, [7]) == [7]
+
+
+def test_delete_quietly_flags_404_when_confirmation_fails():
+    client = FakeClient({"c3": 404}, list_status=500)
+
+    assert delete_quietly(client, ["c3"]) == ["c3"]
+
+
 def test_describe_masks_cpf_in_body():
     resp = requests.Response()
     resp.status_code = 201
@@ -47,19 +87,21 @@ def test_describe_masks_cpf_in_body():
     assert "52998224725" not in text
 
 
+class FakeSession:
+    """Answers every GET with ``resp`` and records the query params of each call."""
+
+    def __init__(self, resp: requests.Response):
+        self._resp = resp
+        self.params: list[dict | None] = []
+
+    def get(self, url, params=None, timeout=None):
+        self.params.append(params)
+        return self._resp
+
+
 def _list_client(status: int, body) -> EmployeesClient:
-    resp = requests.Response()
-    resp.status_code = status
-    resp._content = json.dumps(body).encode()
-    resp.url = "http://x/employees"
-    resp.request = requests.Request("GET", "http://x/employees").prepare()
-
-    class FakeSession:
-        def get(self, *args, **kwargs):
-            return resp
-
     client = EmployeesClient("http://x")
-    client.session = FakeSession()
+    client.session = FakeSession(_json_response(status, body))  # type: ignore[assignment]
     return client
 
 
@@ -84,6 +126,21 @@ def test_find_ids_by_name_skips_malformed_records():
     ]
 
     assert _list_client(200, records).find_ids_by_name("a") == [4]
+
+
+def test_find_ids_by_names_filters_on_the_server_one_get_per_name():
+    client = _list_client(200, [_record(1, "QA-AUTO-a")])
+
+    client.find_ids_by_names({"QA-AUTO-a"})
+
+    assert client.session.params == [{"state.employee.name": "QA-AUTO-a"}]
+
+
+def test_find_ids_by_names_keeps_exact_client_side_match():
+    # Defence in depth: never trust the server filter to be exact.
+    records = [_record(1, "QA-AUTO-a"), _record(2, "QA-AUTO-a-other")]
+
+    assert _list_client(200, records).find_ids_by_names({"QA-AUTO-a"}) == [1]
 
 
 def test_find_ids_by_name_raises_on_non_200():

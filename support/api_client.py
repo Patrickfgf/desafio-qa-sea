@@ -52,22 +52,31 @@ class EmployeesClient:
         return self.session.options(self.url_for(), timeout=self.timeout)
 
     def find_ids_by_name(self, name: str) -> list[EmployeeId]:
-        """One GET of the list, filtered client-side (never loops over the shared base)."""
+        """Ids of records whose ``state.employee.name`` is exactly ``name``."""
         return self.find_ids_by_names({name})
 
     def find_ids_by_names(self, names: set[str]) -> list[EmployeeId]:
-        """Same single GET as ``find_ids_by_name``, matching any of the exact ``names``."""
-        resp = self.list()
-        if resp.status_code != 200:
-            raise AssertionError(f"Unexpected list status: {describe(resp)}")
-        body = resp.json()
-        records = body.get("data", []) if isinstance(body, dict) else body
+        """One server-side exact-name filter GET per name; the shared base is never listed.
+
+        The server filter is exact equality (there is no prefix filter); the name is still
+        re-checked client-side so a looser server never widens what the caller deletes.
+        """
         ids = []
-        for record in records:
-            employee = _employee_of(record)
-            if employee is not None and employee.get("name") in names and "id" in record:
-                ids.append(record["id"])
+        for name in sorted(names):
+            resp = self.list(params={"state.employee.name": name})
+            if resp.status_code != 200:
+                raise AssertionError(f"Unexpected list status: {describe(resp)}")
+            for record in _records_of(resp.json()):
+                employee = _employee_of(record)
+                if employee is not None and employee.get("name") == name and "id" in record:
+                    ids.append(record["id"])
         return ids
+
+
+def _records_of(body) -> list:
+    """The record list of a collection response: a bare array or a paginated ``{"data": [...]}``."""
+    records = body.get("data", []) if isinstance(body, dict) else body
+    return records if isinstance(records, list) else []
 
 
 def _employee_of(record) -> dict | None:
@@ -100,7 +109,12 @@ def describe(resp: requests.Response) -> str:
 
 
 def delete_quietly(client, ids: Iterable[EmployeeId]) -> list[EmployeeId]:
-    """Delete each id; return those whose DELETE was not 200/204/404 (or raised)."""
+    """Delete each id; return the ids that may still exist (the caller warns about them).
+
+    A 404 is ambiguous: the record is gone, or its id is an int that json-server v1 cannot
+    reach by route (``/employees/7`` -> 404 while ``?id=7`` still lists it). Only on 404 the
+    id is confirmed with one ``?id=`` filter GET; a failed confirmation counts as a leftover.
+    """
     leftovers = []
     for employee_id in ids:
         try:
@@ -108,6 +122,20 @@ def delete_quietly(client, ids: Iterable[EmployeeId]) -> list[EmployeeId]:
         except requests.RequestException:
             leftovers.append(employee_id)
             continue
-        if status not in _ALREADY_GONE:
+        if status not in _ALREADY_GONE or (status == 404 and _still_listed(client, employee_id)):
             leftovers.append(employee_id)
     return leftovers
+
+
+def _still_listed(client, employee_id: EmployeeId) -> bool:
+    """True when ``?id=`` still finds the record, or when that cannot be confirmed."""
+    try:
+        resp = client.list(params={"id": employee_id})
+    except requests.RequestException:
+        return True
+    if resp.status_code != 200:
+        return True
+    try:
+        return bool(_records_of(resp.json()))
+    except ValueError:
+        return True
