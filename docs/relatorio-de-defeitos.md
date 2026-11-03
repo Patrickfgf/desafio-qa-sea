@@ -4,6 +4,8 @@
 >
 > **Nota de cobertura:** as áreas do BUG-023 e do BUG-024 vieram da lista de áreas de um repositório público de 2025 (só os nomes das áreas) e foram exploradas do zero. O BUG-022 (título da aba) foi retirado: a área veio dessa mesma lista, e o único achado possível nela é o valor do título, que o outro repositório já confere.
 >
+> **Defeitos de fonte externa:** a seção "Defeitos de fonte externa (reproduzidos por nós)" (EXT-01 a EXT-08) lista defeitos que o repositório público de 2025 já apontava e que reproduzimos de forma independente em 03/11/2026. Eles são creditados à fonte, nunca apresentados como descoberta nossa, e seguem a mesma regra: "Reproduzido à mão" pendente. Por decisão do Patrick (DEC-24), essa seção substitui, para os defeitos reproduzidos, a regra "só áreas" acima.
+>
 > **Como as evidências foram geradas:** por scripts de verificação não versionados, que usam `support.evidence` e o mascaramento do repositório; as evidências de interface foram copiadas dos logs dessas verificações.
 
 **Ambiente de todos os defeitos:** `https://analista-teste.seatecnologia.com.br/` (interface e `/employees`), 03/11/2026 (BUG-001, BUG-006, BUG-007 e BUG-012: verificação anterior, sem data), Chrome headless (interface) e `requests` (API). Base compartilhada: só registros sintéticos com nome `QA-AUTO-`, apagados em seguida. CPF mascarado (`123.***.***-09`) ou descrito, nunca em claro, nas evidências.
@@ -52,6 +54,14 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio (as mesm
 | BUG-020 | CORS inválido (*,*) e POST text/plain aceito | Segurança | Baixa | P3 | `tests/security/test_security.py::test_cors_allow_origin_is_single_value` | pendente |
 | BUG-021 | Sem cabeçalhos de segurança e com x-powered-by | Segurança | Baixa | P3 | `tests/security/test_security.py::test_security_headers_present` | pendente |
 | BUG-023 | Obrigatórios aceitam só espaços | Validação (tela) | Baixa | P3 | `tests/ui/test_form_validation.py::test_required_fields_reject_whitespace_only` | pendente |
+| EXT-01 | Número do CA aceita caracteres especiais (fonte externa) | Validação | Baixa | P3 | `tests/api/test_validation.py::test_create_rejects_symbols_in_ca_number` | pendente |
+| EXT-02 | Bloco "A etapa está concluída?" sobrepõe a listagem (fonte externa) | Layout | Baixa | P3 | `tests/ui/test_external_findings.py::test_step_block_does_not_overlap_the_listing` | pendente |
+| EXT-03 | Rótulos "ITEM 1" repetidos na trilha de etapas (fonte externa) | Conteúdo | Baixa | P3 | `tests/ui/test_external_findings.py::test_step_labels_are_distinct` | pendente |
+| EXT-04 | Rótulo "CONCLUIDO" sem acento (fonte externa) | Conteúdo | Baixa | P3 | `tests/ui/test_external_findings.py::test_concluded_label_is_accented_in_both_states` | pendente |
+| EXT-05 | Itens da barra lateral não reagem ao clique (fonte externa) | Funcional (interface) | Baixa | P3 | `tests/ui/test_external_findings.py::test_sidebar_item_becomes_active_when_clicked` | pendente |
+| EXT-06 | Rótulos abreviados e capitalização inconsistente nos selects (fonte externa) | Conteúdo | Baixa | P3 | `tests/ui/test_external_findings.py::test_select_option_labels_are_spelled_out_and_consistent` | pendente |
+| EXT-07 | Botão de três pontos do card não abre menu (fonte externa) | Funcional (interface) | Baixa | P3 | `tests/ui/test_external_findings.py::test_card_dots_button_opens_a_menu` | pendente |
+| EXT-08 | Título da aba é o do template Vite (fonte externa) | Conteúdo | Baixa | P3 | `tests/ui/test_external_findings.py::test_page_title_is_not_the_template_default` | pendente |
 
 Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na razão. Quando a tabela cita um teste, os demais do mesmo defeito estão na seção dele. Cada premissa de "esperado" abaixo é inferência (sem documentação do sistema); as premissas estão em `plano-de-testes.md`, seção 2.
 
@@ -323,6 +333,115 @@ Evidência: [BUG-021](evidencias/BUG-021-sem-cabecalhos-de-seguranca.txt). Teste
 
 Categoria: validação (tela). RG com 3 espaços, CA com 3 espaços e CPF com 11 espaços salvam, e a API grava os espaços (2 de 2 execuções); o `required` nativo só exige "não vazio". Mesma família do BUG-008 e do BUG-011. Como ver: preencher o cadastro `QA-AUTO-` com um desses campos só de espaços, um caso por vez, e ler o registro por nome exato (checagem de cobertura de 03/11/2026).
 Evidência: [BUG-023](evidencias/BUG-023-obrigatorios-aceitam-espacos.txt) · [print](evidencias/ui/BUG-023.png) · [vídeo](evidencias/ui/BUG-023.mp4). Teste: `tests/ui/test_form_validation.py::test_required_fields_reject_whitespace_only` (um caso por campo).
+
+---
+
+## Defeitos de fonte externa (reproduzidos por nós)
+
+Identificados a partir do repositório público https://github.com/mthsqa/SEA-Tecnologia (outro candidato, 2025); reproduzidos de forma independente na versão atual do app em 03/11/2026, com evidência própria.
+
+Cada item aponta a **Origem** (o item no repositório externo) e traz o que vimos hoje, com registros sintéticos `QA-AUTO-` apagados em seguida e prints/vídeos redigidos (só registros nossos). O repositório externo foi só lido; nenhum código dele foi executado. Severidade Baixa e prioridade P3 em todos: cosmético ou sem especificação. Os demais itens dele (duplicados dos nossos, ou que dependem do protótipo que não temos) não entram aqui. Ids EXT-NN são nossos; a origem mantém o id dele.
+
+### EXT-01 — Número do CA aceita caracteres especiais
+
+- **Categoria:** validação. **Severidade:** Baixa. **Prioridade:** P3.
+- **Ambiente:** interface, 03/11/2026, Chrome headless (1366x900; EXT-02 em 1920x1080). Sem especificação do sistema: o "esperado" é inferência.
+- **Origem:** [BUG-002 na planilha de bugs do repositório externo](https://github.com/mthsqa/SEA-Tecnologia/blob/main/Documentos/Bug%20Report%20-%20Planilha%20de%20Avalia%C3%A7%C3%A3o%20SEA%20Tecnologia.%20Analista%20de%20Teste_QA%20-%20Matheus%20Silva..xlsx) ("Campo Número do CA aceita caracteres especiais"). Mesma família do BUG-008 e do BUG-011, mas campo e regra distintos.
+- **Passos:**
+  1. Abrir o formulário e preencher um cadastro `QA-AUTO-` com dados fictícios.
+  2. Digitar `@!#$&&$#` em "Número do CA" e salvar.
+  3. Ler o registro por nome exato (ou `GET /employees?id=` do registro criado pela API).
+- **Esperado:** rejeitar (400/422 na API, mensagem na tela) ou aceitar só dígitos (regra a confirmar com a especificação).
+- **Obtido:** nenhuma mensagem; `caNumber` gravado como `@!#$&&$#`. O input é `type=text`, sem `pattern` nem `maxlength`; a API aceita o mesmo valor (201).
+- **Evidência:** [EXT-BUG-002](evidencias/ext/EXT-BUG-002-ca-number-simbolos.txt) · [print](evidencias/ext/EXT-BUG-002.png) · [vídeo](evidencias/ext/EXT-BUG-002.mp4) (o texto vem de uma execução e o print/vídeo de outra, ambas nossas).
+- **Teste automatizado:** `tests/api/test_validation.py::test_create_rejects_symbols_in_ca_number`; `tests/ui/test_form_validation.py::test_ca_number_field_rejects_symbols`.
+- **Reproduzido à mão:** pendente.
+
+### EXT-02 — Bloco "A etapa está concluída?" sobrepõe a listagem
+
+- **Categoria:** layout. **Severidade:** Baixa. **Prioridade:** P3.
+- **Ambiente:** interface, 03/11/2026, Chrome headless (1366x900; EXT-02 em 1920x1080). Sem especificação do sistema: o "esperado" é inferência.
+- **Origem:** [BUG-003 na planilha de bugs do repositório externo](https://github.com/mthsqa/SEA-Tecnologia/blob/main/Documentos/Bug%20Report%20-%20Planilha%20de%20Avalia%C3%A7%C3%A3o%20SEA%20Tecnologia.%20Analista%20de%20Teste_QA%20-%20Matheus%20Silva..xlsx) (botão "A etapa está concluída?" sobrepõe outros componentes).
+- **Passos:**
+  1. Abrir `/` em 1920x1080 com a lista cheia (8 cadastros `QA-AUTO-` criados pela API).
+  2. Medir o retângulo do bloco "A etapa está concluída? Sim/Não" (`position:absolute` dentro do painel da listagem, 278x62 px) e o dos cards, com a lista rolada ao início e ao fim.
+- **Esperado:** o bloco não cobrir a listagem.
+- **Obtido:** o bloco cobre cards; a 1920x1080 o ícone de pontos de um card fica inteiramente sob o bloco (`elementFromPoint` devolve o bloco). Qual card é coberto depende do tamanho da lista.
+- **Evidência:** [print](evidencias/ext/EXT-BUG-003.png) · [vídeo](evidencias/ext/EXT-BUG-003.mp4)
+- **Teste automatizado:** `tests/ui/test_external_findings.py::test_step_block_does_not_overlap_the_listing` (lê só geometria, contagens).
+- **Reproduzido à mão:** pendente.
+
+### EXT-03 — Rótulos "ITEM 1" repetidos na trilha de etapas
+
+- **Categoria:** conteúdo. **Severidade:** Baixa. **Prioridade:** P3.
+- **Ambiente:** interface, 03/11/2026, Chrome headless (1366x900; EXT-02 em 1920x1080). Sem especificação do sistema: o "esperado" é inferência.
+- **Origem:** [CT-001 na planilha de casos de teste do repositório externo](https://github.com/mthsqa/SEA-Tecnologia/blob/main/Documentos/Caso%20de%20Testes%20-%20Planilha%20de%20Avalia%C3%A7%C3%A3o%20SEA%20Tecnologia.%20Analista%20de%20Teste_QA%20-%20Matheus%20Silva..xlsx) (rótulos "ITEM 1" repetidos).
+- **Passos:** abrir `/` e ler o texto dos rótulos da trilha de etapas do cabeçalho.
+- **Esperado:** numeração distinta (1 a 9) ou o nome da etapa. Sem especificação: pode ser texto provisório.
+- **Obtido:** os 9 rótulos mostram "ITEM 1".
+- **Evidência:** [print](evidencias/ext/EXT-CT-001.png) · [vídeo](evidencias/ext/EXT-CT-001.mp4)
+- **Teste automatizado:** `tests/ui/test_external_findings.py::test_step_labels_are_distinct`.
+- **Reproduzido à mão:** pendente.
+
+### EXT-04 — Rótulo "CONCLUIDO" sem acento
+
+- **Categoria:** conteúdo. **Severidade:** Baixa. **Prioridade:** P3.
+- **Ambiente:** interface, 03/11/2026, Chrome headless (1366x900; EXT-02 em 1920x1080). Sem especificação do sistema: o "esperado" é inferência.
+- **Origem:** [CT-003 na planilha de casos de teste do repositório externo](https://github.com/mthsqa/SEA-Tecnologia/blob/main/Documentos/Caso%20de%20Testes%20-%20Planilha%20de%20Avalia%C3%A7%C3%A3o%20SEA%20Tecnologia.%20Analista%20de%20Teste_QA%20-%20Matheus%20Silva..xlsx) ("CONCLUIDO" sem acento e sem negrito). Só a parte do texto é objetiva; o negrito depende do protótipo, que não temos, e não é afirmado.
+- **Passos:** abrir `/`, ler o rótulo sob o 1º item, ligar o switch "A etapa está concluída?" e ler de novo.
+- **Esperado:** "CONCLUÍDO", com acento.
+- **Obtido:** "CONCLUIDO" nos dois estados (a classe CSS muda, o texto não).
+- **Evidência:** [print](evidencias/ext/EXT-CT-003.png) · [vídeo](evidencias/ext/EXT-CT-003.mp4)
+- **Teste automatizado:** `tests/ui/test_external_findings.py::test_concluded_label_is_accented_in_both_states`.
+- **Reproduzido à mão:** pendente.
+
+### EXT-05 — Itens da barra lateral não reagem ao clique
+
+- **Categoria:** funcional (interface). **Severidade:** Baixa. **Prioridade:** P3.
+- **Ambiente:** interface, 03/11/2026, Chrome headless (1366x900; EXT-02 em 1920x1080). Sem especificação do sistema: o "esperado" é inferência.
+- **Origem:** [CT-006 e CT-007 na planilha de casos de teste do repositório externo](https://github.com/mthsqa/SEA-Tecnologia/blob/main/Documentos/Caso%20de%20Testes%20-%20Planilha%20de%20Avalia%C3%A7%C3%A3o%20SEA%20Tecnologia.%20Analista%20de%20Teste_QA%20-%20Matheus%20Silva..xlsx) (botões da barra sem funcionalidade; item não muda de cor ao ser selecionado). Mesma causa, um único defeito aqui.
+- **Passos:** abrir `/` e clicar, com ponteiro real, nos 6 ícones da barra lateral, um a um; comparar URL, requisições e o ícone ativo.
+- **Esperado:** algum efeito ao clicar e destaque do item selecionado (sem especificação do comportamento pretendido).
+- **Obtido:** 6 cliques, URL igual, 0 requisições novas, sem texto "Em breve"; o ícone ativo é sempre o 2º. São `div` sem `role` nem `tabindex`, com `cursor:auto`.
+- **Evidência:** [print](evidencias/ext/EXT-CT-006-007.png) · [vídeo](evidencias/ext/EXT-CT-006-007.mp4). O print não mostra a UI mudando: a ausência de efeito consta na legenda (0 requisições, URL igual).
+- **Teste automatizado:** `tests/ui/test_external_findings.py::test_sidebar_item_becomes_active_when_clicked`.
+- **Reproduzido à mão:** pendente.
+
+### EXT-06 — Rótulos abreviados e capitalização inconsistente nos selects
+
+- **Categoria:** conteúdo. **Severidade:** Baixa. **Prioridade:** P3.
+- **Ambiente:** interface, 03/11/2026, Chrome headless (1366x900; EXT-02 em 1920x1080). Sem especificação do sistema: o "esperado" é inferência.
+- **Origem:** [CT-016 na planilha de casos de teste do repositório externo](https://github.com/mthsqa/SEA-Tecnologia/blob/main/Documentos/Caso%20de%20Testes%20-%20Planilha%20de%20Avalia%C3%A7%C3%A3o%20SEA%20Tecnologia.%20Analista%20de%20Teste_QA%20-%20Matheus%20Silva..xlsx) (primeira atividade aparece como "Ativid 01").
+- **Passos:** abrir o formulário e ler as opções de "Atividade" e de EPI; ver o card de um registro `QA-AUTO-` com "Ativid 02".
+- **Esperado:** rótulos por extenso e com o mesmo padrão de capitalização (o texto exato depende da especificação, que não temos).
+- **Obtido:** atividades "Ativid 01" a "Ativid 05" (o card repete "Ativid 0N"); entre os EPIs, "Calçado de Segurança" tem o S maiúsculo, diferente das outras quatro opções.
+- **Evidência:** [print](evidencias/ext/EXT-CT-016.png) · [vídeo](evidencias/ext/EXT-CT-016.mp4)
+- **Teste automatizado:** `tests/ui/test_external_findings.py::test_select_option_labels_are_spelled_out_and_consistent`.
+- **Reproduzido à mão:** pendente.
+
+### EXT-07 — Botão de três pontos do card não abre menu
+
+- **Categoria:** funcional (interface). **Severidade:** Baixa (sobe para Média se o escopo exigir editar e excluir pela tela). **Prioridade:** P3.
+- **Ambiente:** interface, 03/11/2026, Chrome headless (1366x900; EXT-02 em 1920x1080). Sem especificação do sistema: o "esperado" é inferência.
+- **Origem:** [CT-021 na planilha de casos de teste do repositório externo](https://github.com/mthsqa/SEA-Tecnologia/blob/main/Documentos/Caso%20de%20Testes%20-%20Planilha%20de%20Avalia%C3%A7%C3%A3o%20SEA%20Tecnologia.%20Analista%20de%20Teste_QA%20-%20Matheus%20Silva..xlsx) (botão de pontos sem edição nem exclusão).
+- **Passos:** criar 1 registro `QA-AUTO-` pela API, abrir `/` e clicar com ponteiro real no botão de três pontos do card; contar menus, diálogos, nós do DOM e requisições.
+- **Esperado:** um menu com ações (editar, excluir), se o escopo exigir CRUD pela tela.
+- **Obtido:** nenhum menu nem modal (`ant-dropdown`, `ant-modal`, `role=menu`, `role=dialog`: 0); DOM de 158 para 158 nós; 0 requisições; `cursor:auto`. Não há como editar nem excluir um funcionário pela interface.
+- **Evidência:** [print](evidencias/ext/EXT-CT-021.png) · [vídeo](evidencias/ext/EXT-CT-021.mp4)
+- **Teste automatizado:** `tests/ui/test_external_findings.py::test_card_dots_button_opens_a_menu`.
+- **Reproduzido à mão:** pendente.
+
+### EXT-08 — Título da aba é o do template Vite
+
+- **Categoria:** conteúdo. **Severidade:** Baixa. **Prioridade:** P3.
+- **Ambiente:** interface, 03/11/2026, Chrome headless (1366x900; EXT-02 em 1920x1080). Sem especificação do sistema: o "esperado" é inferência.
+- **Origem:** [teste Cypress `cadastro-funcionario.cy.js`, linha 13](https://github.com/mthsqa/SEA-Tecnologia/blob/main/cypress/e2e/cadastro-funcionario.cy.js#L13) (espera o título "Vite + React + TS", que é o do template). É o item que antes constava como BUG-022; o id 022 continua aposentado (DEC-16) e este defeito entra com id EXT.
+- **Passos:** abrir `/` e ler `document.title`.
+- **Esperado:** um título que identifique o produto.
+- **Obtido:** `document.title` = "Vite + React + TS".
+- **Evidência:** [print](evidencias/ext/EXT-TEST-01.png) · [vídeo](evidencias/ext/EXT-TEST-01.mp4). O print comprova o título só pelo texto da legenda.
+- **Teste automatizado:** `tests/ui/test_external_findings.py::test_page_title_is_not_the_template_default`.
+- **Reproduzido à mão:** pendente.
 
 ---
 
