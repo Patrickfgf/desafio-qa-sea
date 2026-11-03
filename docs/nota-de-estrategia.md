@@ -2,7 +2,7 @@
 
 ## Tempo disponível
 
-O prazo era até quarta 04/11. O trabalho registrado no git vai de 31/10 a 03/11: 55 commits até `2315607` (1 em 31/10, 18 em 02/11, 36 em 03/11; nenhum em 01/11). Horas reais dedicadas: ⟪PATRICK: horas reais dedicadas⟫
+O prazo era até quarta 04/11. O trabalho registrado no git vai de 31/10 a 03/11: 55 commits até `2315607` (1 em 31/10, 18 em 02/11, 36 em 03/11; nenhum em 01/11).
 
 ## O que priorizei e por quê
 
