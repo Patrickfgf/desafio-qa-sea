@@ -42,9 +42,9 @@ Sem documentação, todo "comportamento esperado" abaixo é **inferência** (ró
 
 **Dúvidas com checagem dirigida** (resolvidas na reprodução manual, antes de virar asserção)
 
-- O select de EPI grava o valor escolhido? Duas observações divergiram.
-- Com o checkbox desmarcado e CA/EPI vazios, o usuário real vê a mensagem nativa de campo obrigatório, ou o formulário simplesmente não salva?
-- Um registro sem `state.employee` quebra a listagem?
+- O select de EPI grava o valor escolhido? Duas observações divergiram. Resultado automatizado de 03/11 (D1): sim, em 2 execuções o corpo do POST e o GET por id trazem o `epi` escolhido; depois de digitar o CA o select volta a exibir o padrão, mas grava o escolhido. Reprodução manual pendente.
+- Com o checkbox desmarcado e CA/EPI vazios, o usuário real vê a mensagem nativa de campo obrigatório, ou o formulário simplesmente não salva? Resultado automatizado de 03/11 (D2): a validação nativa bloqueia o envio com "Preencha este campo." (foco no CA, 0 requisições, 0 registros); o balão foi inferido do estado de validação, não visto. Reprodução manual pendente.
+- Um registro sem `state.employee` quebra a listagem? Resultado automatizado de 03/11 (D3): sim, em 1 carga o POST sem `state.employee` dá 201 e a listagem fica em branco, com `TypeError` no console. Reprodução manual pendente.
 
 **Dúvidas que ficam em aberto** (não verificáveis dentro dos limites da seção 8; nenhuma vira defeito sem reprodução)
 
@@ -104,7 +104,7 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio, e as du
   | Checkbox "não usa EPI" | CA preenchido | Esperado em `usesEpi` | Esperado em `caNumber` | Observado na exploração |
   |---|---|---|---|---|
   | desmarcado | sim | `true` | CA informado | grava `false` |
-  | desmarcado | não | (formulário não salva) | n/a | sem mensagem visível em headless |
+  | desmarcado | não | (formulário não salva) | n/a | a validação nativa bloqueia o envio com "Preencha este campo." e nenhuma requisição é enviada (checagem D2, automatizada em 03/11; reprodução manual pendente) |
   | marcado | campo some | `false` | vazio | grava `true` e `caNumber: ""` |
 
 - **Cruzamento tela × API.** Criar pela tela e conferir na API os campos gravados; criar pela API e conferir na listagem; comparar o corpo do POST com o que o GET devolve depois; inativar e verificar que o funcionário some da tela mas continua na API.
