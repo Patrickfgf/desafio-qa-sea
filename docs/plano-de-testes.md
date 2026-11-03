@@ -2,7 +2,7 @@
 
 Alvo: sistema de cadastro de trabalhadores para segurança do trabalho, com interface web (cadastro em etapas e listagem) e API REST em `/employees`. Não há documentação formal; este plano parte do comportamento observado.
 
-> **Status: corte de risco decidido em 03/11/2026** (seção 3) e escalas de severidade e prioridade fixadas (seção 3.1). Os comportamentos citados aqui como observados vêm da exploração automatizada; o relatório de defeitos só traz o que foi reproduzido à mão.
+> **Status: corte de risco decidido em 03/11/2026** (seção 3) e escalas de severidade e prioridade fixadas (seção 3.1). Os comportamentos citados aqui como observados vêm da exploração automatizada; cada defeito do relatório traz o status da reprodução manual; o que não for reproduzido à mão sai antes da entrega, junto com o teste e a evidência.
 
 ## 1. Escopo
 
@@ -109,7 +109,7 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio, e as du
 
 - **Cruzamento tela × API.** Criar pela tela e conferir na API os campos gravados; criar pela API e conferir na listagem; comparar o corpo do POST com o que o GET devolve depois; inativar e verificar que o funcionário some da tela mas continua na API.
 - **Leitura estática do bundle como fonte de hipóteses.** A leitura do JavaScript da página gera hipóteses (por exemplo, defaults só visuais, botão sem `type`, arquivo nunca enviado). Hipótese não é achado: cada uma é confirmada ou derrubada no sistema rodando. Uma delas foi derrubada em parte: um botão que se supunha inerte, na verdade, salva o cadastro.
-- **Verificação independente de cada achado antes do relatório.** Todo defeito é reproduzido por um segundo caminho (outro script, ou outra ferramenta) e depois à mão por quem assina o relatório. Se não reproduz, sai do relatório e o teste é corrigido ou removido. Nenhum defeito entra no relatório sem essa reprodução.
+- **Verificação independente de cada achado antes do relatório.** Todo defeito é reproduzido por um segundo caminho (outro script, ou outra ferramenta) e, antes da entrega, à mão por quem assina o relatório. O que não reproduz sai do relatório, e o teste é corrigido ou removido. Enquanto a reprodução manual não acontece, o relatório marca o defeito como pendente.
 
 ## 5. Automatizado × manual
 

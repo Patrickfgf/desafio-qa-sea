@@ -23,13 +23,13 @@ Seleção de 9 das 20 entradas do diário bruto.
 4. Severidade inflada em 14 candidatos. Pego por verificação adversarial. Exploração §3.2 e §5.1.
 5. Um explorador criou 4 registros com `id` inteiro, inapagáveis. Pego pelo próprio explorador e pela checagem de sobras. Exploração §7.3.
 6. A redação do print de falha escondia só cards de 3 divs (fail-open). Pego por 3 revisores independentes. Commits 766723a → 4ad8e1d.
-7. Um script de sondagem imprimiu o DOM da listagem, com dados de terceiros no contexto da IA. Pego por autorrelato do implementador. Relatório da Task 10.
+7. Um script de sondagem imprimiu o DOM da listagem, com dados de terceiros no contexto da IA. Pego por autorrelato do implementador. Sem artefato: autorrelato; a regra hoje está no CLAUDE.md (seção Regras de código, última linha).
 8. O plano prometia conferir por `?id=` após o DELETE, mas o código não fazia. Pego por crítico de completude. Commit a829cdd.
-9. Um verificador enviou um POST vazio e deixou a listagem em branco por segundos. Pego por agente de triagem (Opus), confirmado pelo Claude. Registro apagado; regra nova nos briefs. DEC-13.
+9. Um verificador enviou um POST vazio e deixou a listagem em branco por segundos. Pego por agente de triagem (Opus), confirmado pelo Claude. Registro apagado; regra nova nos briefs. DEC-13 (registro 4643, apagado e confirmado por `?id=`).
 
 ## Guarda-corpos
 
 - `CLAUDE.md`: só registros `QA-AUTO-`, só dados sintéticos, sem payload executável, sem carga, nada fora de `/` e `/employees`.
 - Guarda de PII: `support/pii.py` mascara CPF, e o teste `guard` falha se `docs/` tiver CPF sem máscara.
-- Verificação adversarial: outro agente tenta refutar cada candidato antes de ele chegar ao relatório.
+- Verificação adversarial: um segundo agente tentou refutar 19 dos 24 defeitos; BUG-016, BUG-019 e BUG-022 a 024 só têm a execução de quem os achou e o teste xfail, e dependem da reprodução manual.
 - Portões humanos: reprodução manual dos defeitos, edição final destes textos e a mudança pequena do Portão 3.
