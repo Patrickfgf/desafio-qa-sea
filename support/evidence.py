@@ -171,7 +171,8 @@ def _masked_response_body(text: str) -> str:
         parsed = _UNPARSED
     if parsed is _UNPARSED or isinstance(parsed, str):
         shown = text if parsed is _UNPARSED else json.dumps(parsed, ensure_ascii=False)
-        if _PII_KEY_PATTERN.search(text if parsed is _UNPARSED else parsed):
+        # str(parsed) is a no-op here (parsed is a str); it only narrows the type for Pyright.
+        if _PII_KEY_PATTERN.search(text if parsed is _UNPARSED else str(parsed)):
             return _NON_JSON_PII_NOTICE
         return mask_text(shown)[:MAX_RESPONSE_BODY_CHARS]
     kept, omitted = _filter_records(parsed)
