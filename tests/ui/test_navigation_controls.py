@@ -1,4 +1,4 @@
-"""Layout and dead-control defects of the listing page (BUG-026, BUG-027).
+"""Layout and dead-control defects of the listing page (BUG-026, BUG-027, BUG-028).
 
 Every test is a strict xfail: it states the behaviour we would expect and fails today. Personal
 data of third parties is never read: the geometry test returns counts only, and the click test
@@ -8,6 +8,7 @@ touches shell elements plus the card of the record the test created itself.
 import pytest
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.actions.wheel_input import ScrollOrigin
 from selenium.webdriver.support.ui import WebDriverWait
 
 from pages.employee_list_page import EmployeeListPage
@@ -18,6 +19,10 @@ pytestmark = pytest.mark.ui
 WIDE_VIEWPORT = (1920, 1080)
 OWN_CARDS_FOR_OVERLAP = 8  # enough cards to fill the list panel (the base itself may be tiny)
 EFFECT_WAIT_SECONDS = 2
+LAPTOP_VIEWPORT = (1470, 840)  # MacBook screen minus the Chrome tab and address bars
+OWN_CARDS_FOR_CLIPPING = 12  # taller than the list panel, whatever the size of the shared base
+WHEEL_STEP_PIXELS = 400
+MAX_WHEEL_STEPS = 60  # bounded loop: enough to cross any realistic list, never unbounded
 
 _BLOCK_JS = """
 const span = [...document.querySelectorAll('span')]
@@ -205,3 +210,56 @@ def test_navigation_control_reacts_to_click(driver, base_url, create_employee, g
         dead += 0 if _click_has_effect(driver, locate(driver, name)[index]) else 1
 
     assert dead == 0, f"{dead} of {len(controls)} {group} control(s) had no effect when clicked"
+
+
+# The box that clips the listing: nearest ancestor of our card taller inside than on screen.
+_LIST_BOX_JS = """
+const name = arguments[0];
+const span = [...document.querySelectorAll('span')].find(s => s.textContent.trim() === name);
+let p = span && span.parentElement;
+while (p && p.scrollHeight <= p.clientHeight + 1) p = p.parentElement;
+return p || null;
+"""
+
+# True when the centre of our card is the topmost thing there and lies inside the list box.
+_CARD_REACHABLE_JS = """
+const [name, box] = arguments;
+const span = [...document.querySelectorAll('span')].find(s => s.textContent.trim() === name);
+const card = span && span.parentElement;
+if (!card) return false;
+const r = card.getBoundingClientRect(), b = box.getBoundingClientRect();
+if (r.top < b.top || r.bottom > b.bottom) return false;
+const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+return !!hit && card.contains(hit);
+"""
+
+
+def _card_is_reachable(driver, name: str, box) -> bool:
+    return bool(driver.execute_script(_CARD_REACHABLE_JS, name, box))
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="BUG-028: Listagem mostra só os primeiros cards e não rola",
+)
+def test_every_listing_card_is_reachable_by_scrolling(driver, base_url, create_employee):
+    # New cards are appended at the end of the list, so our last card is the farthest one.
+    names = [_name_of(create_employee()) for _ in range(OWN_CARDS_FOR_CLIPPING)]
+    driver.set_window_size(*LAPTOP_VIEWPORT)
+    EmployeeListPage(driver, base_url).open().wait_for_card(names[-1])
+    box = driver.execute_script(_LIST_BOX_JS, names[-1])
+    if box is None:  # nothing overflows: every card already fits on screen
+        return
+
+    # A real mouse wheel over the list, as a user would scroll (scrollTop by script would hide it).
+    origin = ScrollOrigin.from_element(box)
+    for _ in range(MAX_WHEEL_STEPS):
+        if _card_is_reachable(driver, names[-1], box):
+            break
+        ActionChains(driver).scroll_from_origin(origin, 0, WHEEL_STEP_PIXELS).perform()
+
+    assert _card_is_reachable(driver, names[-1], box), (
+        f"the last of {OWN_CARDS_FOR_CLIPPING} own cards cannot be brought into view with the "
+        f"mouse wheel at {LAPTOP_VIEWPORT[0]}x{LAPTOP_VIEWPORT[1]}"
+    )
