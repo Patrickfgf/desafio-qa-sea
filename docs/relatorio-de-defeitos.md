@@ -1,6 +1,6 @@
 # Relatório de defeitos
 
-> **Status:** todo defeito abaixo foi verificado por automação (Selenium e requests). A verificação é de 03/11/2026, exceto BUG-001, BUG-006, BUG-007 e BUG-012, que vêm de uma verificação automatizada anterior, sem data registrada. A coluna "Reproduzido à mão" registra a reprodução manual, hoje **pendente** para todos (o que não for reproduzido sai do relatório, junto com o teste e a evidência). Nenhum defeito é afirmado como reproduzido à mão antes disso. BUG-023 e BUG-024 vêm da checagem de cobertura, e BUG-025 a BUG-027 da exploração, ambas de 03/11/2026; seguem a mesma regra.
+> **Status:** todo defeito abaixo foi verificado por automação (Selenium e requests). A verificação é de 03/11/2026, exceto BUG-001, BUG-006, BUG-007 e BUG-012, que vêm de uma verificação automatizada anterior, sem data registrada. A coluna "Reproduzido à mão" registra a reprodução manual, hoje **pendente** para todos (o que não for reproduzido sai do relatório, junto com o teste e a evidência). Nenhum defeito é afirmado como reproduzido à mão antes disso. BUG-023 e BUG-024 vêm da checagem de cobertura, e BUG-025 a BUG-028 da exploração, ambas de 03/11/2026; seguem a mesma regra, exceto o BUG-028, que o Patrick reproduziu à mão em 03/11/2026.
 >
 > **Numeração:** o id BUG-022 não é usado (retirado).
 >
@@ -44,6 +44,7 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio (as mesm
 | BUG-013 | Listagem busca dados em paralelo ao POST e fica velha | Funcional (listagem) | Média | P2 | `tests/ui/test_form_controls.py::test_listing_refetch_happens_after_post_completes` | pendente |
 | BUG-014 | PATCH em state apaga os campos não enviados | Contrato da API | Média | P2 | `tests/api/test_validation.py::test_patch_preserves_unsent_fields` | pendente |
 | BUG-024 | Enter descarta o cadastro sem salvar | Funcional (formulário) | Média | P2 | `tests/ui/test_form_controls.py::test_enter_in_text_field_does_not_discard_the_form` | pendente |
+| BUG-028 | Listagem mostra só os primeiros cards e não rola | Funcional (listagem) | Média | P2 | `tests/ui/test_navigation_controls.py::test_every_listing_card_is_reachable_by_scrolling` | sim (Patrick, 03/11) |
 | BUG-015 | Funcionário novo nasce Inativo por padrão | Funcional (tela → payload) | Baixa | P3 | `tests/cross/test_ui_vs_api.py::test_new_employee_defaults_to_active` | pendente |
 | BUG-016 | Select de EPI volta ao padrão ao digitar o CA | Usabilidade | Baixa | P3 | `tests/ui/test_form_controls.py::test_epi_select_keeps_choice_after_typing_ca` | pendente |
 | BUG-017 | Adicionar EPI não tem ação nem foco por teclado | Funcional (formulário) | Baixa | P3 | `tests/ui/test_form_controls.py::test_add_epi_adds_another_epi_block` | pendente |
@@ -280,6 +281,28 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 - **Obtido:** o formulário fecha, a listagem volta, nenhum POST é enviado e nada é gravado (3 de 3 execuções). Causa provável: o primeiro botão `type=submit` do formulário é a seta de voltar, sem `type="button"`. Há contorno: clicar em "Salvar".
 - **Evidência:** [BUG-024](evidencias/BUG-024-enter-descarta-cadastro.txt) · [print](evidencias/ui/BUG-024.png) · [vídeo](evidencias/ui/BUG-024.mp4) (vem da checagem de cobertura de 03/11)
 - **Teste automatizado:** `tests/ui/test_form_controls.py::test_enter_in_text_field_does_not_discard_the_form`.
+
+### BUG-028 — Listagem mostra só os primeiros cards e não rola
+
+- **Categoria:** funcional (listagem). **Severidade:** Média. **Prioridade:** P2 (o usuário não alcança a maioria dos funcionários pela tela; o contorno só vale com poucos ativos).
+- **Ambiente:** interface, 03/11/2026, Chrome (à mão, MacBook) e Chrome headless (Selenium) em 1470x840, 1470x956, 1366x768 e 1920x1080. Sem especificação do sistema: o "esperado" é inferência.
+- **Pré-condições:** base com mais cards do que cabem na área da lista (a base compartilhada já tem dezenas; o teste cria 12 registros `QA-AUTO-`).
+- **Passos:**
+  1. Abrir `/` e, opcionalmente, ligar "Ver apenas ativos".
+  2. Olhar quantos cards aparecem no bloco "Funcionário(s)" e comparar com o contador "Ativos X/Y".
+  3. Girar a roda do mouse sobre a lista; tentar também PageDown, End, ArrowDown, Space e Tab.
+- **Esperado:** a lista rola (ou pagina) e todo card fica ao alcance do usuário.
+- **Obtido:**
+  - À mão (Patrick, 03/11), com 10 ativos ("Ativos 10/37"): só 3 cards aparecem e a roda do mouse não faz nada.
+  - O DOM tem todos os cards (39, ou 9 a 10 com o filtro), mas só aparecem 4 em 1470x956, 3 em 1366x768 e 6 em 1920x1080 (5 inteiros ou parciais, conforme o caso); em 1470x840 com o filtro saem 3 inteiros, como no relato. A tela do MacBook é 1470x956, e com as barras do Chrome o viewport real fica perto de 1470x840.
+  - O contêiner da lista tem `height` igual ao viewport menos 284 px e `overflow-y: hidden`; o `scrollHeight` é de 1109 a 1207 px (9 a 10 cards) ou de 4005 a 4103 px (39 cards) contra 672 px de `clientHeight`. Nenhum outro ancestral rola e a página inteira não rola.
+  - Roda do mouse, gesto de toque, PageDown, End, ArrowDown, Space e arrastar a seleção além da borda não mudam o `scrollTop`; nenhum card recebe foco no Tab. Só `scrollTop` ou `scrollIntoView` feitos por script rolam o contêiner.
+  - Efeito colateral: cards novos entram no fim da lista, justamente na área cortada; nos 6 registros criados na medição, nenhum ficou visível.
+  - Contorno: zoom-out do Chrome (medido em 1470x840 com 9 ativos: 90% mostra 4 cards, 75% mostra 6, 67% mostra 8, 50% mostra todos). Sem o filtro, com 39 cards, nem 25% mostra tudo (29 visíveis): com a base inteira não há contorno.
+- **Evidência:** [print](evidencias/ui/BUG-028-listagem-cortada.png) · [vídeo](evidencias/ui/BUG-028-listagem-cortada.mp4) (1470x840, "Ativos 16/45", 16 cards no DOM e 3 visíveis, 4 giros de roda e PageDown/End sem efeito; texto de terceiros ocultado por `█████`).
+- **Teste automatizado:** `tests/ui/test_navigation_controls.py::test_every_listing_card_is_reachable_by_scrolling` (1470x840, roda do mouse real sobre a lista, afirma que o último de 12 cards próprios chega à área visível).
+- **Fonte:** sessão exploratória do Patrick (03/11). **Reproduzido à mão:** sim (Patrick, 03/11).
+- **Observação:** o bloco "A etapa está concluída?" sobrepõe 11 a 37 px de dois cards conforme o viewport (BUG-026).
 
 ---
 
