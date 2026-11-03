@@ -16,7 +16,18 @@ pytestmark = pytest.mark.api
 
 REJECTED = (400, 422)
 INVALID_CPF_CHECKSUM = "52998224726"  # valid CPF 52998224725 with a wrong last check digit
-UNSENT_FIELDS = ("name", "gender", "cpf", "birthDay", "rg", "role", "usesEpi", "activity", "epi", "caNumber")
+UNSENT_FIELDS = (
+    "name",
+    "gender",
+    "cpf",
+    "birthDay",
+    "rg",
+    "role",
+    "usesEpi",
+    "activity",
+    "epi",
+    "caNumber",
+)
 
 
 def _post_and_register(api, created_ids, payload):
