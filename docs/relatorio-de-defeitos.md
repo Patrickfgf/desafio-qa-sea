@@ -71,7 +71,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
   4. Ler cada registro com `GET /employees?id=<id>` e conferir `usesEpi`.
 - **Esperado:** marcado grava `usesEpi: false`; desmarcado grava `true` (premissa 1).
 - **Obtido:** marcado grava `true` e `caNumber` vazio; desmarcado grava `false`. Nenhum caminho pela tela grava o valor certo.
-- **Evidência:** [BUG-001](evidencias/BUG-001-usesepi-invertido.txt)
+- **Evidência:** [BUG-001](evidencias/BUG-001-usesepi-invertido.txt) · [print](evidencias/ui/BUG-001.png) · [vídeo](evidencias/ui/BUG-001.mp4)
 - **Teste automatizado:** `tests/cross/test_ui_vs_api.py::test_uses_epi_flag_matches_checkbox` (parametrizado nos dois estados).
 
 ### BUG-002 — API expõe CPF, RG e nascimento sem autenticação
@@ -101,7 +101,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
   3. Ler o CPF mostrado.
 - **Esperado:** CPF mascarado ou parcial no card.
 - **Obtido:** os 11 dígitos aparecem sem nenhum asterisco, iguais ao CPF gravado.
-- **Evidência:** [BUG-003](evidencias/BUG-003-listagem-cpf-completo.txt) (CPF mascarado no arquivo).
+- **Evidência:** [BUG-003](evidencias/BUG-003-listagem-cpf-completo.txt) · [print](evidencias/ui/BUG-003.png) · [vídeo](evidencias/ui/BUG-003.mp4) (CPF mascarado no arquivo).
 - **Teste automatizado:** `tests/cross/test_ui_vs_api.py::test_listing_card_masks_cpf`.
 - **Impacto LGPD:** a tela mostra o CPF de todos os cadastrados a quem abrir a página.
 
@@ -151,7 +151,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
   3. Ler o registro por `?id=`.
 - **Esperado:** gravar o que a tela mostra, ou exigir escolha (premissa 2).
 - **Obtido:** `role` vazio e `activity`/`epi` ausentes. Escolhendo no select, o valor é gravado (contorno).
-- **Evidência:** [BUG-006](evidencias/BUG-006-selects-padrao-nao-gravado.txt)
+- **Evidência:** [BUG-006](evidencias/BUG-006-selects-padrao-nao-gravado.txt) · [print](evidencias/ui/BUG-006.png) · [vídeo](evidencias/ui/BUG-006.mp4)
 - **Teste automatizado:** `tests/cross/test_ui_vs_api.py::test_default_selects_are_saved_as_displayed`.
 
 ### BUG-007 — Anexo do ASO não é enviado nem persistido
@@ -165,7 +165,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
   3. Ler o registro por `?id=`.
 - **Esperado:** arquivo enviado ou referenciado (premissa 3; sem especificação, pode ser recurso não implementado).
 - **Obtido:** um único POST `application/json` sem multipart; o registro não guarda referência ao arquivo, e o usuário acredita que anexou.
-- **Evidência:** [BUG-007](evidencias/BUG-007-aso-nao-enviado.txt)
+- **Evidência:** [BUG-007](evidencias/BUG-007-aso-nao-enviado.txt) · [print](evidencias/ui/BUG-007.png) · [vídeo](evidencias/ui/BUG-007.mp4)
 - **Teste automatizado:** `tests/cross/test_ui_vs_api.py::test_aso_file_is_persisted`.
 
 ### BUG-008 — CPF aceito sem validação de conteúdo
@@ -192,7 +192,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
   2. Salvar sem mensagem e abrir o registro por `?id=`.
 - **Esperado:** gravar os 11 dígitos ou avisar.
 - **Obtido:** o campo corta nos 11 primeiros caracteres, sem os dois últimos dígitos e o traço; nenhum aviso; o CPF gravado fica incompleto. Controle com 11 caracteres grava normalmente.
-- **Evidência:** [BUG-009](evidencias/BUG-009-cpf-mascarado-truncado.txt)
+- **Evidência:** [BUG-009](evidencias/BUG-009-cpf-mascarado-truncado.txt) · [print](evidencias/ui/BUG-009.png) · [vídeo](evidencias/ui/BUG-009.mp4)
 - **Teste automatizado:** `tests/ui/test_form_validation.py::test_formatted_cpf_is_not_silently_truncated`.
 
 ### BUG-010 — Data de nascimento sem validação de intervalo
@@ -236,7 +236,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
   3. Conferir se o formulário fechou e se existe registro com o nome.
 - **Esperado:** abrir outro bloco de atividade (premissa 10).
 - **Obtido:** o botão é `type=submit` dentro do form: salva, fecha e cria 1 registro.
-- **Evidência:** [BUG-012](evidencias/BUG-012-adicionar-atividade-salva.txt)
+- **Evidência:** [BUG-012](evidencias/BUG-012-adicionar-atividade-salva.txt) · [print](evidencias/ui/BUG-012.png) · [vídeo](evidencias/ui/BUG-012.mp4)
 - **Teste automatizado:** `tests/ui/test_form_controls.py::test_add_another_activity_does_not_submit`.
 
 ### BUG-013 — Listagem busca dados em paralelo ao POST e fica velha
@@ -250,7 +250,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
   3. Repetir 4 vezes.
 - **Esperado:** a listagem é buscada depois do POST terminar.
 - **Obtido:** o `GET /employees` sai junto com o POST, e a lista ficou velha em 1 de 4 tentativas da evidência (só indicativo). Recarregando, o card aparece.
-- **Evidência:** [BUG-013](evidencias/BUG-013-listagem-busca-paralela.txt)
+- **Evidência:** [BUG-013](evidencias/BUG-013-listagem-busca-paralela.txt) · [print](evidencias/ui/BUG-013.png) · [vídeo](evidencias/ui/BUG-013.mp4)
 - **Teste automatizado:** `tests/ui/test_form_controls.py::test_listing_refetch_happens_after_post_completes` (só a ordem de rede, que é constante).
 - **Observação:** a forma literal "nenhum GET depois do POST, lista sempre velha" foi refutada; este é o defeito reformulado.
 
@@ -275,7 +275,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 - **Passos:** (1) abrir "+ Adicionar Funcionário" e preencher tudo; (2) com o cursor no campo Nº do CA (ou em Nome), apertar Enter, sem clicar em "Salvar"; (3) olhar a rede e conferir por nome exato se algo foi gravado.
 - **Esperado:** Enter salva como o botão "Salvar", ou não faz nada; nunca descarta os dados em silêncio (premissa 2).
 - **Obtido:** o formulário fecha, a listagem volta, nenhuma requisição é enviada e nada é gravado (3 de 3 execuções). Causa provável: o primeiro botão `type=submit` do formulário é a seta de voltar, sem `type="button"`. Há contorno: clicar em "Salvar".
-- **Evidência:** [BUG-024](evidencias/BUG-024-enter-descarta-cadastro.txt) (vem da checagem de cobertura de 03/11)
+- **Evidência:** [BUG-024](evidencias/BUG-024-enter-descarta-cadastro.txt) · [print](evidencias/ui/BUG-024.png) · [vídeo](evidencias/ui/BUG-024.mp4) (vem da checagem de cobertura de 03/11)
 - **Teste automatizado:** `tests/ui/test_form_controls.py::test_enter_in_text_field_does_not_discard_the_form`.
 
 ---
@@ -287,17 +287,17 @@ Severidade Baixa e prioridade P3 em todos; as premissas de "esperado" estão em 
 ### BUG-015 — Funcionário novo nasce Inativo por padrão
 
 Categoria: funcional (tela → payload). Salvar sem tocar no switch grava `isActive: false` e o card some com "Ver apenas ativos"; com o switch ligado funciona. Como ver: salvar um cadastro sem mexer no switch e ler `isActive` por `?id=` (interface, 03/11/2026).
-Evidência: [BUG-015](evidencias/BUG-015-novo-nasce-inativo.txt). Teste: `tests/cross/test_ui_vs_api.py::test_new_employee_defaults_to_active`.
+Evidência: [BUG-015](evidencias/BUG-015-novo-nasce-inativo.txt) · [print](evidencias/ui/BUG-015.png) · [vídeo](evidencias/ui/BUG-015.mp4). Teste: `tests/cross/test_ui_vs_api.py::test_new_employee_defaults_to_active`.
 
 ### BUG-016 — Select de EPI volta ao padrão ao digitar o CA
 
 Categoria: usabilidade. Depois de escolher "Luvas descartáveis" e digitar o CA, o select volta a mostrar "Capacete de segurança"; o valor gravado continua o escolhido (2 de 2 execuções, numa só ordem de preenchimento). Como ver: escolher o EPI, digitar o CA, olhar o select (interface, 03/11/2026).
-Evidência: [BUG-016](evidencias/BUG-016-select-epi-volta-ao-padrao.txt). Teste: `tests/ui/test_form_controls.py::test_epi_select_keeps_choice_after_typing_ca`.
+Evidência: [BUG-016](evidencias/BUG-016-select-epi-volta-ao-padrao.txt) · [print](evidencias/ui/BUG-016.png) · [vídeo](evidencias/ui/BUG-016.mp4). Teste: `tests/ui/test_form_controls.py::test_epi_select_keeps_choice_after_typing_ca`.
 
 ### BUG-017 — Adicionar EPI não tem ação nem foco por teclado
 
 Categoria: funcional (formulário). O clique em "Adicionar EPI" não cria outro bloco nem envia requisição; o elemento é um `span` sem `tabindex` nem `role`, fora da ordem de Tab. Como ver: com o checkbox "não usa EPI" desmarcado, clicar e contar os selects de EPI (interface, 03/11/2026).
-Evidência: [BUG-017](evidencias/BUG-017-adicionar-epi-inerte.txt). Teste: `tests/ui/test_form_controls.py::test_add_epi_adds_another_epi_block` (o teclado é acessibilidade, só observação).
+Evidência: [BUG-017](evidencias/BUG-017-adicionar-epi-inerte.txt) · [print](evidencias/ui/BUG-017.png) · [vídeo](evidencias/ui/BUG-017.mp4). Teste: `tests/ui/test_form_controls.py::test_add_epi_adds_another_epi_block` (o teclado é acessibilidade, só observação).
 
 ### BUG-018 — Paginação inconsistente em casos-limite
 
@@ -322,7 +322,7 @@ Evidência: [BUG-021](evidencias/BUG-021-sem-cabecalhos-de-seguranca.txt). Teste
 ### BUG-023 — Obrigatórios aceitam só espaços
 
 Categoria: validação (tela). RG com 3 espaços, CA com 3 espaços e CPF com 11 espaços salvam, e a API grava os espaços (2 de 2 execuções); o `required` nativo só exige "não vazio". Mesma família do BUG-008 e do BUG-011. Como ver: preencher o cadastro `QA-AUTO-` com um desses campos só de espaços, um caso por vez, e ler o registro por nome exato (checagem de cobertura de 03/11/2026).
-Evidência: [BUG-023](evidencias/BUG-023-obrigatorios-aceitam-espacos.txt). Teste: `tests/ui/test_form_validation.py::test_required_fields_reject_whitespace_only` (um caso por campo).
+Evidência: [BUG-023](evidencias/BUG-023-obrigatorios-aceitam-espacos.txt) · [print](evidencias/ui/BUG-023.png) · [vídeo](evidencias/ui/BUG-023.mp4). Teste: `tests/ui/test_form_validation.py::test_required_fields_reject_whitespace_only` (um caso por campo).
 
 ---
 
