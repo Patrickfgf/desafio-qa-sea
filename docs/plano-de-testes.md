@@ -150,7 +150,7 @@ Na última coleta (`uv run pytest --collect-only -q`, 03/11/2026) a suíte tinha
 | Risco | Mitigação |
 |---|---|
 | Base compartilhada e volátil: registro some no meio do teste, contagem muda | cada teste cria e apaga o próprio dado; o teardown tolera 404; nenhuma asserção sobre total |
-| Registros com `id` numérico não são alcançáveis por id (GET, PUT, PATCH e DELETE dão 404), então não podem ser apagados por nós | os testes nunca criam id numérico; id numérico só em leitura. Quatro registros de teste com esse perfil (prefixo `QA-AUTO-E2-`) ficaram na base durante a exploração; os ids vão ao dono do ambiente junto com a entrega, para remoção |
+| Registro criado com `id` numérico respondeu 404 na rota por id na exploração (02/11), o que impediria apagá-lo | os testes nunca criam id numérico; id numérico só em leitura. Os registros de teste exploratórios (`QA-AUTO-E2-`) já foram removidos (ver relatório de defeitos) |
 | Teardown que trata 404 como "apagado" esconde sobra quando o id é numérico | no 404, conferir por `?id=`: se o registro ainda aparece, ou se não dá para confirmar, conta como sobra e gera aviso |
 | Dados pessoais vazando por mensagem de assert, relatório HTML, artefato de CI ou evidência | `describe()` nas asserções, em vez do corpo cru; máscara antes de salvar; teste de guarda varre `docs/`; artefatos com retenção de 7 dias |
 | O CI escreve no ambiente compartilhado | roda só em `push` e `pull_request` para `main` e em disparo manual; escreve só registros `QA-AUTO-` e os apaga |

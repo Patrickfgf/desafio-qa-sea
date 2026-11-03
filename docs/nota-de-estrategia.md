@@ -21,5 +21,4 @@ Fechei o escopo a partir do mapa de risco (`docs/plano-de-testes.md`, seção 3)
 - Pedir ao dono do produto o comportamento pretendido dos controles sem efeito e então testá-los.
 - Verificar, com autorização, as dúvidas que ficaram em aberto (plano, seção 2): CORS no navegador e cache de dados pessoais.
 - Rodar a suíte de UI em outros navegadores e em tela de celular.
-- Pedir a remoção dos 4 registros órfãos com id numérico.
 

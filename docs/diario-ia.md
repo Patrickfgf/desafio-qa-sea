@@ -29,7 +29,7 @@ Seleção de 9 das 20 entradas do diário bruto.
 2. Sugeriu e-mail à empresa para aprovar os limites do teste. Pego por mim. Design §11.
 3. `assert body == sent` fazia o pytest imprimir CPF no relatório. Pego por subagente revisor. Commits e312b75 → a8f1c64.
 4. Severidade inflada em 14 candidatos. Pego por verificação adversarial. Exploração §3.2 e §5.1.
-5. Um explorador criou 4 registros com `id` inteiro, inapagáveis. Pego por autorrelato do explorador e pela checagem de sobras. Exploração §7.3.
+5. Um explorador criou 4 registros com `id` inteiro, que deram 404 por id em 02/11. Em 03/11 os 2 remanescentes já tinham id string e um DELETE comum os apagou; a IA chegou a reafirmar "inapagável" sem testar de novo, e o teste desmentiu. Pego por autorrelato do explorador e pela checagem de sobras. Exploração §7.3.
 6. A redação do print de falha escondia só cards de 3 divs (fail-open). Pego por 3 revisores. Commits 766723a → 4ad8e1d.
 7. Um script de sondagem imprimiu o DOM da listagem, com dados de terceiros no contexto da IA. Pego por autorrelato do implementador. Relatório interno da Task 10; regra no CLAUDE.md.
 8. O plano prometia conferir por `?id=` após o DELETE, mas o código não fazia. Pego por crítico de completude. Commit a829cdd.
