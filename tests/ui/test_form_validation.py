@@ -146,7 +146,7 @@ def test_required_fields_reject_whitespace_only(
 @pytest.mark.xfail(
     strict=True,
     raises=AssertionError,
-    reason="BUG-025: Número do CA aceita caracteres especiais",
+    reason="BUG-025: CA aceita símbolos",
 )
 def test_ca_number_field_rejects_symbols(driver, base_url, api, ui_created_names):
     symbols = "@!#$&&$#"  # inert text that only looks odd

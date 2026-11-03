@@ -112,7 +112,7 @@ def _wait_for_effect(driver, condition) -> bool:
 @pytest.mark.xfail(
     strict=True,
     raises=AssertionError,
-    reason='BUG-026: Bloco "A etapa está concluída?" sobrepõe a listagem',
+    reason='BUG-026: Bloco "A etapa está concluída?" cobre cards da listagem',
 )
 def test_step_block_does_not_overlap_the_listing(driver, base_url, create_employee):
     names = [_name_of(create_employee()) for _ in range(OWN_CARDS_FOR_OVERLAP)]

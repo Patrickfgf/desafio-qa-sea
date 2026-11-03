@@ -13,7 +13,7 @@ Fechei o escopo a partir do mapa de risco (`docs/plano-de-testes.md`, seção 3)
 - Não testei carga, estresse nem força bruta porque o ambiente é compartilhado com outras pessoas e uma sonda de volume atrapalharia o trabalho delas; as regras de engajamento proíbem.
 - Não testei injeção ativa (SQL, XSS, path traversal) com payload executável porque a base é compartilhada e pode ter dado real; usei só texto inerte, então não afirmo que a aplicação é ou não vulnerável a injeção.
 - Não testei outros navegadores nem mobile porque a automação roda só em Chrome headless e o tempo foi para os fluxos de maior risco: o que a tela grava e a exposição de dados pessoais.
-- Não testei a fundo acessibilidade nem os controles sem efeito ("Próximo passo", "A etapa está concluída?") porque não há especificação do comportamento pretendido; ficaram como observação.
+- Não testei a fundo acessibilidade porque não há especificação do comportamento pretendido. Os controles sem efeito ("Próximo passo", barra lateral, "...") entram só como BUG-027, sem afirmar qual deveria ser o comportamento.
 - Não testei alteração, remoção nem enumeração de registros de terceiros porque mexeria em dado que não é nosso; a prova de "apagar sem autenticação" foi feita num registro criado por mim.
 
 ## O que faria com mais tempo

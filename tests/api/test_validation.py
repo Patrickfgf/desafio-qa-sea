@@ -206,7 +206,7 @@ def test_malformed_json_returns_400(api, created_ids):
 @pytest.mark.xfail(
     strict=True,
     raises=AssertionError,
-    reason="BUG-025: Número do CA aceita caracteres especiais",
+    reason="BUG-025: CA aceita símbolos",
 )
 def test_create_rejects_symbols_in_ca_number(api, created_ids):
     resp = _post_and_register(
