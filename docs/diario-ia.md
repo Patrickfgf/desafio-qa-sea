@@ -13,11 +13,13 @@ Um prompt como "faz o desafio" devolve código plausível e um relatório confia
 | `brainstorming` | Perguntas e alternativas com trade-off até um design aprovado, antes do código | Limites do ambiente compartilhado definidos antes do primeiro request (erro 2) |
 | `writing-plans` | Tasks pequenas, teste primeiro, resultado esperado, checkpoint humano | 15 tasks; cada PR cabe numa revisão |
 | *Subagent-driven development* | Um agente implementa cada task, outro revisa | CPF no relatório do pytest (erro 3); print fail-open (erro 6) |
-| Verificação adversarial | Exploradores propõem; verificadores tentam refutar (19 dos 23 defeitos) | Severidade inflada em 14 candidatos (erro 4) |
+| Verificação adversarial | Exploradores propõem; verificadores tentam refutar (19 dos 26 defeitos) | Severidade inflada em 14 candidatos (erro 4) |
 | Modelo por tarefa | Haiku extrai, Sonnet implementa e verifica, Opus faz a revisão final | Revisão final: 1 CRITICAL e 4 HIGH, todos tratados |
 | `/resume` e `/end-session` | Log diário no meu Obsidian: feito, pendências, decisões | Troquei de máquina (Windows → Mac) sem perder estado |
 
 Humano no circuito: reproduzi à mão cada defeito e fiz uma sessão exploratória própria, procurando o que a IA não achou. ⟪PATRICK: resultado da sessão exploratória⟫
+
+A IA também leu os bugs e testes de um repositório público de 2025 do mesmo desafio para cruzar com os meus achados; os itens coincidentes foram reproduzidos de novo na versão atual do app.
 
 ## O que a IA errou e como foi corrigido
 
@@ -36,4 +38,4 @@ Seleção de 9 das 20 entradas do diário bruto.
 ## Guarda-corpos
 
 - `CLAUDE.md`: só registros `QA-AUTO-`, só dados sintéticos, sem payload executável, sem carga, nada fora de `/` e `/employees`. O teste `guard` falha se `docs/` tiver CPF sem máscara (`support/pii.py`).
-- BUG-016, BUG-019, BUG-023 e BUG-024 não passaram pelo verificador: têm a execução de quem os achou, o teste xfail e a minha reprodução.
+- BUG-016, BUG-019, BUG-023, BUG-024 e BUG-025 a BUG-027 não passaram pelo verificador: têm a execução de quem os achou, o teste xfail e a minha reprodução.
