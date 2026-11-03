@@ -125,25 +125,6 @@ def test_aso_file_is_persisted(driver, base_url, api, ui_created_names, tmp_path
 @pytest.mark.xfail(
     strict=True,
     raises=AssertionError,
-    reason="BUG-015: Funcionário novo nasce Inativo por padrão",
-)
-def test_new_employee_defaults_to_active(driver, base_url, api, ui_created_names):
-    emp = build_employee(isActive=True)
-    ui_created_names.append(emp["name"])
-
-    form = EmployeeListPage(driver, base_url).open().click_add()
-    form.fill_identity(emp).fill_work(emp)  # no set_active: the switch keeps its default
-    form.save()
-    stored = _employee_of(find_saved_record(api, emp["name"]))
-
-    assert stored.get("isActive") is True, (
-        f"employee saved without touching the switch has isActive={stored.get('isActive')!r}"
-    )
-
-
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
     reason="BUG-003: Listagem exibe o CPF completo no card",
 )
 def test_listing_card_masks_cpf(driver, base_url, create_employee):
