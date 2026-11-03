@@ -110,3 +110,28 @@ def test_mask_employee_masks_non_string_values():
     employee = mask_employee(record)["state"]["employee"]
 
     assert employee == {"cpf": "529.***.***-25", "rg": "*****67", "name": None}
+
+
+def test_find_unmasked_cpfs_catches_dash_and_slash_variants():
+    text = "a 123456789-09 b 123.456.789/09 c 123456789/09 d 123.456789-09"
+    assert find_unmasked_cpfs(text) == [
+        "123456789-09",
+        "123.456.789/09",
+        "123456789/09",
+        "123.456789-09",
+    ]
+
+
+def test_mask_text_masks_dash_and_slash_variants():
+    assert mask_text("x 123456789-09 y 123.456.789/09") == "x 123.***.***-09 y 123.***.***-09"
+
+
+def test_find_unmasked_cpfs_ignores_ordinary_numbers():
+    text = "ip 192.168.100.12 date 2026-11-03 part 123.456.789 ts 1730000000-09 v 12.345.678/0001"
+    assert find_unmasked_cpfs(text) == []
+
+
+def test_find_unmasked_cpfs_ignores_non_ascii_digits():
+    arabic_indic = "".join(chr(0x0660 + int(d)) for d in "52998224725")
+    assert find_unmasked_cpfs(arabic_indic) == []
+    assert mask_cpf(arabic_indic) == "*" * 11
