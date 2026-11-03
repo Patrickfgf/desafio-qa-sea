@@ -10,8 +10,6 @@ A IA propôs e decidiu o mapa de risco (`docs/plano-de-testes.md`, seção 3) e 
 
 ## O que não testei e por quê
 
-⟪PATRICK: reescreva estes bullets com as suas palavras; hoje são o rascunho da IA, só com correção gramatical⟫
-
 - Não testei carga, estresse nem força bruta porque o ambiente é compartilhado com outras pessoas e uma sonda de volume atrapalharia o trabalho delas; as regras de engajamento proíbem.
 - Não testei injeção ativa (SQL, XSS, path traversal) com payload executável porque a base é compartilhada e pode ter dado real; usei só texto inerte, então não afirmo que a aplicação é ou não vulnerável a injeção.
 - Não testei outros navegadores nem mobile porque a automação roda só em Chrome headless e o tempo foi para os fluxos de maior risco: o que a tela grava e a exposição de dados pessoais.
@@ -25,4 +23,3 @@ A IA propôs e decidiu o mapa de risco (`docs/plano-de-testes.md`, seção 3) e 
 - Rodar a suíte de UI em outros navegadores e em tela de celular.
 - Pedir a remoção dos 4 registros órfãos com id numérico.
 
-⟪PATRICK: confirme ou reescreva esta lista⟫
