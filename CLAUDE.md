@@ -39,4 +39,4 @@ Estas regras valem para toda tarefa.
 - Commits em inglês, no padrão conventional commits (`feat:`, `fix:`, `test:`, `docs:`,
   `chore:`, `refactor:`), pequenos e na ordem real do trabalho.
 - Nunca commitar direto em `main`.
-- Rascunhos, planos e diário bruto ficam fora do repositório: no vault ou em `work/`.
+- Rascunhos, planos e diário bruto ficam fora do repositório: em notas pessoais ou em `work/`.
