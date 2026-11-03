@@ -125,7 +125,7 @@ A suíte usa marcadores do pytest: `unit`, `api`, `security`, `ui`, `cross` e `g
 | `ui` | cadastro feliz, formulário "no escuro", botões, listagem (Page Objects sobre o Ant Design) | existe (cadastro, validações e controles do formulário, atualização da listagem) |
 | `cross` | criar pela tela e conferir na API, criar pela API e conferir na listagem, inativar | existe |
 
-Na última coleta (`uv run pytest --collect-only -q`, 03/11/2026) a suíte tinha 157 testes coletados (unit 108, api 18, ui 12, security 9, cross 9, guard 1).
+Na última coleta (`uv run pytest --collect-only -q`, 03/11/2026) a suíte tinha 163 testes coletados (unit 108, api 18, ui 17, security 9, cross 10, guard 1).
 
 **Por que automatizar:** regressão barata do que já se sabe (CRUD, contrato, máscara), e cada defeito confirmado vira um `xfail(strict=True, raises=AssertionError)` com o id do defeito: a suíte fica verde e documenta o bug, e se alguém o corrigir o teste passa a falhar, avisando que o plano precisa ser atualizado.
 
