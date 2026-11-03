@@ -294,7 +294,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 - **Esperado:** a lista rola (ou pagina) e todo card fica ao alcance do usuário.
 - **Obtido:**
   - À mão (Patrick, 03/11), com 10 ativos ("Ativos 10/37"): só 3 cards aparecem e a roda do mouse não faz nada.
-  - O DOM tem todos os cards (39, ou 9 a 10 com o filtro), mas só aparecem 4 em 1470x956, 3 em 1366x768 e 6 em 1920x1080 (5 inteiros ou parciais, conforme o caso); em 1470x840 com o filtro saem 3 inteiros, como no relato. A tela do MacBook é 1470x956, e com as barras do Chrome o viewport real fica perto de 1470x840.
+  - O DOM tem todos os cards (39, ou 9 a 10 com o filtro), mas só aparecem 4 em 1470x956, 3 em 1366x768 e 6 em 1920x1080; em 1470x840 com o filtro saem 3 inteiros, como no relato. A tela do MacBook é 1470x956, e com as barras do Chrome o viewport real fica perto de 1470x840.
   - O contêiner da lista tem `height` igual ao viewport menos 284 px e `overflow-y: hidden`; o `scrollHeight` é de 1109 a 1207 px (9 a 10 cards) ou de 4005 a 4103 px (39 cards) contra 672 px de `clientHeight`. Nenhum outro ancestral rola e a página inteira não rola.
   - Roda do mouse, gesto de toque, PageDown, End, ArrowDown, Space e arrastar a seleção além da borda não mudam o `scrollTop`; nenhum card recebe foco no Tab. Só `scrollTop` ou `scrollIntoView` feitos por script rolam o contêiner.
   - Efeito colateral: cards novos entram no fim da lista, justamente na área cortada; nos 6 registros criados na medição, nenhum ficou visível.
