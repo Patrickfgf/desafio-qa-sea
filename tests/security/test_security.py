@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from support.api_client import describe
+from support.api_client import describe, require_status
 from support.factory import as_payload, build_employee
 
 pytestmark = pytest.mark.security
@@ -62,7 +62,7 @@ def test_record_does_not_expose_full_cpf(api, create_employee):
 
     resp = api.get(created["id"])
 
-    assert resp.status_code == 200, describe(resp)
+    require_status(resp, 200)
     assert resp.json()["state"]["employee"]["cpf"] != sent["cpf"], describe(resp)
 
 
@@ -107,7 +107,7 @@ def test_cors_allow_origin_is_single_value(api, create_employee):
     )
 
     allow_origin = resp.headers.get("access-control-allow-origin")
-    assert resp.status_code == 200, describe(resp)
+    require_status(resp, 200)
     assert allow_origin is not None, describe(resp)
     assert "," not in allow_origin, (
         f"access-control-allow-origin has several values: {allow_origin}"

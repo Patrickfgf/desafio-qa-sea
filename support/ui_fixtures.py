@@ -14,7 +14,7 @@ from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.remote.webdriver import WebDriver
 
-from support.api_client import delete_quietly
+from support.api_client import PreconditionError, delete_quietly
 from support.factory import TEST_PREFIX
 from support.screenshots import redact_page
 
@@ -77,7 +77,7 @@ def ui_created_names(api) -> Iterator[list[str]]:
         return
     try:
         ids = api.find_ids_by_names(ours)
-    except (requests.RequestException, AssertionError, ValueError) as exc:
+    except (requests.RequestException, PreconditionError, AssertionError, ValueError) as exc:
         warnings.warn(
             f"Cleanup could not list records ({type(exc).__name__}); UI-created data may remain",
             stacklevel=1,

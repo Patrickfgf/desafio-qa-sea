@@ -9,7 +9,7 @@ from datetime import date, timedelta
 
 import pytest
 
-from support.api_client import describe
+from support.api_client import describe, require_status
 from support.factory import TEST_PREFIX, as_payload, build_employee
 
 pytestmark = pytest.mark.api
@@ -120,7 +120,7 @@ def test_create_rejects_unknown_fields(api, created_ids):
         return
     assert resp.status_code == 201, describe(resp)
     stored = api.get(resp.json()["id"])
-    assert stored.status_code == 200, describe(stored)
+    require_status(stored, 200)
     assert "isAdmin" not in stored.json()["state"]["employee"], describe(stored)
 
 
@@ -138,7 +138,7 @@ def test_put_rejects_missing_required_fields(api, create_employee):
 
     assert resp.status_code in REJECTED, describe(resp)
     after = api.get(created["id"])
-    assert after.status_code == 200, describe(after)
+    require_status(after, 200)
     assert "cpf" in after.json()["state"]["employee"], describe(after)
 
 
@@ -153,8 +153,8 @@ def test_patch_preserves_unsent_fields(api, create_employee):
     patch = api.patch(created["id"], {"state": {"employee": {"isActive": False}}})
     after = api.get(created["id"])
 
-    assert patch.status_code == 200, describe(patch)
-    assert after.status_code == 200, describe(after)
+    require_status(patch, 200)
+    require_status(after, 200)
     employee = after.json()["state"]["employee"]
     missing = [f for f in UNSENT_FIELDS if f not in employee]
     assert missing == [], f"Fields lost after PATCH: {missing}; {describe(after)}"
@@ -171,7 +171,7 @@ def test_pagination_beyond_last_page_returns_empty_data(api, create_employee):
     # The id filter combines with pagination (checked on first run): one match, one page.
     resp = api.list(params={"id": created["id"], "_page": 2, "_per_page": 1})
 
-    assert resp.status_code == 200, f"GET list -> {resp.status_code}"
+    require_status(resp, 200)
     body = resp.json()
     data = body.get("data") if isinstance(body, dict) else None
     # Collection response: assert on counts only, never on its content.

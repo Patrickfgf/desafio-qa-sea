@@ -9,6 +9,15 @@ import requests
 
 from support.pii import mask_text
 
+
+class PreconditionError(RuntimeError):
+    """A test's setup failed (not the behaviour under test).
+
+    Deliberately not an ``AssertionError``: ``xfail(raises=AssertionError)`` must not
+    swallow a broken environment, a reset base or a failed setup call as a known bug.
+    """
+
+
 BASE_URL_DEFAULT = "https://analista-teste.seatecnologia.com.br"
 DESCRIBE_MAX_CHARS = 500
 _ALREADY_GONE = (200, 204, 404)
@@ -65,7 +74,7 @@ class EmployeesClient:
         for name in sorted(names):
             resp = self.list(params={"state.employee.name": name})
             if resp.status_code != 200:
-                raise AssertionError(f"Unexpected list status: {describe(resp)}")
+                raise PreconditionError(f"Unexpected list status: {describe(resp)}")
             for record in _records_of(resp.json()):
                 employee = _employee_of(record)
                 if employee is not None and employee.get("name") == name and "id" in record:
@@ -139,3 +148,9 @@ def _still_listed(client, employee_id: EmployeeId) -> bool:
         return bool(_records_of(resp.json()))
     except ValueError:
         return True
+
+
+def require_status(resp: requests.Response, expected: int) -> None:
+    """Raise PreconditionError (never xfail-able) if a setup call returned another status."""
+    if resp.status_code != expected:
+        raise PreconditionError(f"Precondition failed, expected {expected}: {describe(resp)}")
