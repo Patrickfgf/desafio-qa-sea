@@ -185,10 +185,15 @@ class EmployeeFormPage:
     def is_open(self) -> bool:
         return bool(self.driver.find_elements(*_FORM))
 
-    def wait_until_closed(self, timeout: float = 3) -> bool:
-        """True when the form disappears before the deadline (an explicit wait, never a sleep)."""
+    def wait_until_closed(self, timeout: float | None = None) -> bool:
+        """True when the form disappears before the deadline (an explicit wait, never a sleep).
+
+        Defaults to the same deadline ``save()`` allows for the POST and re-render, so a slow
+        environment cannot make a "save was blocked" check pass by timing alone.
+        """
+        deadline = self.wait._timeout if timeout is None else timeout
         try:
-            WebDriverWait(self.driver, timeout).until(EC.invisibility_of_element_located(_FORM))
+            WebDriverWait(self.driver, deadline).until(EC.invisibility_of_element_located(_FORM))
         except TimeoutException:
             return False
         return True
