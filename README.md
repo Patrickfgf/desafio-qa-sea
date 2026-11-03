@@ -36,7 +36,7 @@ CLAUDE.md    regras de engajamento para a IA
 
 ## Números
 
-- Coleta de `uv run pytest --collect-only -q` em 03/11/2026: **176 testes**. Por marcador: unit 114, api 19, ui 23, security 9, cross 10, guard 1.
+- Coleta de `uv run pytest --collect-only -q` em 03/11/2026: **175 testes**. Por marcador: unit 114, api 19, ui 23, security 9, cross 9, guard 1.
 - Último CI: [execução 41582056702](https://github.com/Patrickfgf/desafio-qa-sea/actions/runs/41582056702), `success`, em 03/11/2026, sobre o commit `f9f3241` da branch `feat/findings-and-deliverables`.
 
 Os defeitos conhecidos são testes `xfail(strict=True)` com o id `BUG-NNN` no motivo; o status de cada um está no relatório.

@@ -13,7 +13,7 @@ Um prompt como "faz o desafio" devolve código plausível e um relatório confia
 | `brainstorming` | Perguntas e alternativas com trade-off até um design aprovado, antes do código | Limites do ambiente compartilhado definidos antes do primeiro request (erro 2) |
 | `writing-plans` | Tasks pequenas, teste primeiro, resultado esperado, checkpoint humano | 15 tasks; cada PR cabe numa revisão |
 | *Subagent-driven development* | Um agente implementa cada task, outro revisa | CPF no relatório do pytest (erro 3); print fail-open (erro 6) |
-| Verificação adversarial | Exploradores propõem; verificadores tentam refutar (19 dos 27 defeitos) | Severidade inflada em 14 candidatos (erro 4) |
+| Verificação adversarial | Exploradores propõem; verificadores tentam refutar (19 dos 26 defeitos) | Severidade inflada em 14 candidatos (erro 4) |
 | Modelo por tarefa | Haiku extrai, Sonnet implementa e verifica, Opus faz a revisão final | Revisão final: 1 CRITICAL e 4 HIGH, todos tratados |
 | `/resume` e `/end-session` | Log diário no meu Obsidian: feito, pendências, decisões | Troquei de máquina (Windows → Mac) sem perder estado |
 
@@ -34,6 +34,7 @@ Seleção de 9 das 20 entradas do diário bruto.
 7. Um script de sondagem imprimiu o DOM da listagem, com dados de terceiros no contexto da IA. Pego por autorrelato do implementador. Relatório interno da Task 10; regra no CLAUDE.md.
 8. O plano prometia conferir por `?id=` após o DELETE, mas o código não fazia. Pego por crítico de completude. Commit a829cdd.
 9. Um verificador enviou um POST vazio e deixou a listagem em branco por segundos. Pego pela triagem. Registro 4643 apagado e confirmado por `?id=`; regra nova nos briefs (DEC-13).
+10. Classificou como defeito ("tela → payload") o cadastro nascer inativo, sem checar que o switch já mostra "Inativo". Pego por mim na reprodução manual; virou observação.
 
 ## Guarda-corpos
 

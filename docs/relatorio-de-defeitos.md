@@ -2,7 +2,7 @@
 
 > **Status:** todo defeito abaixo foi verificado por automação (Selenium e requests). A verificação é de 03/11/2026, exceto BUG-001, BUG-006, BUG-007 e BUG-012, que vêm de uma verificação automatizada anterior, sem data registrada. A coluna "Reproduzido à mão" registra a reprodução manual, hoje **pendente** para todos (o que não for reproduzido sai do relatório, junto com o teste e a evidência). Nenhum defeito é afirmado como reproduzido à mão antes disso. BUG-023 e BUG-024 vêm da checagem de cobertura, e BUG-025 a BUG-028 da exploração, ambas de 03/11/2026; seguem a mesma regra, exceto o BUG-028, que o Patrick reproduziu à mão em 03/11/2026.
 >
-> **Numeração:** o id BUG-022 não é usado (retirado).
+> **Numeração:** os ids BUG-015 e BUG-022 não são usados (retirados; o BUG-015 virou observação, ver "Observações").
 >
 > **Como as evidências foram geradas:** por scripts de verificação não versionados, que usam `support.evidence` e o mascaramento do repositório; as evidências de interface foram copiadas dos logs dessas verificações.
 
@@ -45,7 +45,6 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio (as mesm
 | BUG-014 | PATCH em state apaga os campos não enviados | Contrato da API | Média | P2 | `tests/api/test_validation.py::test_patch_preserves_unsent_fields` | pendente |
 | BUG-024 | Enter descarta o cadastro sem salvar | Funcional (formulário) | Média | P2 | `tests/ui/test_form_controls.py::test_enter_in_text_field_does_not_discard_the_form` | pendente |
 | BUG-028 | Listagem mostra só os primeiros cards e não rola | Funcional (listagem) | Média | P2 | `tests/ui/test_navigation_controls.py::test_every_listing_card_is_reachable_by_scrolling` | sim (Patrick, 03/11) |
-| BUG-015 | Funcionário novo nasce Inativo por padrão | Funcional (tela → payload) | Baixa | P3 | `tests/cross/test_ui_vs_api.py::test_new_employee_defaults_to_active` | pendente |
 | BUG-016 | Select de EPI volta ao padrão ao digitar o CA | Usabilidade | Baixa | P3 | `tests/ui/test_form_controls.py::test_epi_select_keeps_choice_after_typing_ca` | pendente |
 | BUG-017 | Adicionar EPI não tem ação nem foco por teclado | Funcional (formulário) | Baixa | P3 | `tests/ui/test_form_controls.py::test_add_epi_adds_another_epi_block` | pendente |
 | BUG-018 | Paginação inconsistente em casos-limite | Contrato da API | Baixa | P3 | `tests/api/test_validation.py::test_pagination_beyond_last_page_returns_empty_data` | pendente |
@@ -309,12 +308,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 
 ## Defeitos de baixa prioridade (P3)
 
-Severidade Baixa e prioridade P3 em todos; as premissas de "esperado" estão em `plano-de-testes.md`, seção 2. BUG-015 a BUG-023 não têm passo a passo completo: cada um traz o que acontece, como ver, a evidência e o teste. BUG-025 a BUG-027 trazem os passos.
-
-### BUG-015 — Funcionário novo nasce Inativo por padrão
-
-Categoria: funcional (tela → payload). Salvar sem tocar no switch grava `isActive: false` e o card some com "Ver apenas ativos"; com o switch ligado funciona. Como ver: salvar um cadastro sem mexer no switch e ler `isActive` por `?id=` (interface, 03/11/2026).
-Evidência: [BUG-015](evidencias/BUG-015-novo-nasce-inativo.txt) · [print](evidencias/ui/BUG-015.png) · [vídeo](evidencias/ui/BUG-015.mp4). Teste: `tests/cross/test_ui_vs_api.py::test_new_employee_defaults_to_active`.
+Severidade Baixa e prioridade P3 em todos; as premissas de "esperado" estão em `plano-de-testes.md`, seção 2. BUG-016 a BUG-023 não têm passo a passo completo: cada um traz o que acontece, como ver, a evidência e o teste. BUG-025 a BUG-027 trazem os passos.
 
 ### BUG-016 — Select de EPI volta ao padrão ao digitar o CA
 
@@ -404,6 +398,7 @@ Itens vistos na interface que não entram como defeito: sem impacto funcional ou
 - **Opções "Ativid 01" a "Ativid 05" e "Calçado de Segurança":** "Ativid 0N" é nome provisório, mas consistente (select, valor gravado e card repetem o mesmo texto). Já "Calçado de Segurança" tem o S maiúsculo, diferente das outras quatro opções de EPI. O select grava o rótulo: se surgir outra grafia da mesma opção, uma consulta por EPI contaria dois valores. Risco de qualidade de dado, não defeito hoje.
 - **Título da aba "Vite + React + TS":** é o título do template, sem o nome do produto. Sem impacto para o usuário.
 - **Contador "Ativos X/Y" não acompanha o filtro "Ver apenas ativos":** com o filtro ligado, a lista passa de 15 para 8 cards e o contador segue "Ativos 8/15" (conta a base, não o filtro). O comportamento pretendido é desconhecido.
+- **Cadastro novo nasce inativo:** o switch "O trabalhador está ativo ou inativo?" abre mostrando "Inativo" e grava `isActive: false`, então a tela mostra o que grava. O cadastro some do filtro "Ver apenas ativos" até o usuário ligar o switch. O comportamento pretendido não é especificado: padrão "ativo" seria preferência de produto, não defeito (ex-BUG-015, decisão do Patrick em 03/11 na reprodução manual).
 
 ---
 
