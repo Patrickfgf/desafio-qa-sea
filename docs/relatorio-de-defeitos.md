@@ -1,6 +1,6 @@
 # Relatório de defeitos
 
-> **Status:** todo defeito abaixo foi verificado por automação (Selenium e requests). A verificação é de 03/11/2026, exceto BUG-001, BUG-006, BUG-007 e BUG-012, que vêm de uma verificação automatizada anterior, sem data registrada. A coluna "Reproduzido à mão" registra a reprodução manual, hoje **pendente** para todos (o que não for reproduzido sai do relatório, junto com o teste e a evidência). Nenhum defeito é afirmado como reproduzido à mão antes disso.
+> **Status:** todo defeito abaixo foi verificado por automação (Selenium e requests). A verificação é de 03/11/2026, exceto BUG-001, BUG-006, BUG-007 e BUG-012, que vêm de uma verificação automatizada anterior, sem data registrada. A coluna "Reproduzido à mão" registra a reprodução manual, hoje **pendente** para todos (o que não for reproduzido sai do relatório, junto com o teste e a evidência). Nenhum defeito é afirmado como reproduzido à mão antes disso. BUG-022, BUG-023 e BUG-024 vêm da checagem de cobertura de 03/11/2026 (candidatos explorados do zero) e seguem a mesma regra.
 
 **Ambiente de todos os defeitos:** `https://analista-teste.seatecnologia.com.br/` (interface e `/employees`), 03/11/2026 (BUG-001, BUG-006, BUG-007 e BUG-012: verificação anterior, sem data), Chrome headless (interface) e `requests` (API). Base compartilhada: só registros sintéticos com nome `QA-AUTO-`, apagados em seguida. CPF mascarado (`123.***.***-09`) ou descrito, nunca em claro, nas evidências.
 
@@ -39,6 +39,7 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio (as mesm
 | BUG-012 | Adicionar outra atividade salva e fecha o formulário | Funcional (formulário) | Média | P2 | `tests/ui/test_form_controls.py::test_add_another_activity_does_not_submit` | pendente |
 | BUG-013 | Listagem busca dados em paralelo ao POST e fica velha | Funcional (listagem) | Média | P2 | `tests/ui/test_form_controls.py::test_listing_refetch_happens_after_post_completes` | pendente |
 | BUG-014 | PATCH em state apaga os campos não enviados | Contrato da API | Média | P2 | `tests/api/test_validation.py::test_patch_preserves_unsent_fields` | pendente |
+| BUG-024 | Enter descarta o cadastro sem salvar | Funcional (formulário) | Média | P2 | `tests/ui/test_form_controls.py::test_enter_in_text_field_does_not_discard_the_form` | pendente |
 | BUG-015 | Funcionário novo nasce Inativo por padrão | Funcional (tela → payload) | Baixa | P3 | `tests/cross/test_ui_vs_api.py::test_new_employee_defaults_to_active` | pendente |
 | BUG-016 | Select de EPI volta ao padrão ao digitar o CA | Usabilidade | Baixa | P3 | `tests/ui/test_form_controls.py::test_epi_select_keeps_choice_after_typing_ca` | pendente |
 | BUG-017 | Adicionar EPI não tem ação nem foco por teclado | Funcional (formulário) | Baixa | P3 | `tests/ui/test_form_controls.py::test_add_epi_adds_another_epi_block` | pendente |
@@ -46,6 +47,8 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio (as mesm
 | BUG-019 | JSON malformado devolve 500 em vez de 400 | Tratamento de erro | Baixa | P3 | `tests/api/test_validation.py::test_malformed_json_returns_400` | pendente |
 | BUG-020 | CORS inválido (*,*) e POST text/plain aceito | Segurança | Baixa | P3 | `tests/security/test_security.py::test_cors_allow_origin_is_single_value` | pendente |
 | BUG-021 | Sem cabeçalhos de segurança e com x-powered-by | Segurança | Baixa | P3 | `tests/security/test_security.py::test_security_headers_present` | pendente |
+| BUG-022 | Título da aba é o do template Vite | Usabilidade | Baixa | P3 | `tests/ui/test_page_metadata.py::test_page_title_identifies_the_app` | pendente |
+| BUG-023 | Obrigatórios aceitam só espaços | Validação (tela) | Baixa | P3 | `tests/ui/test_form_validation.py::test_required_fields_reject_whitespace_only` | pendente |
 
 Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na razão. Quando a tabela cita um teste, os demais do mesmo defeito estão na seção dele. Cada premissa de "esperado" abaixo é inferência (sem documentação do sistema); as premissas estão em `plano-de-testes.md`, seção 2.
 
@@ -262,6 +265,17 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 - **Evidência:** [BUG-014](evidencias/BUG-014-patch-apaga-campos.txt)
 - **Teste automatizado:** `tests/api/test_validation.py::test_patch_preserves_unsent_fields`.
 
+### BUG-024 — Enter descarta o cadastro sem salvar
+
+- **Categoria:** funcional (formulário). **Severidade:** Média. **Prioridade:** P2.
+- **Ambiente:** interface, checagem de cobertura de 03/11/2026, Chrome headless. **Pré-condições:** formulário preenchido com registro de teste `QA-AUTO-`.
+- **Passos:** (1) abrir "+ Adicionar Funcionário" e preencher tudo; (2) com o cursor no campo Nº do CA (ou em Nome), apertar Enter, sem clicar em "Salvar"; (3) olhar a rede e conferir por nome exato se algo foi gravado.
+- **Esperado:** Enter salva como o botão "Salvar", ou não faz nada; nunca descarta os dados em silêncio (premissa 2).
+- **Obtido:** o formulário fecha, a listagem volta, nenhuma requisição é enviada e nada é gravado (3 de 3 execuções). Causa provável: o primeiro botão `type=submit` do formulário é a seta de voltar, sem `type="button"`. Há contorno: clicar em "Salvar".
+- **Evidência:** [BUG-024](evidencias/BUG-024-enter-descarta-cadastro.txt) (vem da checagem de cobertura de 03/11)
+- **Reproduzido à mão:** pendente.
+- **Teste automatizado:** `tests/ui/test_form_controls.py::test_enter_in_text_field_does_not_discard_the_form`.
+
 ---
 
 ## Prioridade P3
@@ -336,6 +350,28 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 - **Obtido:** os cinco ausentes e `x-powered-by: tinyhttp`. Em `/`, `cache-control: no-store,public`.
 - **Evidência:** [BUG-021](evidencias/BUG-021-sem-cabecalhos-de-seguranca.txt)
 - **Teste automatizado:** `tests/security/test_security.py::test_security_headers_present`.
+
+### BUG-022 — Título da aba é o do template Vite
+
+- **Categoria:** usabilidade. **Severidade:** Baixa. **Prioridade:** P3.
+- **Ambiente:** interface, checagem de cobertura de 03/11/2026, Chrome headless. **Pré-condições:** nenhuma; nada é criado.
+- **Passos:** (1) abrir `/`; (2) ler o título da aba (`document.title`).
+- **Esperado:** título que identifique a aplicação (premissa inferida, sem requisito escrito).
+- **Obtido:** `Vite + React + TS`; também `<html lang="en">` e ícone `/vite.svg` (2 execuções por curl e 2 por Selenium).
+- **Evidência:** [BUG-022](evidencias/BUG-022-titulo-da-aba-template-vite.txt) (vem da checagem de cobertura de 03/11)
+- **Reproduzido à mão:** pendente.
+- **Teste automatizado:** `tests/ui/test_page_metadata.py::test_page_title_identifies_the_app`.
+
+### BUG-023 — Obrigatórios aceitam só espaços
+
+- **Categoria:** validação (tela). **Severidade:** Baixa. **Prioridade:** P3.
+- **Ambiente:** interface, checagem de cobertura de 03/11/2026, Chrome headless. **Pré-condições:** formulário aberto; registro de teste `QA-AUTO-`, apagado em seguida.
+- **Passos:** (1) preencher o cadastro com tudo válido, mas RG com 3 espaços (depois CA com 3 espaços, depois CPF com 11 espaços, um caso por vez); (2) clicar em "Salvar"; (3) ler o registro gravado por nome exato.
+- **Esperado:** campo obrigatório só com espaços é tratado como vazio: bloqueia com "Preencha este campo." ou é aparado antes de gravar.
+- **Obtido:** os três casos salvam e a API grava os espaços (2 de 2 execuções). O `required` nativo só exige "não vazio". Mesma família do BUG-008 e do BUG-011 (sem validação de conteúdo).
+- **Evidência:** [BUG-023](evidencias/BUG-023-obrigatorios-aceitam-espacos.txt) (vem da checagem de cobertura de 03/11)
+- **Reproduzido à mão:** pendente.
+- **Teste automatizado:** `tests/ui/test_form_validation.py::test_required_fields_reject_whitespace_only` (um caso por campo).
 
 ---
 

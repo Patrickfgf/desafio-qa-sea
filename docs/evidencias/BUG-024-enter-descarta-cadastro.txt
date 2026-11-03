@@ -1,0 +1,16 @@
+BUG-024: Enter descarta o cadastro sem salvar
+Origem: checagem de cobertura de 03/11/2026 (candidato explorado do zero, Selenium, Chrome headless) contra https://analista-teste.seatecnologia.com.br.
+Só registros próprios (nome QA-AUTO-), apagados ao fim e confirmados por ?id=; CPF nunca em claro; sem captura de tela.
+Esperado: Enter com o formulário válido salva (como o botão Salvar) ou não faz nada; nunca descarta os dados sem aviso.
+
+Formulário completo e válido (nome QA-AUTO-C3-...); cursor no campo Nº do CA; tecla Enter (sem clicar em Salvar).
+Resultado (3 execuções: Enter no Nº do CA com o form completo, 2 vezes; Enter no Nome com o form completo):
+requisições POST/PUT/PATCH/DELETE depois do Enter: [] (nenhuma, 5 s de observação)
+formulário ainda presente: não (fechou e a listagem voltou)
+registros com o nome exato: 0 (ids: [])
+Registros criados: 0, nada a apagar.
+
+Causa provável (DOM): o formulário tem 3 botões type=submit; o primeiro, na ordem do DOM, é a seta de voltar
+(<button><img src="/assets/left-arrow-...svg" alt=""></button>), sem type="button". O Enter dispara o envio implícito
+do navegador, que aciona esse primeiro botão.
+Controle: o mesmo cadastro com clique em Salvar gera o POST 201 (registro próprio, apagado e confirmado por ?id=).

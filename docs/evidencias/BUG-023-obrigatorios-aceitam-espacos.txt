@@ -1,0 +1,16 @@
+BUG-023: Obrigatórios aceitam só espaços
+Origem: checagem de cobertura de 03/11/2026 (candidato explorado do zero, Selenium, Chrome headless) contra https://analista-teste.seatecnologia.com.br.
+Só registros próprios (nome QA-AUTO-), apagados ao fim e confirmados por ?id=; CPF nunca em claro; sem captura de tela.
+Esperado: campo obrigatório com só espaços bloqueia o envio ("Preencha este campo.") ou é aparado antes de gravar.
+
+Formulário completo e válido para a validação nativa; um campo obrigatório preenchido só com espaços; clique em Salvar.
+Resultado (2 execuções, 8 registros QA-AUTO-C2- criados e apagados; ?id= vazio nos 8; sobras: 0):
+run1 rg-spaces:       validação nativa passou=True, formulário fechou=True, registros=1, gravado rg='   ' (3 espaços)
+run1 ca-spaces:       validação nativa passou=True, formulário fechou=True, registros=1, gravado caNumber='   ' (3 espaços)
+run1 cpf-spaces:      validação nativa passou=True, formulário fechou=True, registros=1, cpf com 11 espaços (comprimento 11, nenhum dígito)
+run1 rg-single-char:  controle (RG 'x'): salva, como esperado
+run2 rg-spaces:       idem run1
+run2 ca-spaces:       idem run1
+run2 cpf-spaces:      idem run1
+run2 rg-single-char:  idem run1
+Com o formulário vazio, a validação nativa bloqueia e foca o primeiro inválido (nome, CPF, nascimento, RG, CA: "Preencha este campo."); o defeito é que ela aceita espaços.
