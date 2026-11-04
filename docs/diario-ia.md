@@ -2,7 +2,7 @@
 
 Ponteiros de seção remetem a notas internas, disponíveis na conversa; onde há, uso o sha do commit.
 
-Defini a tese da entrega. A arquitetura e a stack saíram de uma discussão conjunta enquanto montávamos o design e o plano: a IA propôs e comparou as alternativas (Selenium, Playwright e Cypress), eu questionei e aprovei o design antes de qualquer código, inclusive os três portões humanos e a separação entre rascunhos e entrega. Em 03/11 eu deleguei à IA as decisões que o plano reservava a mim: o corte de risco, a severidade e a prioridade finais, o texto do "não testei" e a estrutura dos PRs. A IA as registrou num log de decisões (DEC-01 a DEC-23) que eu valido. Rodar a Task 12 foi decisão minha. ⟪PATRICK: confirme depois da reprodução manual: cada defeito do relatório foi reproduzido por mim à mão antes da entrega⟫
+Defini a tese da entrega. A arquitetura e a stack saíram de uma discussão conjunta enquanto montávamos o design e o plano: a IA propôs e comparou as alternativas (Selenium, Playwright e Cypress), eu questionei e aprovei o design antes de qualquer código, inclusive os três portões humanos e a separação entre rascunhos e entrega. Em 03/11 eu deleguei à IA as decisões que o plano reservava a mim: o corte de risco, a severidade e a prioridade finais, o texto do "não testei" e a estrutura dos PRs. A IA as registrou num log de decisões (DEC-01 a DEC-23) que eu valido. Rodar a Task 12 foi decisão minha. Reproduzi à mão os defeitos visíveis na interface; os exclusivos da API deleguei à automação, mais confiável para checagem determinística, e mandei reverificá-los com um verificador e um cético por defeito.
 
 ## Método: por que não um prompt único
 
@@ -13,11 +13,11 @@ Um prompt como "faz o desafio" devolve código plausível e um relatório confia
 | `brainstorming` | Perguntas e alternativas com trade-off até um design aprovado, antes do código | Limites do ambiente compartilhado definidos antes do primeiro request (erro 2) |
 | `writing-plans` | Tasks pequenas, teste primeiro, resultado esperado, checkpoint humano | 15 tasks; cada PR cabe numa revisão |
 | *Subagent-driven development* | Um agente implementa cada task, outro revisa | CPF no relatório do pytest (erro 3); print fail-open (erro 6) |
-| Verificação adversarial | Exploradores propõem; verificadores tentam refutar (18 dos 27 defeitos) | Severidade inflada em 14 candidatos (erro 4) |
+| Verificação adversarial | Exploradores propõem; verificadores tentam refutar (19 dos 27 defeitos) | Severidade inflada em 14 candidatos (erro 4) |
 | Modelo por tarefa | Haiku extrai, Sonnet implementa e verifica, Opus faz a revisão final | Revisão final: 1 CRITICAL e 4 HIGH, todos tratados |
 | `/resume` e `/end-session` | Log diário no meu Obsidian: feito, pendências, decisões | Troquei de máquina (Windows → Mac) sem perder estado |
 
-Humano no circuito: reproduzi à mão cada defeito e fiz uma sessão exploratória própria, procurando o que a IA não achou. ⟪PATRICK: resultado da sessão exploratória⟫
+Humano no circuito: fiz uma sessão exploratória própria, procurando o que a IA não achou. Ela produziu a listagem cortada e sem rolagem (BUG-028), os controles e a navegação sem efeito (BUG-027), os códigos de EPI inconsistentes (BUG-029), o ano de 6 dígitos (BUG-010), a validação de CPF só por tamanho e o nome sem trim (BUG-023) e o contorno falso do BUG-006 (escolher a opção já exibida também não grava). Também rebaixei o BUG-015 a observação.
 
 A IA também leu os bugs e testes de um repositório público de 2025 do mesmo desafio para cruzar com os meus achados; os itens coincidentes foram reproduzidos de novo na versão atual do app.
 
@@ -39,4 +39,4 @@ Seleção de 10 das 21 entradas do diário bruto.
 ## Guarda-corpos
 
 - `CLAUDE.md`: só registros `QA-AUTO-`, só dados sintéticos, sem payload executável, sem carga, nada fora de `/` e `/employees`. O teste `guard` falha se `docs/` tiver CPF sem máscara (`support/pii.py`).
-- BUG-016, BUG-019, BUG-023, BUG-024 e BUG-025 a BUG-029 não passaram pelo verificador: têm a execução de quem os achou, o teste xfail e a minha reprodução.
+- BUG-016, BUG-023, BUG-024 e BUG-025 a BUG-029 não passaram pelo verificador: têm a execução de quem os achou, o teste xfail e a minha reprodução. Os defeitos de API foram reverificados ao vivo em 04/11, e o BUG-019 passou por essa rodada.
