@@ -153,7 +153,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
   2. Preencher os demais campos sem abrir os selects e salvar.
   3. Ler o registro por `?id=`.
 - **Esperado:** gravar o que a tela mostra, ou exigir escolha (premissa 2).
-- **Obtido:** `role` vazio e `activity`/`epi` ausentes. Escolhendo no select, o valor é gravado (contorno).
+- **Obtido:** `role` vazio e `activity`/`epi` ausentes. Escolher outra opção no select grava o valor, mas clicar na opção que já aparece ("Cargo 01") continua gravando `role: ""` (reproduzido à mão pelo Patrick em 03/11, registro `QA-AUTO-P1-006b`): o valor exibido por padrão não é gravado nem quando o usuário o escolhe de propósito.
 - **Evidência:** [BUG-006](evidencias/BUG-006-selects-padrao-nao-gravado.txt) · [print](evidencias/ui/BUG-006.png) · [vídeo](evidencias/ui/BUG-006.mp4)
 - **Teste automatizado:** `tests/cross/test_ui_vs_api.py::test_default_selects_are_saved_as_displayed`.
 
