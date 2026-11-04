@@ -2,7 +2,7 @@
 
 Ponteiros de seção remetem a notas internas, disponíveis na conversa; onde há, uso o sha do commit.
 
-Defini a tese da entrega. A arquitetura e a stack saíram de uma discussão conjunta enquanto montávamos o design e o plano: a IA propôs e comparou as alternativas (Selenium, Playwright e Cypress), eu questionei e aprovei o design antes de qualquer código, inclusive os três portões humanos e a separação entre rascunhos e entrega. Em 03/11 eu deleguei à IA as decisões que o plano reservava a mim: o corte de risco, a severidade e a prioridade finais, o texto do "não testei" e a estrutura dos PRs. A IA as registrou num log de decisões (DEC-01 a DEC-23) que eu valido. Rodar a Task 12 foi decisão minha. Reproduzi à mão os defeitos visíveis na interface; os exclusivos da API deleguei à automação, mais confiável para checagem determinística, e mandei reverificá-los com um verificador e um cético por defeito.
+Defini a tese da entrega. A arquitetura e a stack saíram de uma discussão conjunta enquanto montávamos o design e o plano: a IA propôs e comparou as alternativas (Selenium, Playwright e Cypress), eu questionei e aprovei o design antes de qualquer código, inclusive os três portões humanos e a separação entre rascunhos e entrega. Em 03/11 eu deleguei à IA as decisões que o plano reservava a mim: o corte de risco, a severidade e a prioridade finais, o texto do "não testei" e a estrutura dos PRs. A IA as registrou num log de decisões (DEC-01 a DEC-23) que eu valido. Rodar a Task 12 foi decisão minha. Reproduzi à mão os defeitos visíveis na interface; os que dependem da API para serem provocados ou provados (BUG-002, 004, 005, 011, 014, 018, 019, 020 e 021) deleguei à automação, mais confiável para checagem determinística, e mandei reverificá-los com um verificador e um cético por defeito.
 
 ## Método: por que não um prompt único
 
@@ -39,4 +39,4 @@ Seleção de 10 das 21 entradas do diário bruto.
 ## Guarda-corpos
 
 - `CLAUDE.md`: só registros `QA-AUTO-`, só dados sintéticos, sem payload executável, sem carga, nada fora de `/` e `/employees`. O teste `guard` falha se `docs/` tiver CPF sem máscara (`support/pii.py`).
-- BUG-016, BUG-023, BUG-024 e BUG-025 a BUG-029 não passaram pelo verificador: têm a execução de quem os achou, o teste xfail e a minha reprodução. Os nove defeitos de API auditados (BUG-002, 004, 005, 011, 014, 018, 019, 020 e 021) foram reverificados ao vivo em 04/11.
+- BUG-016, BUG-023, BUG-024 e BUG-025 a BUG-029 não passaram pelo verificador: têm a execução de quem os achou, o teste xfail e a minha reprodução. Os nove defeitos de API citados acima foram reverificados ao vivo em 04/11.

@@ -1,6 +1,6 @@
 # Relatório de defeitos
 
-> **Método de verificação:** os defeitos visíveis na interface foram reproduzidos à mão; os exclusivos da API foram delegados à automação — são checagens determinísticas (requisição → resposta), que o teste xfail repete igual a cada execução do CI e registra com a evidência HTTP. Os nove defeitos de API auditados (BUG-002, 004, 005, 011, 014, 018, 019, 020 e 021) passaram, em 04/11, por uma reverificação ao vivo com um verificador e um cético independentes; os demais passaram pelo verificador em 03/11 (exceto os listados no diário).
+> **Método de verificação:** os defeitos visíveis na interface foram reproduzidos à mão; os que dependem da API para serem provocados ou provados (BUG-002, 004, 005, 011, 014, 018, 019, 020 e 021) foram delegados à automação — são checagens determinísticas (requisição → resposta), que o teste xfail repete igual a cada execução do CI e registra com a evidência HTTP. Esses nove defeitos passaram, em 04/11, por uma reverificação ao vivo com um verificador e um cético independentes; os demais passaram pelo verificador em 03/11 (exceto os listados no diário).
 >
 > **Numeração:** os ids BUG-015 e BUG-022 não são usados (retirados; o BUG-015 virou observação, ver "Observações").
 >
