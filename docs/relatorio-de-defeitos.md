@@ -6,7 +6,7 @@
 >
 > **Como as evidências foram geradas:** por scripts de verificação não versionados, que usam `support.evidence` e o mascaramento do repositório; as evidências de interface foram copiadas dos logs dessas verificações.
 
-**Ambiente de todos os defeitos:** `https://analista-teste.seatecnologia.com.br/` (interface e `/employees`), 03/11/2026 (BUG-001, BUG-006, BUG-007 e BUG-012: verificação anterior, sem data), Chrome headless (interface) e `requests` (API). Base compartilhada: só registros sintéticos com nome `QA-AUTO-`, apagados em seguida. CPF mascarado (`123.***.***-09`) ou descrito, nunca em claro, nas evidências.
+**Ambiente de todos os defeitos:** `https://analista-teste.seatecnologia.com.br/` (interface e `/employees`), 03/11/2026 (BUG-001, BUG-006, BUG-007 e BUG-012: verificação anterior, sem data; defeitos de API reauditados ao vivo em 04/11/2026), Chrome headless (interface) e `requests` (API). Base compartilhada: só registros sintéticos com nome `QA-AUTO-`, apagados em seguida. CPF mascarado (`123.***.***-09`) ou descrito, nunca em claro, nas evidências.
 
 ## Escalas
 
@@ -15,7 +15,7 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio (as mesm
 | Severidade | Critério |
 |---|---|
 | Crítica | perda ou exposição de dados em larga escala, sem pré-condição |
-| Alta | dado gravado ou exposto de forma errada em fluxo principal, ou controle de acesso ausente |
+| Alta | dado gravado ou exposto de forma errada em fluxo principal, controle de acesso ausente, ou fluxo principal indisponível para todos |
 | Média | comportamento incorreto com contorno, ou efeito limitado a clientes da API |
 | Baixa | cosmético, usabilidade, má prática sem dano demonstrado |
 
@@ -32,7 +32,7 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio (as mesm
 | BUG-001 | Checkbox não usa EPI grava usesEpi invertido | Funcional (tela → payload) | Alta | P1 | `tests/cross/test_ui_vs_api.py::test_uses_epi_flag_matches_checkbox` | pendente |
 | BUG-002 | API expõe CPF, RG e nascimento sem autenticação | Privacidade / LGPD | Alta | P1 | `tests/security/test_security.py::test_record_does_not_expose_full_cpf` | pendente |
 | BUG-003 | Listagem exibe o CPF completo no card | Privacidade / LGPD | Alta | P1 | `tests/cross/test_ui_vs_api.py::test_listing_card_masks_cpf` | pendente |
-| BUG-004 | API cria, altera e apaga registros sem autenticação | Segurança (controle de acesso) | Alta | P1 | `tests/security/test_security.py::test_create_requires_authentication` | pendente |
+| BUG-004 | API cria, altera e apaga registros sem autenticação | Segurança (controle de acesso) | Alta | P1 | `tests/security/test_security.py::test_create_requires_authentication` (+ `update` em PUT/PATCH e `delete`, ver seção) | pendente |
 | BUG-005 | Registro sem state.employee deixa a listagem em branco | Funcional (listagem) | Alta | P1 | manual | pendente |
 | BUG-006 | Selects exibem padrão que não é gravado ao salvar | Funcional (tela → payload) | Média | P2 | `tests/cross/test_ui_vs_api.py::test_default_selects_are_saved_as_displayed` | pendente |
 | BUG-007 | Anexo do ASO não é enviado nem persistido | Funcional (tela → payload) | Média | P2 | `tests/cross/test_ui_vs_api.py::test_aso_file_is_persisted` | pendente |
@@ -42,9 +42,9 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio (as mesm
 | BUG-011 | API não valida schema, tipos nem campos extras | Contrato da API | Média | P2 | `tests/api/test_validation.py::test_create_rejects_missing_required_fields` | pendente |
 | BUG-012 | Adicionar outra atividade salva e fecha o formulário | Funcional (formulário) | Média | P2 | `tests/ui/test_form_controls.py::test_add_another_activity_does_not_submit` | pendente |
 | BUG-013 | Listagem busca dados em paralelo ao POST e fica velha | Funcional (listagem) | Média | P2 | `tests/ui/test_form_controls.py::test_listing_refetch_happens_after_post_completes` | pendente |
-| BUG-014 | PATCH em state apaga os campos não enviados | Contrato da API | Média | P2 | `tests/api/test_validation.py::test_patch_preserves_unsent_fields` | pendente |
 | BUG-024 | Enter descarta o cadastro sem salvar | Funcional (formulário) | Média | P2 | `tests/ui/test_form_controls.py::test_enter_in_text_field_does_not_discard_the_form` | pendente |
 | BUG-028 | Listagem mostra só os primeiros cards e não rola | Funcional (listagem) | Média | P2 | `tests/ui/test_navigation_controls.py::test_every_listing_card_is_reachable_by_scrolling` | sim (Patrick, 03/11) |
+| BUG-014 | PATCH em state apaga os campos não enviados | Contrato da API | Baixa | P3 | `tests/api/test_validation.py::test_patch_preserves_unsent_fields` | pendente |
 | BUG-016 | Select de EPI volta ao padrão ao digitar o CA | Usabilidade | Baixa | P3 | `tests/ui/test_form_controls.py::test_epi_select_keeps_choice_after_typing_ca` | pendente |
 | BUG-017 | Adicionar EPI não tem ação nem foco por teclado | Funcional (formulário) | Baixa | P3 | `tests/ui/test_form_controls.py::test_add_epi_adds_another_epi_block` | pendente |
 | BUG-018 | Paginação inconsistente em casos-limite | Contrato da API | Baixa | P3 | `tests/api/test_validation.py::test_pagination_beyond_last_page_returns_empty_data` | pendente |
@@ -88,11 +88,13 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
   2. `GET /employees/<id>` sem credencial.
   3. `GET /employees?id=<id>` sem credencial.
   4. Apagar o registro e confirmar por `?id=`.
-- **Esperado:** 401/403 sem credencial, ou ao menos CPF mascarado ou omitido (premissa 8).
-- **Obtido:** 200 com CPF de 11 dígitos, RG e data de nascimento completos, `cache-control: public` e `access-control-allow-origin: *,*`. A listagem completa serve o mesmo, inclusive inativos: nas medições agregadas, 7 de 7 e 11 de 11 registros traziam os três campos (a evidência abaixo mostra só o registro de teste; o CPF está mascarado no arquivo).
+- **Esperado (premissa 8, inferência; o enunciado não exige autenticação):** 401/403 sem credencial, ou ao menos CPF mascarado ou omitido.
+- **Obtido:** 200 sem credencial, com o CPF de 11 dígitos igual ao enviado, RG e data de nascimento completos (registro próprio, por `/employees/<id>` e por `?id=`). O CPF está mascarado no arquivo de evidência.
 - **Evidência:** [BUG-002](evidencias/BUG-002-api-expoe-pii-sem-autenticacao.txt)
-- **Testes automatizados:** `tests/security/test_security.py::test_record_does_not_expose_full_cpf`, `::test_list_requires_authentication` (usa `?id=` do registro próprio).
+- **Testes automatizados:** `tests/security/test_security.py::test_record_does_not_expose_full_cpf`, `::test_list_requires_authentication` (usa `?id=` do registro próprio e afirma só status e contagem, não o conteúdo da listagem completa).
 - **Impacto LGPD:** dado pessoal exposto a qualquer visitante, sem minimização (art. 6º, III e VII, e art. 46). Não há prova de que os registros de terceiros sejam reais; a exposição é do mecanismo.
+- **Severidade:** Alta/P1 pela leitura anônima de CPF completo, RG e nascimento, somada à escrita anônima (BUG-004).
+- **Relacionados:** BUG-003 (card) e BUG-004 (escrita) têm a mesma causa: API sem autenticação nem minimização.
 
 ### BUG-003 — Listagem exibe o CPF completo no card
 
@@ -116,29 +118,31 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 - **Pré-condições:** nenhuma credencial; registro de teste.
 - **Passos:**
   1. `POST /employees` com registro sintético `QA-AUTO-`.
-  2. `PUT /employees/<id>` com outro corpo completo `QA-AUTO-`.
+  2. `PUT /employees/<id>` com outro corpo completo `QA-AUTO-` (e `PATCH` com uma chave).
   3. `DELETE /employees/<id>`.
   4. Confirmar por `?id=` que o registro sumiu.
-- **Esperado:** 401/403 nas três escritas (premissa 8).
-- **Obtido:** 201, 200 e 200. Qualquer cliente anônimo altera ou apaga qualquer registro (só o próprio foi tocado nos testes).
+- **Esperado (premissa 8, inferência; o enunciado não exige autenticação, mas pede explorar segurança e privacidade da API):** 401/403 em todas as escritas.
+- **Obtido:** 201 no POST, 200 no PUT e no PATCH, 200 no DELETE; o GET seguinte confirma que a alteração persistiu e o `?id=` confirma a remoção. Um token inválido em `Authorization` não muda nada, e o preflight não lista `Authorization` em `allow-headers`. Um cliente anônimo altera e apaga o registro criado por outro cliente anônimo; não há noção de dono. Registros de terceiros não foram tocados (regra de engajamento), então o alcance sobre eles é inferência.
 - **Evidência:** [BUG-004](evidencias/BUG-004-escrita-sem-autenticacao.txt)
-- **Testes automatizados:** `tests/security/test_security.py::test_create_requires_authentication`, `::test_update_requires_authentication`, `::test_delete_requires_authentication`.
-- **Impacto LGPD:** integridade e disponibilidade dos dados pessoais sem controle (art. 46). É o gatilho de baixo custo do BUG-005.
+- **Testes automatizados:** `tests/security/test_security.py::test_create_requires_authentication`, `::test_update_requires_authentication`, `::test_delete_requires_authentication`. Os testes afirmam só o status; a persistência foi confirmada pelo script de verificação.
+- **Impacto LGPD:** integridade e disponibilidade dos dados pessoais sem controle (art. 46). É a pré-condição do BUG-005 (escrita anônima de um corpo malformado).
 
 ### BUG-005 — Registro sem state.employee deixa a listagem em branco
 
-- **Categoria:** funcional (listagem), com origem em contrato da API (BUG-004 e BUG-011). **Severidade:** Alta. **Prioridade:** P1.
+- **Categoria:** funcional (listagem): a tela não tolera um registro malformado. O gatilho é a API aceitar esse registro (BUG-004 e BUG-011, comportamento padrão do json-server). **Severidade:** Alta. **Prioridade:** P1.
 - **Ambiente:** interface e API, 03/11/2026, Chrome headless.
-- **Pré-condições:** nenhuma. Defeito de efeito global: **não repetir sem necessidade** e apagar logo após uma única carga.
+- **Pré-condições:** nenhuma credencial; a API aceita escrita anônima (BUG-004) e corpo sem validação (BUG-011). Defeito de efeito global: criar por `curl`, abrir a listagem uma vez e apagar logo em seguida, confirmando por `?id=`.
 - **Passos:**
   1. `POST /employees` com `{"qa":"QA-AUTO-manual","state":{}}` (sem `id`; o marcador na raiz permite achar a sobra).
   2. Abrir a listagem uma única vez.
   3. Apagar o registro com `DELETE /employees/<id>` e confirmar por `?id=`.
 - **Esperado:** a listagem ignora o registro malformado, ou a API o rejeita.
-- **Obtido:** POST 201; a tela desmonta (corpo vazio, `#root` sem filhos, sem contador), com `TypeError ... reading 'isActive'` no console (a evidência registra 3 erros SEVERE, dois deles `TypeError` listados). A mesma evidência marca o botão "Adicionar" como visível no instante da checagem; a triagem o descreve sumindo depois. ⟪PATRICK: confirme na reprodução manual se o botão some e quantos erros aparecem⟫ Vale para todos os usuários enquanto o registro existir.
-- **Evidência:** [BUG-005](evidencias/BUG-005-listagem-em-branco.txt) (da verificação automatizada de 03/11; não reexecutada para o relatório).
-- **Teste automatizado:** manual, por decisão: cada execução do CI deixaria a tela em branco para terceiros, e o registro não carrega o prefixo `QA-AUTO-`.
-- **Observação:** um POST com corpo vazio também cria um registro `{id}` (não verificado como gatilho da tela em branco).
+- **Obtido:** POST 201; a tela desmonta (corpo vazio, `#root` sem filhos, sem contador), com pelo menos um `TypeError: Cannot read properties of undefined` no console (com a receita do passo 1, `reading 'employee'`; a evidência de 03/11 registrou `reading 'isActive'`, sem anotar o payload). Depois que a lista carrega, a página inteira fica vazia, sem botão "Adicionar" e sem contador. Vale para qualquer visitante enquanto o registro existir (inferência: GET anônimo e perfil limpo; não medido com um segundo cliente em paralelo).
+- **Evidência:** [BUG-005](evidencias/BUG-005-listagem-em-branco.txt) (verificação automatizada de 03/11; reexecutada em 04/11 com o mesmo efeito na tela e mensagem `reading 'employee'`).
+- **Teste automatizado:** manual, por decisão: cada execução do CI deixaria a tela em branco para terceiros.
+- **Severidade:** Alta/P1: fluxo principal inutilizável para todos os visitantes, disparado por 1 POST anônimo; sem perda de dado, recuperável com um DELETE.
+- **Ocorrência real (04/11):** um registro só com `{"id"}` (sem state.employee), de origem não identificada, deixou a listagem em branco para todos até ser removido; o mesmo formato é criado por um POST com corpo vazio, sem autenticação (BUG-004): uma única requisição anônima derruba a listagem de todos os usuários.
+- **Observação:** um POST com corpo vazio também cria um registro `{id}`; num episódio acidental de verificação ele deixou a listagem em branco por alguns segundos (registro apagado e confirmado, ver diário), sem reprodução controlada.
 
 ---
 
@@ -221,14 +225,14 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 - **Pré-condições:** registros sintéticos `QA-AUTO-`; todo corpo mantém `state.employee` (ver BUG-005).
 - **Passos:**
   1. `POST` só com `name`.
-  2. `POST` com `role: "Cargo 99"`, `epi: "nao-existe"` e `isActive: "false"` (texto).
+  2. `POST` com `role: "Cargo 99"`, `epi: "nao-existe"` e `isActive: "false"` (texto) (o teste envia cada campo num POST separado).
   3. `POST` com campo extra `isAdmin: true`.
   4. `PUT` só com `name` em registro próprio e ler o resultado.
-- **Esperado:** 400/422 em 1 a 3; campos desconhecidos descartados; PUT incompleto rejeitado (premissa 6).
-- **Obtido:** 201 em todos, gravados como enviados (inclusive `isAdmin`); o PUT apaga todos os outros campos.
+- **Esperado (premissa 6, inferência; a validação pode existir só na tela):** 400/422 em 1 a 3; campos desconhecidos descartados; PUT sem os obrigatórios rejeitado. O domínio de `role` e `epi` é inferido das opções da tela.
+- **Obtido:** 201 em todos, gravados como enviados (inclusive `isAdmin`); o PUT sem os obrigatórios é aceito (200) e os campos não enviados somem.
 - **Evidência:** [BUG-011](evidencias/BUG-011-api-sem-schema.txt)
 - **Testes automatizados:** `tests/api/test_validation.py::test_create_rejects_missing_required_fields`, `::test_create_rejects_out_of_domain_values`, `::test_create_rejects_unknown_fields`, `::test_put_rejects_missing_required_fields`.
-- **Observação:** `PUT {}`, `PUT {"foo":"bar"}` e `PATCH {"state":null}` também removem `state.employee`, o que dispara o BUG-005; por isso ficam só como passo manual.
+- **Observação:** por inferência, `PUT {}`, `PUT {"foo":"bar"}` e `PATCH {"state":null}` também removeriam `state.employee` e disparariam o BUG-005; não foram executados, por causa do efeito global.
 
 ### BUG-012 — Adicionar outra atividade salva e fecha o formulário
 
@@ -258,20 +262,6 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 - **Evidência:** [BUG-013](evidencias/BUG-013-listagem-busca-paralela.txt) · [print](evidencias/ui/BUG-013.png) · [vídeo](evidencias/ui/BUG-013.mp4)
 - **Teste automatizado:** `tests/ui/test_form_controls.py::test_listing_refetch_happens_after_post_completes` (só a ordem de rede, que é constante).
 - **Observação:** a forma literal "nenhum GET depois do POST, lista sempre velha" foi refutada; este é o defeito reformulado.
-
-### BUG-014 — PATCH em state apaga os campos não enviados
-
-- **Categoria:** contrato da API. **Severidade:** Média. **Prioridade:** P2.
-- **Ambiente:** `/employees`, 03/11/2026, `requests`.
-- **Pré-condições:** registro sintético completo.
-- **Passos:**
-  1. `POST` do registro completo.
-  2. `PATCH /employees/<id>` com `{"state":{"employee":{"isActive":false}}}`.
-  3. `GET /employees/<id>`.
-- **Esperado:** os outros campos permanecem (mescla em profundidade) ou o PATCH é rejeitado (premissa 7).
-- **Obtido:** só `isActive` sobra; `name`, `cpf` e os demais somem (merge raso, comportamento padrão do servidor; a tela não usa PATCH).
-- **Evidência:** [BUG-014](evidencias/BUG-014-patch-apaga-campos.txt)
-- **Teste automatizado:** `tests/api/test_validation.py::test_patch_preserves_unsent_fields`.
 
 ### BUG-024 — Enter descarta o cadastro sem salvar
 
@@ -309,7 +299,22 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 
 ## Defeitos de baixa prioridade (P3)
 
-Severidade Baixa e prioridade P3 em todos; as premissas de "esperado" estão em `plano-de-testes.md`, seção 2. BUG-016 a BUG-023 não têm passo a passo completo: cada um traz o que acontece, como ver, a evidência e o teste. BUG-025 a BUG-027 e BUG-029 trazem os passos.
+Severidade Baixa e prioridade P3 em todos; as premissas de "esperado" estão em `plano-de-testes.md`, seção 2. BUG-016 a BUG-023 (exceto o BUG-014) não têm passo a passo completo: cada um traz o que acontece, como ver, a evidência e o teste. BUG-014, BUG-025 a BUG-027 e BUG-029 trazem os passos.
+
+### BUG-014 — PATCH em state apaga os campos não enviados
+
+- **Categoria:** contrato da API. **Severidade:** Baixa. **Prioridade:** P3.
+- **Ambiente:** `/employees`, 03/11/2026, `requests`.
+- **Pré-condições:** registro sintético completo (11 campos de `build_employee`); somem os 10 que não são `isActive`: name, gender, cpf, birthDay, rg, role, usesEpi, activity, epi, caNumber.
+- **Passos:**
+  1. `POST` do registro completo.
+  2. `PATCH /employees/<id>` com `{"state":{"employee":{"isActive":false}}}`.
+  3. `GET /employees/<id>`.
+- **Esperado (premissa 7, inferência; JSON Merge Patch, RFC 7396):** os outros campos permanecem ou o PATCH é rejeitado. O comportamento observado é o padrão documentado do json-server v1 (mescla rasa).
+- **Obtido:** só `isActive` sobra; `name`, `cpf` e os demais somem (mescla rasa, comportamento padrão do servidor). Um PATCH na raiz preserva `state.employee`.
+- **Evidência:** [BUG-014](evidencias/BUG-014-patch-apaga-campos.txt)
+- **Teste automatizado:** `tests/api/test_validation.py::test_patch_preserves_unsent_fields`.
+- **Rebaixado de Média/P2 para Baixa/P3:** o fato se sustenta, mas é o comportamento documentado da biblioteca e o "esperado" depende só de uma premissa; sem dano demonstrado (escala: "má prática sem dano demonstrado").
 
 ### BUG-016 — Select de EPI volta ao padrão ao digitar o CA
 
@@ -323,22 +328,23 @@ Evidência: [BUG-017](evidencias/BUG-017-adicionar-epi-inerte.txt) · [print](ev
 
 ### BUG-018 — Paginação inconsistente em casos-limite
 
-Categoria: contrato da API. `_page=2` e `_page=999` com `_per_page=1` devolvem a última página em vez de `data` vazio; `_page=0` ou `abc` devolve array puro; `_per_page=-1` dá `pages` negativo. Como ver: `GET /employees?id=<id>&_page=999&_per_page=1` com registro próprio (03/11/2026, `requests`).
-Evidência: [BUG-018](evidencias/BUG-018-paginacao-limites.txt). Teste: `tests/api/test_validation.py::test_pagination_beyond_last_page_returns_empty_data`.
+Categoria: contrato da API. `_page=2` e `_page=999` devolvem a última página em vez de `data` vazio (também com `_per_page=10`); `_page=0` ou `abc` devolve array puro em vez do objeto paginado; `_per_page=-1` devolve `pages=-1` e `last=-1` com `items=1` e `data` vazio. Sem especificação: o esperado é inferência por boa prática REST, e o ajuste de página é comportamento da biblioteca (json-server v1, `x-powered-by: tinyhttp`). Como ver: `GET /employees?id=<id>&_page=999&_per_page=1` com registro próprio (03/11/2026, `requests`).
+Evidência: [BUG-018](evidencias/BUG-018-paginacao-limites.txt). Só `_page=2` e `_page=999` têm evidência; `_page=0`, `_page=abc` e `_per_page=-1` não têm. Teste: `tests/api/test_validation.py::test_pagination_beyond_last_page_returns_empty_data` (só o caso `_page=2`; os demais são manuais).
 
 ### BUG-019 — JSON malformado devolve 500 em vez de 400
 
-Categoria: tratamento de erro. O 500 vem com a mensagem crua do parser, sem `Content-Type`. Como ver: `POST /employees` com corpo `not json` e `Content-Type: application/json`; nada é criado (nunca usar corpo vazio) (03/11/2026, `requests`).
+Categoria: tratamento de erro. O 500 vem com a mensagem crua do parser (`Unexpected token o in JSON at position 1`; com JSON truncado, `Unexpected end of JSON input`), sem `Content-Type`. Igual com `application/json`, `text/plain` ou sem `Content-Type`, e em `PATCH`. Provável tratamento padrão do json-server v1. Baixa: sem dado errado, sem vazamento sensível (sem stack trace nem caminho) e com contorno trivial (enviar JSON válido). Como ver: `POST /employees` com corpo `not json` e `Content-Type: application/json`; nada é criado (nunca usar corpo vazio) (03/11/2026, `requests`).
 Evidência: [BUG-019](evidencias/BUG-019-json-malformado-500.txt). Teste: `tests/api/test_validation.py::test_malformed_json_returns_400`.
 
 ### BUG-020 — CORS inválido (*,*) e POST text/plain aceito
 
-Categoria: segurança. `OPTIONS` com `Origin` externo devolve `access-control-allow-origin: *,*` (duplicado, inválido) e 204; o POST `text/plain` devolve 201 e grava como JSON. O efeito do `*,*` num navegador não foi observado. Como ver: `OPTIONS` e `POST text/plain` com registro `QA-AUTO-`, apagado depois (03/11/2026, `requests`).
+Categoria: segurança. Toda resposta de `/employees` traz `access-control-allow-origin: *,*` (um único header com dois valores, inválido), independente do `Origin`. Observado por automação em 04/11: em Chromium, um `fetch` de outra origem é bloqueado (`The 'Access-Control-Allow-Origin' header contains multiple values '*,*'`); isso quebra clientes cross-origin legítimos, sem expor dado (a própria tela é same-origin). Um POST `text/plain` (requisição simples, sem preflight) devolve 201 e grava como JSON; vindo de outra origem, o navegador não lê a resposta, mas o registro é gravado. O json-server padrão emite só `*`; o `*,*` sugere dois emissores (app e uma camada intermediária), ou seja, configuração do ambiente. Aceitar `text/plain` é padrão do json-server (o parser não filtra o tipo); a correção é validar o `Content-Type` na frente. O ganho de segurança da escrita `text/plain` é pequeno, porque a API já aceita escrita sem autenticação (BUG-004). Como ver: `OPTIONS` e `POST text/plain` com registro `QA-AUTO-`, apagado depois (03/11/2026, `requests`).
 Evidência: [BUG-020](evidencias/BUG-020-cors-invalido.txt). Testes: `tests/security/test_security.py::test_cors_allow_origin_is_single_value`, `::test_create_rejects_non_json_content_type`.
 
 ### BUG-021 — Sem cabeçalhos de segurança e com x-powered-by
 
-Categoria: segurança. Faltam CSP, HSTS, X-Frame-Options, X-Content-Type-Options e Referrer-Policy, e há `x-powered-by: tinyhttp`; em `/`, `cache-control: no-store,public`. Como ver: `HEAD /` e `HEAD /employees`; nada é criado (03/11/2026, `requests`).
+Categoria: segurança. Faltam CSP, HSTS, X-Frame-Options, X-Content-Type-Options e Referrer-Policy, e há `x-powered-by: tinyhttp`; em `/`, `cache-control: no-store,public`. Como ver: `GET /` e `HEAD /employees`; nada é criado (03/11/2026, `requests`).
+Sem especificação do sistema: o esperado segue a boa prática OWASP Secure Headers. A ausência é o padrão de um json-server sem hardening, então a correção é de implantação, não de código da aplicação.
 Evidência: [BUG-021](evidencias/BUG-021-sem-cabecalhos-de-seguranca.txt). Teste: `tests/security/test_security.py::test_security_headers_present`.
 
 ### BUG-023 — Obrigatórios aceitam só espaços
@@ -436,4 +442,4 @@ Itens vistos na interface que não entram como defeito: sem impacto funcional ou
 - **Base volátil.** Em 31/10 a base passou de 3.698 para 2 registros em menos de 1 hora, sem ação nossa. Compatível com um `DELETE` sem autenticação (BUG-004), mas a causa não é demonstrável. Um registro próprio também sumiu em segundos. Por isso cada teste cria e apaga o próprio dado, e o teardown tolera 404.
 - **`id` de tipo misto.** O servidor gera `id` string de 4 hexadecimais, mas aceita `id` do cliente (inteiro ou texto) e mantém o tipo. Em 02/11, quatro registros `QA-AUTO-E2` criados com `id` numérico por um explorador (para testar a H10, antes de a regra existir) responderam 404 na rota por id. Em 03/11 os 2 que restavam tinham `id` string e foram apagados por `DELETE` comum; "`id` inteiro inalcançável" não foi reproduzido nem refutado depois. Os testes nunca criam `id` inteiro.
 - **Órfãos `QA-AUTO-E2` resolvidos.** Dos quatro registros citados acima, só 2 restavam em 03/11, ambos com `id` string; um `DELETE /employees/<id>` comum os apagou (confirmado por `?id=` e pela contagem). Os outros 2 sumiram sem ação nossa (base volátil). Detalhe em `work/orfaos/pesquisa.md` (fora do repositório).
-- **Dúvidas em aberto (não viram defeito sem reprodução).** (1) O `access-control-allow-origin: *,*` bloqueia leitura cross-origin num navegador? Exigiria uma página de outra origem. (2) Proxies cacheiam dados pessoais por causa de `cache-control: public`? Exigiria um proxy no caminho. (3) Há dado real na base e com qual base legal? Desconhecido; por isso os registros de terceiros são tratados como reais e só aparecem aqui em agregados.
+- **Dúvidas em aberto (não viram defeito sem reprodução).** (1) Proxies cacheiam dados pessoais por causa de `cache-control: public`? Exigiria um proxy no caminho. (2) Há dado real na base e com qual base legal? Desconhecido; por isso os registros de terceiros são tratados como reais e só aparecem aqui em agregados.
