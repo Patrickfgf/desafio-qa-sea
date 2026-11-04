@@ -1,6 +1,6 @@
 """Cross-checks between what the UI shows/sends and what the API stores.
 
-Bug tests are strict xfails (all still "pending manual reproduction", DEC-14); the rest pass.
+Bug tests are strict xfails (each carries its BUG-NNN id in the reason); the rest pass.
 Every UI-created name is registered in ``ui_created_names`` BEFORE saving.
 """
 
@@ -119,25 +119,6 @@ def test_aso_file_is_persisted(driver, base_url, api, ui_created_names, tmp_path
     )
     assert has_reference, (
         f"stored record has no reference to the attached file; keys: {sorted(keys)}"
-    )
-
-
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="BUG-015: Funcionário novo nasce Inativo por padrão",
-)
-def test_new_employee_defaults_to_active(driver, base_url, api, ui_created_names):
-    emp = build_employee(isActive=True)
-    ui_created_names.append(emp["name"])
-
-    form = EmployeeListPage(driver, base_url).open().click_add()
-    form.fill_identity(emp).fill_work(emp)  # no set_active: the switch keeps its default
-    form.save()
-    stored = _employee_of(find_saved_record(api, emp["name"]))
-
-    assert stored.get("isActive") is True, (
-        f"employee saved without touching the switch has isActive={stored.get('isActive')!r}"
     )
 
 

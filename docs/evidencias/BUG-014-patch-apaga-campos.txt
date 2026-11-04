@@ -1,7 +1,7 @@
 BUG-014: PATCH em state apaga os campos não enviados
 Gerado em 03/11/2026 contra https://analista-teste.seatecnologia.com.br/employees com requests (sem credencial).
 Registros: sintéticos, nome com prefixo QA-AUTO-, apagados em seguida e confirmados por ?id=.
-CPF mascarado antes de salvar; registros de terceiros nunca entram.
+Corpo com CPF mascarado no arquivo; registros de terceiros nunca entram.
 Esperado: os outros campos permanecem. Obtido: só isActive sobra.
 
 ## POST (registro completo)

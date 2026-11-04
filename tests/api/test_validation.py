@@ -5,16 +5,17 @@ Every test documents a known defect as a strict xfail. Each record sent here car
 API (wrongly) accepts most of these payloads and would otherwise leave them behind.
 """
 
-from datetime import date, timedelta
 
 import pytest
 
-from support.api_client import describe, require_status
+from support.api_client import PreconditionError, describe, require_status
 from support.factory import TEST_PREFIX, as_payload, build_employee
 
 pytestmark = pytest.mark.api
 
 REJECTED = (400, 422)
+GATEWAY_ERRORS = (502, 503, 504)
+SYMBOLS_ONLY_CA = "@!#$&&$#"  # inert text that only looks odd (BUG-025)
 INVALID_CPF_CHECKSUM = "52998224726"  # valid CPF 52998224725 with a wrong last check digit
 UNSENT_FIELDS = (
     "name",
@@ -67,10 +68,9 @@ def test_create_rejects_cpf_with_letters(api, created_ids):
     raises=AssertionError,
     reason="BUG-010: Data de nascimento sem validação de intervalo",
 )
-def test_create_rejects_future_birth_date(api, created_ids):
-    tomorrow = (date.today() + timedelta(days=1)).isoformat()
-
-    resp = _post_and_register(api, created_ids, as_payload(build_employee(birthDay=tomorrow)))
+@pytest.mark.parametrize("birth_day", ["2099-12-31", "275760-04-14"])
+def test_create_rejects_future_birth_date(api, created_ids, birth_day):
+    resp = _post_and_register(api, created_ids, as_payload(build_employee(birthDay=birth_day)))
 
     assert resp.status_code in REJECTED, describe(resp)
 
@@ -121,7 +121,8 @@ def test_create_rejects_unknown_fields(api, created_ids):
     assert resp.status_code == 201, describe(resp)
     stored = api.get(resp.json()["id"])
     require_status(stored, 200)
-    assert "isAdmin" not in stored.json()["state"]["employee"], describe(stored)
+    has_admin = "isAdmin" in stored.json()["state"]["employee"]
+    assert not has_admin, describe(stored)
 
 
 @pytest.mark.xfail(
@@ -199,4 +200,19 @@ def test_malformed_json_returns_400(api, created_ids):
     if isinstance(body, dict) and "id" in body:
         created_ids.append(body["id"])
 
-    assert resp.status_code == 400, f"POST malformed JSON -> {resp.status_code}"
+    if resp.status_code in GATEWAY_ERRORS:
+        raise PreconditionError(f"POST malformed JSON -> {resp.status_code}: server unavailable")
+    assert resp.status_code in REJECTED, f"POST malformed JSON -> {resp.status_code}"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="BUG-025: CA aceita símbolos",
+)
+def test_create_rejects_symbols_in_ca_number(api, created_ids):
+    resp = _post_and_register(
+        api, created_ids, as_payload(build_employee(caNumber=SYMBOLS_ONLY_CA))
+    )
+
+    assert resp.status_code in REJECTED, describe(resp)

@@ -14,3 +14,5 @@ run2 ca-spaces:       idem run1
 run2 cpf-spaces:      idem run1
 run2 rg-single-char:  idem run1
 Com o formulário vazio, a validação nativa bloqueia e foca o primeiro inválido (nome, CPF, nascimento, RG, CA: "Preencha este campo."); o defeito é que ela aceita espaços.
+
+Acréscimo da sessão exploratória do Patrick (03-04/11/2026, reprodução manual, Response do POST): o campo CPF recusou 3 espaços e aceitou 11 (gravou 11 espaços); o nome " QA-AUTO-P1-007 " (id d6f6) foi gravado com espaço no começo e no fim, ou seja, o formulário não apara as pontas.

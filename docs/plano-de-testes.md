@@ -2,7 +2,7 @@
 
 Alvo: sistema de cadastro de trabalhadores para segurança do trabalho, com interface web (cadastro em etapas e listagem) e API REST em `/employees`. Não há documentação formal; este plano parte do comportamento observado.
 
-> **Status: corte de risco decidido em 03/11/2026** (seção 3) e escalas de severidade e prioridade fixadas (seção 3.1). Os comportamentos citados aqui como observados vêm da exploração automatizada; cada defeito do relatório traz o status da reprodução manual; o que não for reproduzido à mão sai antes da entrega, junto com o teste e a evidência.
+> **Status: corte de risco decidido em 03/11/2026** (seção 3) e escalas de severidade e prioridade fixadas (seção 3.1). Os comportamentos citados aqui como observados vêm da exploração automatizada; o método de verificação de cada defeito (à mão na interface, automação com reverificação independente na API) está no topo do relatório.
 
 ## 1. Escopo
 
@@ -40,11 +40,11 @@ Sem documentação, todo "comportamento esperado" abaixo é **inferência** (ró
 11. O `id` é gerado pelo servidor e é único (duplicata deveria dar 409).
 12. Os registros existentes na base contam como dado potencialmente real, mesmo sem prova de que sejam.
 
-**Dúvidas com checagem dirigida** (checadas por automação em 03/11; a reprodução manual confirma ou derruba cada uma)
+**Dúvidas com checagem dirigida** (checadas por automação em 03/11)
 
-- O select de EPI grava o valor escolhido? Duas observações divergiram. Resultado automatizado de 03/11 (D1): sim, em 2 execuções o corpo do POST e o GET por id trazem o `epi` escolhido; depois de digitar o CA o select volta a exibir o padrão, mas grava o escolhido. Reprodução manual pendente.
-- Com o checkbox desmarcado e CA/EPI vazios, o usuário real vê a mensagem nativa de campo obrigatório, ou o formulário simplesmente não salva? Resultado automatizado de 03/11 (D2): a validação nativa bloqueia o envio com "Preencha este campo." (foco no CA, 0 requisições, 0 registros); o balão foi inferido do estado de validação, não visto. Reprodução manual pendente.
-- Um registro sem `state.employee` quebra a listagem? Resultado automatizado de 03/11 (D3): sim, em 1 carga o POST sem `state.employee` dá 201 e a listagem fica em branco, com `TypeError` no console. Reprodução manual pendente.
+- O select de EPI grava o valor escolhido? Duas observações divergiram. Resultado automatizado de 03/11 (D1): sim, em 2 execuções o corpo do POST e o GET por id trazem o `epi` escolhido; depois de digitar o CA o select volta a exibir o padrão, mas grava o escolhido.
+- Com o checkbox desmarcado e CA/EPI vazios, o usuário real vê a mensagem nativa de campo obrigatório, ou o formulário simplesmente não salva? Resultado automatizado de 03/11 (D2): a validação nativa bloqueia o envio com "Preencha este campo." (foco no CA, 0 requisições, 0 registros); o balão foi inferido do estado de validação, não visto.
+- Um registro sem `state.employee` quebra a listagem? Resultado automatizado de 03/11 (D3): sim, em 1 carga o POST sem `state.employee` dá 201 e a listagem fica em branco, com `TypeError` no console (reexecutado em 04/11, ver BUG-005 no relatório).
 
 **Dúvidas que ficam em aberto** (não verificáveis dentro dos limites da seção 8; nenhuma vira defeito sem reprodução)
 
@@ -104,12 +104,12 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio, e as du
   | Checkbox "não usa EPI" | CA preenchido | Esperado em `usesEpi` | Esperado em `caNumber` | Observado na exploração |
   |---|---|---|---|---|
   | desmarcado | sim | `true` | CA informado | grava `false` |
-  | desmarcado | não | (formulário não salva) | n/a | a validação nativa bloqueia o envio com "Preencha este campo." e nenhuma requisição é enviada (checagem D2, automatizada em 03/11; reprodução manual pendente) |
+  | desmarcado | não | (formulário não salva) | n/a | a validação nativa bloqueia o envio com "Preencha este campo." e nenhuma requisição é enviada (checagem D2, automatizada em 03/11) |
   | marcado | campo some | `false` | vazio | grava `true` e `caNumber: ""` |
 
 - **Cruzamento tela × API.** Criar pela tela e conferir na API os campos gravados; criar pela API e conferir na listagem; comparar o corpo do POST com o que o GET devolve depois; inativar e verificar que o funcionário some da tela mas continua na API.
 - **Leitura estática do bundle como fonte de hipóteses.** A leitura do JavaScript da página gera hipóteses (por exemplo, defaults só visuais, botão sem `type`, arquivo nunca enviado). Hipótese não é achado: cada uma é confirmada ou derrubada no sistema rodando. Uma delas foi derrubada em parte: um botão que se supunha inerte, na verdade, salva o cadastro.
-- **Verificação independente de cada achado antes do relatório.** Todo defeito é reproduzido por um segundo caminho (outro script, ou outra ferramenta) e, antes da entrega, à mão por quem assina o relatório. O que não reproduz sai do relatório, e o teste é corrigido ou removido. Enquanto a reprodução manual não acontece, o relatório marca o defeito como pendente.
+- **Verificação independente de cada achado antes do relatório.** Todo defeito é reproduzido por um segundo caminho (outro script, ou outra ferramenta) e, antes da entrega, conforme a natureza do defeito: os visíveis na interface, à mão por quem assina o relatório; os exclusivos da API, pela automação, que repete a checagem determinística (requisição → resposta) a cada execução do CI, com reverificação ao vivo por um verificador e um cético independentes (04/11, nos nove defeitos de API auditados). O que não reproduz sai do relatório, e o teste é corrigido ou removido.
 
 ## 5. Automatizado × manual
 
@@ -125,7 +125,7 @@ A suíte usa marcadores do pytest: `unit`, `api`, `security`, `ui`, `cross` e `g
 | `ui` | cadastro feliz, formulário "no escuro", botões, listagem (Page Objects sobre o Ant Design) | existe (cadastro, validações e controles do formulário, atualização da listagem) |
 | `cross` | criar pela tela e conferir na API, criar pela API e conferir na listagem, inativar | existe |
 
-Na última coleta (`uv run pytest --collect-only -q`, 03/11/2026) a suíte tinha 168 testes coletados (unit 114, api 18, ui 16, security 9, cross 10, guard 1).
+Na última coleta (`uv run pytest --collect-only -q`, 04/11/2026) a suíte tinha 181 testes coletados (unit 114, api 20, ui 28, security 9, cross 9, guard 1).
 
 **Por que automatizar:** regressão barata do que já se sabe (CRUD, contrato, máscara), e cada defeito confirmado vira um `xfail(strict=True, raises=AssertionError)` com o id do defeito: a suíte fica verde e documenta o bug, e se alguém o corrigir o teste passa a falhar, avisando que o plano precisa ser atualizado.
 
@@ -139,7 +139,7 @@ Na última coleta (`uv run pytest --collect-only -q`, 03/11/2026) a suíte tinha
 ## 6. Ambiente e dados
 
 - **Alvo:** web `https://analista-teste.seatecnologia.com.br/` e API `https://analista-teste.seatecnologia.com.br/employees`. A base pode ser trocada pela variável de ambiente `APP_BASE_URL`.
-- **Navegador:** Chrome headless (Selenium 4). Local: Windows; CI: Ubuntu. O `input type=date` é preenchido em `AAAA-MM-DD`, que funciona independentemente do locale.
+- **Navegador:** Chrome headless (Selenium 4). Local: Windows e macOS; CI: Ubuntu. O `input type=date` é preenchido em `AAAA-MM-DD`, que funciona independentemente do locale.
 - **Ferramentas:** Python 3.12 (fixado em `.python-version`), gerenciado com `uv`; pytest, requests, jsonschema, Faker (pt_BR), pytest-html e ruff.
 - **Dados:** sintéticos, gerados com Faker pt_BR e CPF válido gerado por nós. Todo registro criado tem o nome com prefixo `QA-AUTO-` e é apagado no teardown. Nenhum dado real é usado.
 - **Base:** compartilhada e volátil. Outras pessoas escrevem nela ao mesmo tempo e ela chegou a mudar de milhares de registros para poucos em menos de uma hora. Nenhum teste depende de contagem global nem de registro alheio.
@@ -150,7 +150,7 @@ Na última coleta (`uv run pytest --collect-only -q`, 03/11/2026) a suíte tinha
 | Risco | Mitigação |
 |---|---|
 | Base compartilhada e volátil: registro some no meio do teste, contagem muda | cada teste cria e apaga o próprio dado; o teardown tolera 404; nenhuma asserção sobre total |
-| Registros com `id` numérico não são alcançáveis por id (GET, PUT, PATCH e DELETE dão 404), então não podem ser apagados por nós | os testes nunca criam id numérico; id numérico só em leitura. Quatro registros de teste com esse perfil (prefixo `QA-AUTO-E2-`) ficaram na base durante a exploração; os ids vão ao dono do ambiente junto com a entrega, para remoção |
+| Registro criado com `id` numérico respondeu 404 na rota por id na exploração (02/11), o que impediria apagá-lo | os testes nunca criam id numérico; id numérico só em leitura. Os registros de teste exploratórios (`QA-AUTO-E2-`) já foram removidos (ver relatório de defeitos) |
 | Teardown que trata 404 como "apagado" esconde sobra quando o id é numérico | no 404, conferir por `?id=`: se o registro ainda aparece, ou se não dá para confirmar, conta como sobra e gera aviso |
 | Dados pessoais vazando por mensagem de assert, relatório HTML, artefato de CI ou evidência | `describe()` nas asserções, em vez do corpo cru; máscara antes de salvar; teste de guarda varre `docs/`; artefatos com retenção de 7 dias |
 | O CI escreve no ambiente compartilhado | roda só em `push` e `pull_request` para `main` e em disparo manual; escreve só registros `QA-AUTO-` e os apaga |

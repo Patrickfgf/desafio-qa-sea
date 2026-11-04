@@ -1,0 +1,22 @@
+BUG-029: Códigos de EPI gravados com grafia e acentuação inconsistentes
+Origem: sessão exploratória do Patrick (reprodução manual em 03 e 04/11/2026, pela interface, DevTools > Network > Response do POST) contra https://analista-teste.seatecnologia.com.br. A tabela rótulo -> código vem do bundle servido em / (opções do select de EPI) e foi confirmada pelo teste tests/ui/test_epi_codes.py (Selenium, 04/11/2026).
+Só registros próprios (nome QA-AUTO-); abaixo constam apenas name, id e epi (sem CPF, RG nem outros campos).
+Esperado: o código gravado de cada EPI segue uma regra única, por exemplo slug ASCII minúsculo derivado do rótulo (ex.: "Óculos de proteção" -> "oculos-de-protecao").
+
+## Registros do Patrick (campo epi lido na Response do POST)
+name=QA-AUTO-P1-008   id=6461  epi="oculor-de-proteçao"   (rótulo escolhido: "Óculos de proteção")
+name=QA-AUTO-P1-023   id=6c6b  epi="calçado-de-segurança" (rótulo escolhido: "Calçado de Segurança")
+name=QA-AUTO-P1-007   id=d6f6  epi="luvas-descartaveis"   (rótulo escolhido: "Luvas descartáveis")
+name=QA-AUTO-P1-006c  id=e01f  epi="protetor-auditivo"    (rótulo escolhido: "Protetor auditivo")
+
+## Rótulo exibido -> código gravado (as 5 opções do select)
+Capacete de segurança  -> capacete-de-segurança   (ç acentuado; é também o valor exibido por padrão)
+Luvas descartáveis     -> luvas-descartaveis      (sem acento)
+Óculos de proteção     -> oculor-de-proteçao      (erro de grafia "oculor" e só o ç acentuado)
+Calçado de Segurança   -> calçado-de-segurança    (todos os acentos)
+Protetor auditivo      -> protetor-auditivo       (sem acento)
+
+Resumo: 3 dos 5 códigos têm caractere fora de [a-z0-9-]; 1 deles ainda tem erro de grafia; nenhuma regra única (sem acento, todos os acentos, só parte).
+
+## Observação sobre o teste automatizado
+tests/ui/test_epi_codes.py cria 1 registro QA-AUTO- por opção pela interface, lê por nome exato e apaga ao fim (confirmado por ?id=). "Capacete", "Óculos" e "Calçado" falham a regra ^[a-z0-9-]+$ (xfail strict); "Luvas" e "Protetor" passam e servem de controle.

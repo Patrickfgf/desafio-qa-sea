@@ -3,6 +3,7 @@ plain request. Writes only touch records created by ``create_employee`` (``QA-AU
 """
 
 import json
+import re
 
 import pytest
 
@@ -12,6 +13,7 @@ from support.factory import as_payload, build_employee
 pytestmark = pytest.mark.security
 
 DENIED = (401, 403)
+PII_FIELDS = ("cpf", "rg", "birthDay")
 ORIGIN = "https://evil.example"
 SECURITY_HEADERS = (
     "content-security-policy",
@@ -62,8 +64,17 @@ def test_record_does_not_expose_full_cpf(api, create_employee):
 
     resp = api.get(created["id"])
 
+    if resp.status_code in DENIED:
+        return  # access denied is a fix too (also covered by test_list_requires_authentication)
     require_status(resp, 200)
-    assert resp.json()["state"]["employee"]["cpf"] != sent["cpf"], describe(resp)
+    stored = resp.json()["state"]["employee"]
+    # Digits only: merely re-formatting the full value (dots, dash) is not a fix.
+    exposed = [
+        field
+        for field in PII_FIELDS
+        if re.sub(r"\D", "", str(stored.get(field, ""))) == re.sub(r"\D", "", str(sent[field]))
+    ]
+    assert exposed == [], f"Fields returned in full: {exposed}"
 
 
 @pytest.mark.xfail(strict=True, raises=AssertionError, reason=NO_CREDENTIALS_REASON)
