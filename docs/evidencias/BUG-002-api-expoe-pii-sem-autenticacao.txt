@@ -1,7 +1,7 @@
 BUG-002: API expõe CPF, RG e nascimento sem autenticação
 Gerado em 03/11/2026 contra https://analista-teste.seatecnologia.com.br/employees com requests (sem credencial).
 Registros: sintéticos, nome com prefixo QA-AUTO-, apagados em seguida e confirmados por ?id=.
-CPF mascarado antes de salvar; demais campos são constantes sintéticas da fábrica de testes; registros de terceiros nunca entram.
+CPF mascarado no arquivo; o corpo enviado tem o CPF sintético completo; demais campos são constantes sintéticas da fábrica de testes; registros de terceiros nunca entram.
 Esperado: 401/403 sem credencial, ou campos pessoais minimizados. Obtido: 200 com os campos.
 
 ## POST /employees (cria o registro de teste)
@@ -13,6 +13,7 @@ content-type: application/json
 access-control-allow-origin: *,*
 access-control-allow-methods: GET, HEAD, PUT, PATCH, POST, DELETE
 x-powered-by: tinyhttp
+cache-control: public
 {"id": "a6c1", "state": {"employee": {"isActive": true, "name": "QA-AUTO-Zoe Almeida 6a801f", "gender": "feminino", "cpf": "867.***.***-71", "birthDay": "1991-06-12", "rg": "8577849", "role": "Cargo 01", "usesEpi": true, "activity": "Ativid 04", "epi": "capacete-de-segurança", "caNumber": "91240"}}}
 
 ## GET /employees/{id} sem credencial
@@ -23,8 +24,8 @@ content-type: application/json
 access-control-allow-origin: *,*
 access-control-allow-methods: GET, HEAD, PUT, PATCH, POST, DELETE
 x-powered-by: tinyhttp
-{"id": "a6c1", "state": {"employee": {"isActive": true, "name": "QA-AUTO-Zoe Almeida 6a801f", "gender": "feminino", "cpf": "867.***.***-71", "birthDay": "1991-06-12", "rg": "8577849", "role": "Cargo 01", "usesEpi": true, "activity": "Ativid 04", "epi": "capacete-de-segurança", "caNumber": "91240"}}}
 cache-control: public
+{"id": "a6c1", "state": {"employee": {"isActive": true, "name": "QA-AUTO-Zoe Almeida 6a801f", "gender": "feminino", "cpf": "867.***.***-71", "birthDay": "1991-06-12", "rg": "8577849", "role": "Cargo 01", "usesEpi": true, "activity": "Ativid 04", "epi": "capacete-de-segurança", "caNumber": "91240"}}}
 
 ## GET /employees?id={id} sem credencial
 GET https://analista-teste.seatecnologia.com.br/employees?id=a6c1
@@ -34,8 +35,9 @@ content-type: application/json
 access-control-allow-origin: *,*
 access-control-allow-methods: GET, HEAD, PUT, PATCH, POST, DELETE
 x-powered-by: tinyhttp
-[{"id": "a6c1", "state": {"employee": {"isActive": true, "name": "QA-AUTO-Zoe Almeida 6a801f", "gender": "feminino", "cpf": "867.***.***-71", "birthDay": "1991-06-12", "rg": "8577849", "role": "Cargo 01", "usesEpi": true, "activity": "Ativid 04", "epi": "capacete-de-segurança", "caNumber": "91240"}}}]
 cache-control: public
+[{"id": "a6c1", "state": {"employee": {"isActive": true, "name": "QA-AUTO-Zoe Almeida 6a801f", "gender": "feminino", "cpf": "867.***.***-71", "birthDay": "1991-06-12", "rg": "8577849", "role": "Cargo 01", "usesEpi": true, "activity": "Ativid 04", "epi": "capacete-de-segurança", "caNumber": "91240"}}}]
 
+Derivado (reverificação de 04/11): cpf devolvido == cpf enviado: True; 11 dígitos: True (o mascaramento igual nos dois lados do arquivo não distingue CPF completo de mascarado).
 
 Limpeza: 1 registro(s) criado(s), apagado(s); restantes confirmados por ?id=: 0

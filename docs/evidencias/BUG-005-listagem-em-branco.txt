@@ -5,7 +5,8 @@ Executado uma única vez e o registro apagado em seguida: o defeito deixa a tela
 
 POST sem state.employee -> 201
 id retornado: 'f190' (tipo str)
-listagem renderizou (botao Adicionar visivel): True
+payload enviado: nao registrado nesta evidencia
+listagem renderizou (botao Adicionar visivel no primeiro instante, antes do GET resolver): True; 0 botoes depois (reverificacao de 04/11)
 contador Ativos/Total: nao encontrado
 tamanho do texto do body: 0; filhos de #root: 0
 erros SEVERE no console: 3

@@ -12,6 +12,8 @@ HTTP 500 Internal Server Error
 access-control-allow-origin: *
 access-control-allow-methods: GET, HEAD, PUT, PATCH, POST, DELETE
 x-powered-by: tinyhttp
+content-type: (ausente)
+corpo: 40 bytes
 Unexpected token o in JSON at position 1
 
 
