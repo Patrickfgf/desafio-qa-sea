@@ -139,7 +139,7 @@ Na última coleta (`uv run pytest --collect-only -q`, 04/11/2026) a suíte tinha
 ## 6. Ambiente e dados
 
 - **Alvo:** web `https://analista-teste.seatecnologia.com.br/` e API `https://analista-teste.seatecnologia.com.br/employees`. A base pode ser trocada pela variável de ambiente `APP_BASE_URL`.
-- **Navegador:** Chrome headless (Selenium 4). Local: Windows; CI: Ubuntu. O `input type=date` é preenchido em `AAAA-MM-DD`, que funciona independentemente do locale.
+- **Navegador:** Chrome headless (Selenium 4). Local: Windows e macOS; CI: Ubuntu. O `input type=date` é preenchido em `AAAA-MM-DD`, que funciona independentemente do locale.
 - **Ferramentas:** Python 3.12 (fixado em `.python-version`), gerenciado com `uv`; pytest, requests, jsonschema, Faker (pt_BR), pytest-html e ruff.
 - **Dados:** sintéticos, gerados com Faker pt_BR e CPF válido gerado por nós. Todo registro criado tem o nome com prefixo `QA-AUTO-` e é apagado no teardown. Nenhum dado real é usado.
 - **Base:** compartilhada e volátil. Outras pessoas escrevem nela ao mesmo tempo e ela chegou a mudar de milhares de registros para poucos em menos de uma hora. Nenhum teste depende de contagem global nem de registro alheio.
