@@ -82,16 +82,28 @@ const img = span && span.parentElement.querySelector('img[src*="dots"]');
 return img ? img.parentElement : null;
 """
 
-# Counts DOM mutations from now on (the body subtree) so a click can be judged by its effect.
+# Counts elements mounted directly under <body> from now on: menus, modals and drawers are
+# rendered there as portals. In-place re-renders of the listing and attribute changes (hover,
+# focus) are ignored on purpose: other tests change the listing while this one runs.
 _OBSERVE_JS = """
-window.__qaMutations = 0;
-new MutationObserver(m => { window.__qaMutations += m.length; })
-  .observe(document.body, {subtree: true, childList: true, attributes: true, characterData: true});
+window.__qaPortals = 0;
+new MutationObserver(ms => {
+  for (const m of ms) {
+    window.__qaPortals += [...m.addedNodes].filter(n => n.nodeType === Node.ELEMENT_NODE).length;
+  }
+}).observe(document.body, {childList: true});
 """
 
 _OVERLAYS_JS = (
-    "return document.querySelectorAll("
-    "\".ant-dropdown, .ant-modal, [role='menu'], [role='dialog']\").length;"
+    'return document.querySelectorAll(".ant-dropdown, .ant-modal, .ant-drawer, .ant-popover, '
+    "[role='menu'], [role='dialog'], [role='listbox']\").length;"
+)
+
+# Only calls to the API count as a network reaction; images and stylesheets loaded on hover
+# (uncached in CI) do not.
+_API_CALLS_JS = (
+    "return performance.getEntriesByType('resource')"
+    ".filter(e => e.initiatorType === 'fetch' || e.initiatorType === 'xmlhttprequest').length;"
 )
 
 # The sidebar is the row that holds the one element whose class list has the token "active".
@@ -141,23 +153,27 @@ def test_step_block_does_not_overlap_the_listing(driver, base_url, create_employ
 def _click_has_effect(driver, element) -> bool:
     """Click ``element`` with a real pointer; True if the page reacts before the deadline.
 
-    A reaction is any DOM mutation, a URL change, a new network resource or an opened
-    menu/dialog. Watching all four keeps the check independent of how the app would react.
+    A reaction is a URL change, a new call to the API, a new element mounted under <body>
+    (menus, modals and drawers are portals) or an open menu/dialog. Generic DOM mutations are
+    not counted: in CI they come from hover styles and from other tests refreshing the listing,
+    which made an inert control look alive (false XPASS). Trade-off: a future fix that reacts
+    only in place (inline content, no portal, no URL change, no API call) would keep this test
+    XFAIL until the check is widened.
     """
     driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
     url = driver.current_url
-    resources = driver.execute_script("return performance.getEntriesByType('resource').length;")
+    api_calls = driver.execute_script(_API_CALLS_JS)
+    overlays = driver.execute_script(_OVERLAYS_JS)
     driver.execute_script(_OBSERVE_JS)
 
     ActionChains(driver).move_to_element(element).click().perform()
 
     def reacted(d) -> bool:
         return bool(
-            d.execute_script("return window.__qaMutations;")
-            or d.current_url != url
-            or d.execute_script("return performance.getEntriesByType('resource').length;")
-            > resources
-            or d.execute_script(_OVERLAYS_JS)
+            d.current_url != url
+            or d.execute_script(_API_CALLS_JS) > api_calls
+            or d.execute_script("return window.__qaPortals;")
+            or d.execute_script(_OVERLAYS_JS) > overlays
         )
 
     return _wait_for_effect(driver, reacted)
