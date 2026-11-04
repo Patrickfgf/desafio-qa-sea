@@ -5,7 +5,6 @@ Every test documents a known defect as a strict xfail. Each record sent here car
 API (wrongly) accepts most of these payloads and would otherwise leave them behind.
 """
 
-from datetime import date, timedelta
 
 import pytest
 
@@ -69,10 +68,9 @@ def test_create_rejects_cpf_with_letters(api, created_ids):
     raises=AssertionError,
     reason="BUG-010: Data de nascimento sem validação de intervalo",
 )
-def test_create_rejects_future_birth_date(api, created_ids):
-    tomorrow = (date.today() + timedelta(days=1)).isoformat()
-
-    resp = _post_and_register(api, created_ids, as_payload(build_employee(birthDay=tomorrow)))
+@pytest.mark.parametrize("birth_day", ["2099-12-31", "275760-04-14"])
+def test_create_rejects_future_birth_date(api, created_ids, birth_day):
+    resp = _post_and_register(api, created_ids, as_payload(build_employee(birthDay=birth_day)))
 
     assert resp.status_code in REJECTED, describe(resp)
 

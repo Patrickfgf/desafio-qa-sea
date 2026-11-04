@@ -216,7 +216,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 - **Obtido:** 201 na API e gravação nos 4 casos da interface, como digitado.
 - **Caso extremo (sessão exploratória do Patrick, 03/11):** o campo aceita ano de 6 dígitos. Pela interface, `14/04/275760` foi persistido como `birthDay: "275760-04-14"` (registro `QA-AUTO-P1-001a`, lido por `?state.employee.name=`). Sem `max`, o `input type=date` do Chrome vai até o ano 275760, o limite do `Date` do JavaScript; nem a tela nem a API rejeitam, e um ano assim quebra quem consome o dado depois (cálculo de idade, relatório, exportação).
 - **Evidência:** [BUG-010](evidencias/BUG-010-data-nascimento-sem-intervalo.txt) · [print do ano de 6 dígitos](evidencias/ui/BUG-010-ano-6-digitos.png)
-- **Testes automatizados:** `tests/api/test_validation.py::test_create_rejects_future_birth_date`; `tests/ui/test_form_validation.py::test_birth_date_rejects_future` (só 2099-12-31).
+- **Testes automatizados:** `tests/api/test_validation.py::test_create_rejects_future_birth_date` (2 casos: `2099-12-31` e o ano de 6 dígitos `275760-04-14`); `tests/ui/test_form_validation.py::test_birth_date_rejects_future` (só 2099-12-31).
 
 ### BUG-011 — API não valida schema, tipos nem campos extras
 
