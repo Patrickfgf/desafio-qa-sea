@@ -39,4 +39,4 @@ Seleção de 10 das 21 entradas do diário bruto.
 ## Guarda-corpos
 
 - `CLAUDE.md`: só registros `QA-AUTO-`, só dados sintéticos, sem payload executável, sem carga, nada fora de `/` e `/employees`. O teste `guard` falha se `docs/` tiver CPF sem máscara (`support/pii.py`).
-- BUG-016, BUG-023, BUG-024 e BUG-025 a BUG-029 não passaram pelo verificador: têm a execução de quem os achou, o teste xfail e a minha reprodução. Os defeitos de API foram reverificados ao vivo em 04/11, e o BUG-019 passou por essa rodada.
+- BUG-016, BUG-023, BUG-024 e BUG-025 a BUG-029 não passaram pelo verificador: têm a execução de quem os achou, o teste xfail e a minha reprodução. Os nove defeitos de API auditados (BUG-002, 004, 005, 011, 014, 018, 019, 020 e 021) foram reverificados ao vivo em 04/11.
