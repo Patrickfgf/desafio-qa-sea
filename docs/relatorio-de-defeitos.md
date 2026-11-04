@@ -258,7 +258,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
   2. Verificar se o card aparece sem recarregar.
   3. Repetir 4 vezes.
 - **Esperado:** a listagem é buscada depois do POST terminar.
-- **Obtido:** o `GET /employees` sai junto com o POST, e a lista ficou velha em 1 de 4 tentativas da evidência (só indicativo). Recarregando, o card aparece.
+- **Obtido:** o `GET /employees` sai junto com o POST, e a lista ficou velha em 1 de 4 tentativas da evidência (só indicativo). Recarregando, o card aparece. Na reprodução manual de 04/11, o total do contador não subiu sem F5 na primeira tentativa, e o POST e o GET saíram juntos (mesma duração, 33 ms).
 - **Evidência:** [BUG-013](evidencias/BUG-013-listagem-busca-paralela.txt) · [print](evidencias/ui/BUG-013.png) · [vídeo](evidencias/ui/BUG-013.mp4)
 - **Teste automatizado:** `tests/ui/test_form_controls.py::test_listing_refetch_happens_after_post_completes` (só a ordem de rede, que é constante).
 - **Observação:** a forma literal "nenhum GET depois do POST, lista sempre velha" foi refutada; este é o defeito reformulado.
