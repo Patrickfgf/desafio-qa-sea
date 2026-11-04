@@ -100,7 +100,7 @@ A tela não tolera registro malformado, e a API o aceita (BUG-004, BUG-011; padr
 
 - **Esperado:** a listagem ignora o registro, ou a API o rejeita.
 - **Obtido:** POST 201; a página desmonta (`#root` sem filhos, sem "Adicionar" nem contador), com `TypeError: Cannot read properties of undefined (reading 'employee')` no console (a evidência de 03/11 registrou `reading 'isActive'`, sem anotar o payload). Vale para todo visitante enquanto o registro existir (inferência: GET anônimo; não medido com um segundo cliente).
-- **Impacto:** fluxo principal inutilizável para todos por 1 POST anônimo; sem perda de dado, recuperável com DELETE. Ocorreu de fato em 04/11 (registro só com `{"id"}`, de origem não identificada, até ser removido); um POST de corpo vazio cria esse formato (num acidente de verificação, tela em branco por segundos; apagado, sem reprodução controlada).
+- **Impacto:** fluxo principal inutilizável para todos por 1 POST anônimo; sem perda de dado, recuperável com DELETE. Ocorreu de fato em 04/11 (registro só com `{"id"}`, de origem não identificada, deixou a listagem em branco para todos até ser removido); um POST de corpo vazio, sem autenticação, cria esse formato (num acidente de verificação, tela em branco por segundos; apagado, sem reprodução controlada).
 - **Evidência:** [BUG-005](evidencias/BUG-005-listagem-em-branco.txt) (03/11; reexecutada em 04/11, mesmo efeito). **Teste:** manual, por decisão: cada CI deixaria a tela em branco para terceiros.
 
 ---
@@ -184,7 +184,7 @@ Todo corpo mantém `state.employee` (ver BUG-005).
 
 - **Esperado:** Enter salva como "Salvar" ou não faz nada; nunca descarta em silêncio (premissa 2).
 - **Obtido:** o form fecha, nenhum POST sai e nada é gravado (3 de 3). Causa provável: o primeiro `type=submit` é a seta de voltar, sem `type="button"`. Contorno: clicar em "Salvar".
-- **Evidência:** [BUG-024](evidencias/BUG-024-enter-descarta-cadastro.txt), [print](evidencias/ui/BUG-024.png), [vídeo](evidencias/ui/BUG-024.mp4). **Teste:** `test_enter_in_text_field_does_not_discard_the_form`.
+- **Evidência:** [BUG-024](evidencias/BUG-024-enter-descarta-cadastro.txt), [print](evidencias/ui/BUG-024.png), [vídeo](evidencias/ui/BUG-024.mp4) (da checagem de cobertura de 03/11). **Teste:** `test_enter_in_text_field_does_not_discard_the_form`.
 
 ### BUG-028 — Listagem mostra só os primeiros cards e não rola (Média, P2)
 P2: o usuário não alcança a maioria dos funcionários, e o contorno só vale com poucos ativos.
@@ -267,7 +267,7 @@ P2: o usuário não alcança a maioria dos funcionários, e o contorno só vale 
 - **Esperado:** rejeitar obrigatório só com espaços.
 - **Obtido:** RG e CA com 3 espaços e CPF com 11 salvam, e a API grava os espaços (2 de 2); o `required` nativo só exige "não vazio". O CPF recusa 3 espaços e aceita 11 (valida só o tamanho, o que explica também o BUG-008 e o BUG-009), e as pontas não são aparadas (" QA-AUTO-P1-007 " gravado com os espaços). Família do BUG-008 e do BUG-011.
 - **Evidência:** [BUG-023](evidencias/BUG-023-obrigatorios-aceitam-espacos.txt), [print](evidencias/ui/BUG-023.png), [vídeo](evidencias/ui/BUG-023.mp4). **Teste:** `test_required_fields_reject_whitespace_only` (um caso por campo).
-- **Fonte (CPF com 3 e 11 espaços, pontas):** sessão exploratória do Patrick (03–04/11).
+- **Fonte (CPF com 3 e 11 espaços, pontas):** sessão exploratória do Patrick (03–04/11); o restante, checagem de cobertura de 03/11.
 
 ### BUG-025 — CA aceita símbolos
 
@@ -297,7 +297,7 @@ Baixa; sobe para Média se o escopo exigir editar e excluir pela tela.
   - **"Próximo passo":** mãozinha; nem clique nem Enter fazem nada.
   - **9 passos "ITEM 1":** mesmo rótulo nos 9 (pode ser provisório), sem clique, cursor padrão.
   - A mãozinha vem de `:hover { cursor: pointer }`; sem hover, `getComputedStyle(...).cursor` dá `auto`, o que esconde o problema.
-- **Evidência:** barra lateral [print](evidencias/ui/BUG-027-barra-lateral.png), [vídeo](evidencias/ui/BUG-027-barra-lateral.mp4); "..." [print](evidencias/ui/BUG-027-pontinhos.png), [vídeo](evidencias/ui/BUG-027-pontinhos.mp4); "Próximo passo" [print](evidencias/ui/BUG-027-proximo-passo.png), [vídeo](evidencias/ui/BUG-027-proximo-passo.mp4); etapas [print](evidencias/ui/BUG-027-indicador-etapas.png), [vídeo](evidencias/ui/BUG-027-indicador-etapas.mp4). **Teste:** `test_navigation_control_reacts_to_click` (os quatro grupos).
+- **Evidência:** barra lateral [print](evidencias/ui/BUG-027-barra-lateral.png), [vídeo](evidencias/ui/BUG-027-barra-lateral.mp4); "..." [print](evidencias/ui/BUG-027-pontinhos.png), [vídeo](evidencias/ui/BUG-027-pontinhos.mp4); "Próximo passo" [print](evidencias/ui/BUG-027-proximo-passo.png), [vídeo](evidencias/ui/BUG-027-proximo-passo.mp4); etapas [print](evidencias/ui/BUG-027-indicador-etapas.png), [vídeo](evidencias/ui/BUG-027-indicador-etapas.mp4). **Teste:** `test_navigation_control_reacts_to_click` (os quatro grupos). O "Próximo passo" antes constava só como observação (nota de estratégia e plano de testes).
 
 ### BUG-029 — Códigos de EPI gravados com grafia e acentuação inconsistentes
 
@@ -314,7 +314,7 @@ Baixa; sobe para Média se o escopo exigir editar e excluir pela tela.
   | Calçado de Segurança | `calçado-de-segurança` | todos os acentos |
   | Protetor auditivo | `protetor-auditivo` | nenhum |
 
-- **Impacto:** o código é o dado persistido e o contrato da API: quem consome (relatório, integração, `?epi=`) precisa reproduzir "oculor", e o `ç` exige URL-encoding e quebra comparações entre sistemas; a falta de regra sugere códigos digitados à mão. Baixa: nenhum fluxo da tela falha hoje.
+- **Impacto:** o código é o dado persistido e o contrato da API: quem consome (relatório, integração, `?epi=`) precisa reproduzir "oculor", e o `ç` exige URL-encoding e quebra comparações entre sistemas que normalizam de outro jeito (agrupar por EPI divergiria); a falta de regra sugere códigos digitados à mão. Baixa: nenhum fluxo da tela falha hoje.
 - **Evidência:** [BUG-029](evidencias/BUG-029-codigos-epi-inconsistentes.txt) (registros do Patrick `6461`, `6c6b`, `d6f6`, `e01f`). **Teste:** `test_saved_epi_code_is_an_ascii_slug` (falha em 3 de 5; para "Óculos" exige o prefixo `oculos-`).
 - **Fonte:** sessão exploratória do Patrick (04/11); tabela tirada do bundle de `/` e dos registros dele.
 
@@ -322,8 +322,8 @@ Baixa; sobe para Média se o escopo exigir editar e excluir pela tela.
 
 ## Observações (não são defeitos)
 
-- "CONCLUIDO" sem acento sob o 1º item do indicador; sem impacto, e o enunciado não pede revisão de texto.
-- "Ativid 01" a "Ativid 05" é nome provisório, mas consistente; o `S` de "Calçado de Segurança" é cosmético, pois o EPI é gravado por código (ex.: `protetor-auditivo`, `QA-AUTO-P1-006c`), cuja grafia é o BUG-029.
+- "CONCLUIDO" sem acento sob o 1º item do indicador, nos dois estados do switch "A etapa está concluída?"; sem impacto, e o enunciado não pede revisão de texto.
+- "Ativid 01" a "Ativid 05" é nome provisório, mas consistente (select, valor gravado e card repetem o texto); o `S` de "Calçado de Segurança" é cosmético, pois o EPI é gravado por código (ex.: `protetor-auditivo`, `QA-AUTO-P1-006c`), cuja grafia é o BUG-029.
 - Aba "Vite + React + TS": título do template, sem o nome do produto.
 - O contador "Ativos X/Y" conta a base, não o filtro (15 → 8 cards, contador "Ativos 8/15"); comportamento pretendido desconhecido.
 - Cadastro novo nasce inativo (mostra e grava `isActive: false`) e some do filtro de ativos; padrão "ativo" seria preferência de produto (ex-BUG-015, decisão do Patrick em 03/11).
