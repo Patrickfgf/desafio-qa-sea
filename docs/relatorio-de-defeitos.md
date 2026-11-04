@@ -343,7 +343,7 @@ Evidência: [BUG-020](evidencias/BUG-020-cors-invalido.txt). Testes: `tests/secu
 
 ### BUG-021 — Sem cabeçalhos de segurança e com x-powered-by
 
-Categoria: segurança. Faltam CSP, HSTS, X-Frame-Options, X-Content-Type-Options e Referrer-Policy, e há `x-powered-by: tinyhttp`; em `/`, `cache-control: no-store,public`. Como ver: `GET /` e `HEAD /employees`; nada é criado (03/11/2026, `requests`).
+Categoria: segurança. Faltam CSP, HSTS, X-Frame-Options, X-Content-Type-Options e Referrer-Policy, e há `x-powered-by: tinyhttp`; em `/`, `cache-control: no-store,public`. Como ver: a evidência registra `HEAD /` e `HEAD /employees`; o teste usa `HEAD /employees` e `GET /` (o `GET /` devolve só a página estática, sem registros). Nada é criado (03/11/2026, `requests`).
 Sem especificação do sistema: o esperado segue a boa prática OWASP Secure Headers. A ausência é o padrão de um json-server sem hardening, então a correção é de implantação, não de código da aplicação.
 Evidência: [BUG-021](evidencias/BUG-021-sem-cabecalhos-de-seguranca.txt). Teste: `tests/security/test_security.py::test_security_headers_present`.
 
