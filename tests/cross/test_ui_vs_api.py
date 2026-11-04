@@ -1,6 +1,6 @@
 """Cross-checks between what the UI shows/sends and what the API stores.
 
-Bug tests are strict xfails (all still "pending manual reproduction", DEC-14); the rest pass.
+Bug tests are strict xfails (each carries its BUG-NNN id in the reason); the rest pass.
 Every UI-created name is registered in ``ui_created_names`` BEFORE saving.
 """
 

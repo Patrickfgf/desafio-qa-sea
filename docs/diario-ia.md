@@ -15,7 +15,7 @@ Um prompt como "faz o desafio" devolve código plausível e um relatório confia
 | *Subagent-driven development* | Um agente implementa cada task, outro revisa | CPF no relatório do pytest (erro 3); print fail-open (erro 6) |
 | Verificação adversarial | Exploradores propõem; verificadores tentam refutar (19 dos 27 defeitos) | Severidade inflada em 14 candidatos (erro 4) |
 | Modelo por tarefa | Haiku extrai, Sonnet implementa e verifica, Opus faz a revisão final | Revisão final: 1 CRITICAL e 4 HIGH, todos tratados |
-| `/resume` e `/end-session` | Log diário no meu Obsidian: feito, pendências, decisões | Troquei de máquina (Windows → Mac) sem perder estado |
+| `/resume` e `/end-session` | Log diário de sessão: feito, pendências, decisões | Troquei de máquina (Windows → Mac) sem perder estado |
 
 Humano no circuito: fiz uma sessão exploratória própria, procurando o que a IA não achou. Ela produziu a listagem cortada e sem rolagem (BUG-028), os controles e a navegação sem efeito (BUG-027), os códigos de EPI inconsistentes (BUG-029), o ano de 6 dígitos (BUG-010), a validação de CPF só por tamanho e o nome sem trim (BUG-023) e o contorno falso do BUG-006 (escolher a opção já exibida também não grava). Também rebaixei o BUG-015 a observação.
 
@@ -23,7 +23,7 @@ A IA também leu os bugs e testes de um repositório público de 2025 do mesmo d
 
 ## O que a IA errou e como foi corrigido
 
-Seleção de 10 das 21 entradas do diário bruto.
+Seleção de 10 dos erros registrados durante o trabalho.
 
 1. Tratou "upload de ASO" como fato, vindo de pesquisa externa. Pego por subagente revisor.
 2. Sugeriu e-mail à empresa para aprovar os limites do teste. Pego por mim.
