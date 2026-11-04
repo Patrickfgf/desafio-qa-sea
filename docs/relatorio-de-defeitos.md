@@ -374,7 +374,7 @@ Evidência: [BUG-023](evidencias/BUG-023-obrigatorios-aceitam-espacos.txt) · [p
   1. Abrir `/` em 1920x1080 com a lista cheia (8 cadastros `QA-AUTO-` criados pela API).
   2. Medir o retângulo do bloco "A etapa está concluída? Sim/Não" (`position:absolute` dentro do painel da listagem, 278x62 px) e o dos cards, com a lista rolada ao início e ao fim.
 - **Esperado:** o bloco não cobrir a listagem.
-- **Obtido:** o bloco cobre cards; a 1920x1080 o ícone de pontos de um card fica inteiramente sob o bloco (`elementFromPoint` devolve o bloco). Qual card é coberto depende do tamanho da lista.
+- **Obtido:** o bloco cobre cards; a 1920x1080 o ícone de pontos de um card fica inteiramente sob o bloco (`elementFromPoint` devolve o bloco). Qual card é coberto depende do tamanho da lista e da área útil: na reprodução manual de 04/11, com zoom de 100%, o bloco cobre a borda de um card e invade o topo do seguinte; com zoom reduzido (mais área útil), o bloco deixa de cobrir os cards.
 - **Evidência:** [print](evidencias/ui/BUG-026.png) · [vídeo](evidencias/ui/BUG-026.mp4)
 - **Teste automatizado:** `tests/ui/test_navigation_controls.py::test_step_block_does_not_overlap_the_listing` (lê só geometria, contagens).
 
