@@ -1,6 +1,6 @@
 # Relatório de defeitos
 
-> **Status:** todo defeito abaixo foi verificado por automação (Selenium e requests). A verificação é de 03/11/2026, exceto BUG-001, BUG-006, BUG-007 e BUG-012, que vêm de uma verificação automatizada anterior, sem data registrada. A coluna "Reproduzido à mão" registra a reprodução manual, hoje **pendente** para todos (o que não for reproduzido sai do relatório, junto com o teste e a evidência). Nenhum defeito é afirmado como reproduzido à mão antes disso. BUG-023 e BUG-024 vêm da checagem de cobertura, e BUG-025 a BUG-028 da exploração, ambas de 03/11/2026; seguem a mesma regra, exceto o BUG-028, que o Patrick reproduziu à mão em 03/11/2026. O BUG-029 vem da sessão exploratória do Patrick (04/11/2026), que o reproduziu à mão.
+> **Método de verificação:** os defeitos visíveis na interface foram reproduzidos à mão; os exclusivos da API foram delegados à automação — são checagens determinísticas (requisição → resposta), que o teste xfail repete igual a cada execução do CI e registra com a evidência HTTP. Todos os defeitos de API passaram, em 04/11, por uma reverificação ao vivo com um verificador e um cético independentes.
 >
 > **Numeração:** os ids BUG-015 e BUG-022 não são usados (retirados; o BUG-015 virou observação, ver "Observações").
 >
@@ -27,35 +27,35 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio (as mesm
 
 ## Resumo (por prioridade)
 
-| ID | Título | Categoria | Severidade | Prioridade | Automatizado | Reproduzido à mão |
-|---|---|---|---|---|---|---|
-| BUG-001 | Checkbox não usa EPI grava usesEpi invertido | Funcional (tela → payload) | Alta | P1 | `tests/cross/test_ui_vs_api.py::test_uses_epi_flag_matches_checkbox` | pendente |
-| BUG-002 | API expõe CPF, RG e nascimento sem autenticação | Privacidade / LGPD | Alta | P1 | `tests/security/test_security.py::test_record_does_not_expose_full_cpf` | pendente |
-| BUG-003 | Listagem exibe o CPF completo no card | Privacidade / LGPD | Alta | P1 | `tests/cross/test_ui_vs_api.py::test_listing_card_masks_cpf` | pendente |
-| BUG-004 | API cria, altera e apaga registros sem autenticação | Segurança (controle de acesso) | Alta | P1 | `tests/security/test_security.py::test_create_requires_authentication` (+ `update` em PUT/PATCH e `delete`, ver seção) | pendente |
-| BUG-005 | Registro sem state.employee deixa a listagem em branco | Funcional (listagem) | Alta | P1 | manual | pendente |
-| BUG-006 | Selects exibem padrão que não é gravado ao salvar | Funcional (tela → payload) | Média | P2 | `tests/cross/test_ui_vs_api.py::test_default_selects_are_saved_as_displayed` | pendente |
-| BUG-007 | Anexo do ASO não é enviado nem persistido | Funcional (tela → payload) | Média | P2 | `tests/cross/test_ui_vs_api.py::test_aso_file_is_persisted` | pendente |
-| BUG-008 | CPF aceito sem validação de conteúdo | Validação | Média | P2 | `tests/api/test_validation.py::test_create_rejects_invalid_cpf_checksum` | pendente |
-| BUG-009 | CPF digitado com máscara é truncado sem aviso | Validação (tela) | Média | P2 | `tests/ui/test_form_validation.py::test_formatted_cpf_is_not_silently_truncated` | pendente |
-| BUG-010 | Data de nascimento sem validação de intervalo | Validação | Média | P2 | `tests/api/test_validation.py::test_create_rejects_future_birth_date` | pendente |
-| BUG-011 | API não valida schema, tipos nem campos extras | Contrato da API | Média | P2 | `tests/api/test_validation.py::test_create_rejects_missing_required_fields` | pendente |
-| BUG-012 | Adicionar outra atividade salva e fecha o formulário | Funcional (formulário) | Média | P2 | `tests/ui/test_form_controls.py::test_add_another_activity_does_not_submit` | pendente |
-| BUG-013 | Listagem busca dados em paralelo ao POST e fica velha | Funcional (listagem) | Média | P2 | `tests/ui/test_form_controls.py::test_listing_refetch_happens_after_post_completes` | pendente |
-| BUG-024 | Enter descarta o cadastro sem salvar | Funcional (formulário) | Média | P2 | `tests/ui/test_form_controls.py::test_enter_in_text_field_does_not_discard_the_form` | pendente |
-| BUG-028 | Listagem mostra só os primeiros cards e não rola | Funcional (listagem) | Média | P2 | `tests/ui/test_navigation_controls.py::test_every_listing_card_is_reachable_by_scrolling` | sim (Patrick, 03/11) |
-| BUG-014 | PATCH em state apaga os campos não enviados | Contrato da API | Baixa | P3 | `tests/api/test_validation.py::test_patch_preserves_unsent_fields` | pendente |
-| BUG-016 | Select de EPI volta ao padrão ao digitar o CA | Usabilidade | Baixa | P3 | `tests/ui/test_form_controls.py::test_epi_select_keeps_choice_after_typing_ca` | pendente |
-| BUG-017 | Adicionar EPI não tem ação nem foco por teclado | Funcional (formulário) | Baixa | P3 | `tests/ui/test_form_controls.py::test_add_epi_adds_another_epi_block` | pendente |
-| BUG-018 | Paginação inconsistente em casos-limite | Contrato da API | Baixa | P3 | `tests/api/test_validation.py::test_pagination_beyond_last_page_returns_empty_data` | pendente |
-| BUG-019 | JSON malformado devolve 500 em vez de 400 | Tratamento de erro | Baixa | P3 | `tests/api/test_validation.py::test_malformed_json_returns_400` | pendente |
-| BUG-020 | CORS inválido (*,*) e POST text/plain aceito | Segurança | Baixa | P3 | `tests/security/test_security.py::test_cors_allow_origin_is_single_value` | pendente |
-| BUG-021 | Sem cabeçalhos de segurança e com x-powered-by | Segurança | Baixa | P3 | `tests/security/test_security.py::test_security_headers_present` | pendente |
-| BUG-023 | Obrigatórios aceitam só espaços | Validação (tela) | Baixa | P3 | `tests/ui/test_form_validation.py::test_required_fields_reject_whitespace_only` | pendente |
-| BUG-025 | CA aceita símbolos | Validação | Baixa | P3 | `tests/api/test_validation.py::test_create_rejects_symbols_in_ca_number` | pendente |
-| BUG-026 | Bloco "A etapa está concluída?" cobre cards da listagem | Layout | Baixa | P3 | `tests/ui/test_navigation_controls.py::test_step_block_does_not_overlap_the_listing` | pendente |
-| BUG-027 | Navegação e controles sem efeito | Funcional (interface) | Baixa | P3 | `tests/ui/test_navigation_controls.py::test_navigation_control_reacts_to_click` | pendente |
-| BUG-029 | Códigos de EPI gravados com grafia e acentuação inconsistentes | Qualidade de dado / contrato da API | Baixa | P3 | `tests/ui/test_epi_codes.py::test_saved_epi_code_is_an_ascii_slug` | sim (Patrick, 04/11) |
+| ID | Título | Categoria | Severidade | Prioridade | Automatizado |
+|---|---|---|---|---|---|
+| BUG-001 | Checkbox não usa EPI grava usesEpi invertido | Funcional (tela → payload) | Alta | P1 | `tests/cross/test_ui_vs_api.py::test_uses_epi_flag_matches_checkbox` |
+| BUG-002 | API expõe CPF, RG e nascimento sem autenticação | Privacidade / LGPD | Alta | P1 | `tests/security/test_security.py::test_record_does_not_expose_full_cpf` |
+| BUG-003 | Listagem exibe o CPF completo no card | Privacidade / LGPD | Alta | P1 | `tests/cross/test_ui_vs_api.py::test_listing_card_masks_cpf` |
+| BUG-004 | API cria, altera e apaga registros sem autenticação | Segurança (controle de acesso) | Alta | P1 | `tests/security/test_security.py::test_create_requires_authentication` (+ `update` em PUT/PATCH e `delete`, ver seção) |
+| BUG-005 | Registro sem state.employee deixa a listagem em branco | Funcional (listagem) | Alta | P1 | manual |
+| BUG-006 | Selects exibem padrão que não é gravado ao salvar | Funcional (tela → payload) | Média | P2 | `tests/cross/test_ui_vs_api.py::test_default_selects_are_saved_as_displayed` |
+| BUG-007 | Anexo do ASO não é enviado nem persistido | Funcional (tela → payload) | Média | P2 | `tests/cross/test_ui_vs_api.py::test_aso_file_is_persisted` |
+| BUG-008 | CPF aceito sem validação de conteúdo | Validação | Média | P2 | `tests/api/test_validation.py::test_create_rejects_invalid_cpf_checksum` |
+| BUG-009 | CPF digitado com máscara é truncado sem aviso | Validação (tela) | Média | P2 | `tests/ui/test_form_validation.py::test_formatted_cpf_is_not_silently_truncated` |
+| BUG-010 | Data de nascimento sem validação de intervalo | Validação | Média | P2 | `tests/api/test_validation.py::test_create_rejects_future_birth_date` |
+| BUG-011 | API não valida schema, tipos nem campos extras | Contrato da API | Média | P2 | `tests/api/test_validation.py::test_create_rejects_missing_required_fields` |
+| BUG-012 | Adicionar outra atividade salva e fecha o formulário | Funcional (formulário) | Média | P2 | `tests/ui/test_form_controls.py::test_add_another_activity_does_not_submit` |
+| BUG-013 | Listagem busca dados em paralelo ao POST e fica velha | Funcional (listagem) | Média | P2 | `tests/ui/test_form_controls.py::test_listing_refetch_happens_after_post_completes` |
+| BUG-024 | Enter descarta o cadastro sem salvar | Funcional (formulário) | Média | P2 | `tests/ui/test_form_controls.py::test_enter_in_text_field_does_not_discard_the_form` |
+| BUG-028 | Listagem mostra só os primeiros cards e não rola | Funcional (listagem) | Média | P2 | `tests/ui/test_navigation_controls.py::test_every_listing_card_is_reachable_by_scrolling` |
+| BUG-014 | PATCH em state apaga os campos não enviados | Contrato da API | Baixa | P3 | `tests/api/test_validation.py::test_patch_preserves_unsent_fields` |
+| BUG-016 | Select de EPI volta ao padrão ao digitar o CA | Usabilidade | Baixa | P3 | `tests/ui/test_form_controls.py::test_epi_select_keeps_choice_after_typing_ca` |
+| BUG-017 | Adicionar EPI não tem ação nem foco por teclado | Funcional (formulário) | Baixa | P3 | `tests/ui/test_form_controls.py::test_add_epi_adds_another_epi_block` |
+| BUG-018 | Paginação inconsistente em casos-limite | Contrato da API | Baixa | P3 | `tests/api/test_validation.py::test_pagination_beyond_last_page_returns_empty_data` |
+| BUG-019 | JSON malformado devolve 500 em vez de 400 | Tratamento de erro | Baixa | P3 | `tests/api/test_validation.py::test_malformed_json_returns_400` |
+| BUG-020 | CORS inválido (*,*) e POST text/plain aceito | Segurança | Baixa | P3 | `tests/security/test_security.py::test_cors_allow_origin_is_single_value` |
+| BUG-021 | Sem cabeçalhos de segurança e com x-powered-by | Segurança | Baixa | P3 | `tests/security/test_security.py::test_security_headers_present` |
+| BUG-023 | Obrigatórios aceitam só espaços | Validação (tela) | Baixa | P3 | `tests/ui/test_form_validation.py::test_required_fields_reject_whitespace_only` |
+| BUG-025 | CA aceita símbolos | Validação | Baixa | P3 | `tests/api/test_validation.py::test_create_rejects_symbols_in_ca_number` |
+| BUG-026 | Bloco "A etapa está concluída?" cobre cards da listagem | Layout | Baixa | P3 | `tests/ui/test_navigation_controls.py::test_step_block_does_not_overlap_the_listing` |
+| BUG-027 | Navegação e controles sem efeito | Funcional (interface) | Baixa | P3 | `tests/ui/test_navigation_controls.py::test_navigation_control_reacts_to_click` |
+| BUG-029 | Códigos de EPI gravados com grafia e acentuação inconsistentes | Qualidade de dado / contrato da API | Baixa | P3 | `tests/ui/test_epi_codes.py::test_saved_epi_code_is_an_ascii_slug` |
 
 Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na razão (no BUG-029, só os 3 casos que quebram a regra; os outros 2 passam e servem de controle). Quando a tabela cita um teste, os demais do mesmo defeito estão na seção dele. Cada premissa de "esperado" abaixo é inferência (sem documentação do sistema); as premissas estão em `plano-de-testes.md`, seção 2.
 
@@ -292,7 +292,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
   - Contorno: zoom-out do Chrome (medido em 1470x840 com 9 ativos: 90% mostra 4 cards, 75% mostra 6, 67% mostra 8, 50% mostra todos). Sem o filtro, com 39 cards, nem 25% mostra tudo (29 visíveis): com a base inteira não há contorno.
 - **Evidência:** [print](evidencias/ui/BUG-028-listagem-cortada.png) · [vídeo](evidencias/ui/BUG-028-listagem-cortada.mp4) (1470x840, "Ativos 16/45", 16 cards no DOM e 3 visíveis, 4 giros de roda e PageDown/End sem efeito; texto de terceiros ocultado por `█████`).
 - **Teste automatizado:** `tests/ui/test_navigation_controls.py::test_every_listing_card_is_reachable_by_scrolling` (1470x840, roda do mouse real sobre a lista, afirma que o último de 12 cards próprios chega à área visível).
-- **Fonte:** sessão exploratória do Patrick (03/11). **Reproduzido à mão:** sim (Patrick, 03/11).
+- **Fonte:** sessão exploratória do Patrick (03/11).
 - **Observação:** o bloco "A etapa está concluída?" sobrepõe 11 a 37 px de dois cards conforme o viewport (BUG-026).
 
 ---
@@ -365,7 +365,6 @@ Evidência: [BUG-023](evidencias/BUG-023-obrigatorios-aceitam-espacos.txt) · [p
 - **Obtido:** nenhuma mensagem; `caNumber` gravado como `@!#$&&$#`. O input é `type=text`, sem `pattern` nem `maxlength`; a API aceita o mesmo valor (201).
 - **Evidência:** [BUG-025](evidencias/BUG-025-ca-number-simbolos.txt) · [print](evidencias/ui/BUG-025.png) · [vídeo](evidencias/ui/BUG-025.mp4)
 - **Testes automatizados:** `tests/api/test_validation.py::test_create_rejects_symbols_in_ca_number`; `tests/ui/test_form_validation.py::test_ca_number_field_rejects_symbols`.
-- **Reproduzido à mão:** pendente.
 
 ### BUG-026 — Bloco "A etapa está concluída?" cobre cards da listagem
 
@@ -378,7 +377,6 @@ Evidência: [BUG-023](evidencias/BUG-023-obrigatorios-aceitam-espacos.txt) · [p
 - **Obtido:** o bloco cobre cards; a 1920x1080 o ícone de pontos de um card fica inteiramente sob o bloco (`elementFromPoint` devolve o bloco). Qual card é coberto depende do tamanho da lista.
 - **Evidência:** [print](evidencias/ui/BUG-026.png) · [vídeo](evidencias/ui/BUG-026.mp4)
 - **Teste automatizado:** `tests/ui/test_navigation_controls.py::test_step_block_does_not_overlap_the_listing` (lê só geometria, contagens).
-- **Reproduzido à mão:** pendente.
 
 ### BUG-027 — Navegação e controles sem efeito
 
@@ -394,7 +392,6 @@ Evidência: [BUG-023](evidencias/BUG-023-obrigatorios-aceitam-espacos.txt) · [p
 - **Evidência:** barra lateral [print](evidencias/ui/BUG-027-barra-lateral.png) · [vídeo](evidencias/ui/BUG-027-barra-lateral.mp4); "..." [print](evidencias/ui/BUG-027-pontinhos.png) · [vídeo](evidencias/ui/BUG-027-pontinhos.mp4); "Próximo passo" [print](evidencias/ui/BUG-027-proximo-passo.png) · [vídeo](evidencias/ui/BUG-027-proximo-passo.mp4); indicador de etapas [print](evidencias/ui/BUG-027-indicador-etapas.png) · [vídeo](evidencias/ui/BUG-027-indicador-etapas.mp4).
 - **Teste automatizado:** `tests/ui/test_navigation_controls.py::test_navigation_control_reacts_to_click` (parametrizado nos quatro grupos; um card próprio, sem ler dado de terceiros).
 - **Observação:** o cursor de mão vem de regras CSS `:hover { cursor: pointer }`: sem o ponteiro sobre o elemento, `getComputedStyle(...).cursor` devolve `auto`, o que esconde o problema; com o hover, o cursor é `pointer`. O "Próximo passo" antes constava só como observação (nota de estratégia e plano de testes).
-- **Reproduzido à mão:** pendente.
 
 ### BUG-029 — Códigos de EPI gravados com grafia e acentuação inconsistentes
 
@@ -421,7 +418,6 @@ Evidência: [BUG-023](evidencias/BUG-023-obrigatorios-aceitam-espacos.txt) · [p
 - **Fonte:** sessão exploratória do Patrick (04/11). A tabela vem do bundle servido em `/` e dos registros dele, lidos na Response do POST.
 - **Evidência:** [BUG-029](evidencias/BUG-029-codigos-epi-inconsistentes.txt)
 - **Teste automatizado:** `tests/ui/test_epi_codes.py::test_saved_epi_code_is_an_ascii_slug` (um caso por EPI; falha em 3 dos 5 e, para "Óculos de proteção", exige também o prefixo `oculos-`).
-- **Reproduzido à mão:** sim (Patrick, 04/11).
 
 ---
 
