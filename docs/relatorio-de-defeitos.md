@@ -1,6 +1,6 @@
 # Relatório de defeitos
 
-> **Status:** todo defeito abaixo foi verificado por automação (Selenium e requests). A verificação é de 03/11/2026, exceto BUG-001, BUG-006, BUG-007 e BUG-012, que vêm de uma verificação automatizada anterior, sem data registrada. A coluna "Reproduzido à mão" registra a reprodução manual, hoje **pendente** para todos (o que não for reproduzido sai do relatório, junto com o teste e a evidência). Nenhum defeito é afirmado como reproduzido à mão antes disso. BUG-023 e BUG-024 vêm da checagem de cobertura, e BUG-025 a BUG-028 da exploração, ambas de 03/11/2026; seguem a mesma regra, exceto o BUG-028, que o Patrick reproduziu à mão em 03/11/2026.
+> **Status:** todo defeito abaixo foi verificado por automação (Selenium e requests). A verificação é de 03/11/2026, exceto BUG-001, BUG-006, BUG-007 e BUG-012, que vêm de uma verificação automatizada anterior, sem data registrada. A coluna "Reproduzido à mão" registra a reprodução manual, hoje **pendente** para todos (o que não for reproduzido sai do relatório, junto com o teste e a evidência). Nenhum defeito é afirmado como reproduzido à mão antes disso. BUG-023 e BUG-024 vêm da checagem de cobertura, e BUG-025 a BUG-028 da exploração, ambas de 03/11/2026; seguem a mesma regra, exceto o BUG-028, que o Patrick reproduziu à mão em 03/11/2026. O BUG-029 vem da sessão exploratória do Patrick (04/11/2026), que o reproduziu à mão.
 >
 > **Numeração:** os ids BUG-015 e BUG-022 não são usados (retirados; o BUG-015 virou observação, ver "Observações").
 >
@@ -55,8 +55,9 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio (as mesm
 | BUG-025 | CA aceita símbolos | Validação | Baixa | P3 | `tests/api/test_validation.py::test_create_rejects_symbols_in_ca_number` | pendente |
 | BUG-026 | Bloco "A etapa está concluída?" cobre cards da listagem | Layout | Baixa | P3 | `tests/ui/test_navigation_controls.py::test_step_block_does_not_overlap_the_listing` | pendente |
 | BUG-027 | Navegação e controles sem efeito | Funcional (interface) | Baixa | P3 | `tests/ui/test_navigation_controls.py::test_navigation_control_reacts_to_click` | pendente |
+| BUG-029 | Códigos de EPI gravados com grafia e acentuação inconsistentes | Qualidade de dado / contrato da API | Baixa | P3 | `tests/ui/test_epi_codes.py::test_saved_epi_code_is_an_ascii_slug` | sim (Patrick, 04/11) |
 
-Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na razão. Quando a tabela cita um teste, os demais do mesmo defeito estão na seção dele. Cada premissa de "esperado" abaixo é inferência (sem documentação do sistema); as premissas estão em `plano-de-testes.md`, seção 2.
+Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na razão (no BUG-029, só os 3 casos que quebram a regra; os outros 2 passam e servem de controle). Quando a tabela cita um teste, os demais do mesmo defeito estão na seção dele. Cada premissa de "esperado" abaixo é inferência (sem documentação do sistema); as premissas estão em `plano-de-testes.md`, seção 2.
 
 ---
 
@@ -308,7 +309,7 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 
 ## Defeitos de baixa prioridade (P3)
 
-Severidade Baixa e prioridade P3 em todos; as premissas de "esperado" estão em `plano-de-testes.md`, seção 2. BUG-016 a BUG-023 não têm passo a passo completo: cada um traz o que acontece, como ver, a evidência e o teste. BUG-025 a BUG-027 trazem os passos.
+Severidade Baixa e prioridade P3 em todos; as premissas de "esperado" estão em `plano-de-testes.md`, seção 2. BUG-016 a BUG-023 não têm passo a passo completo: cada um traz o que acontece, como ver, a evidência e o teste. BUG-025 a BUG-027 e BUG-029 trazem os passos.
 
 ### BUG-016 — Select de EPI volta ao padrão ao digitar o CA
 
@@ -343,6 +344,7 @@ Evidência: [BUG-021](evidencias/BUG-021-sem-cabecalhos-de-seguranca.txt). Teste
 ### BUG-023 — Obrigatórios aceitam só espaços
 
 Categoria: validação (tela). RG com 3 espaços, CA com 3 espaços e CPF com 11 espaços salvam, e a API grava os espaços (2 de 2 execuções); o `required` nativo só exige "não vazio". Mesma família do BUG-008 e do BUG-011. Como ver: preencher o cadastro `QA-AUTO-` com um desses campos só de espaços, um caso por vez, e ler o registro por nome exato (checagem de cobertura de 03/11/2026).
+Na sessão exploratória do Patrick (03–04/11), o campo CPF recusou 3 espaços e aceitou 11 (gravou 11 espaços): ele valida só o tamanho, o que também explica o BUG-008 e o BUG-009. O formulário também não remove espaços nas pontas: o nome " QA-AUTO-P1-007 " foi gravado com o espaço no começo e no fim.
 Evidência: [BUG-023](evidencias/BUG-023-obrigatorios-aceitam-espacos.txt) · [print](evidencias/ui/BUG-023.png) · [vídeo](evidencias/ui/BUG-023.mp4). Teste: `tests/ui/test_form_validation.py::test_required_fields_reject_whitespace_only` (um caso por campo).
 
 ### BUG-025 — CA aceita símbolos
@@ -388,6 +390,33 @@ Evidência: [BUG-023](evidencias/BUG-023-obrigatorios-aceitam-espacos.txt) · [p
 - **Observação:** o cursor de mão vem de regras CSS `:hover { cursor: pointer }`: sem o ponteiro sobre o elemento, `getComputedStyle(...).cursor` devolve `auto`, o que esconde o problema; com o hover, o cursor é `pointer`. O "Próximo passo" antes constava só como observação (nota de estratégia e plano de testes).
 - **Reproduzido à mão:** pendente.
 
+### BUG-029 — Códigos de EPI gravados com grafia e acentuação inconsistentes
+
+- **Categoria:** qualidade de dado / contrato da API. **Severidade:** Baixa. **Prioridade:** P3.
+- **Ambiente:** interface, 03 e 04/11/2026, Chrome (à mão) e Chrome headless (Selenium). Sem especificação do sistema: o "esperado" é inferência.
+- **Passos:**
+  1. Abrir o formulário e preencher um cadastro `QA-AUTO-` com dados fictícios, com "Usa EPI".
+  2. Escolher um EPI no select, salvar e, no DevTools > Network, abrir a requisição `POST /employees` > Response.
+  3. Ler o campo `epi` e repetir para as 5 opções (a evidência traz os registros do Patrick: ids `6461`, `6c6b`, `d6f6` e `e01f`).
+- **Esperado:** um código por EPI seguindo uma regra única e estável, por exemplo slug ASCII minúsculo do rótulo (`oculos-de-protecao`).
+- **Obtido:** cada opção grava um código escrito de um jeito diferente:
+
+  | Rótulo exibido | Código gravado | O que há de errado |
+  |---|---|---|
+  | Capacete de segurança | `capacete-de-segurança` | `ç` acentuado |
+  | Luvas descartáveis | `luvas-descartaveis` | sem acento (o padrão limpo) |
+  | Óculos de proteção | `oculor-de-proteçao` | erro de grafia ("oculor") e só o `ç` acentuado |
+  | Calçado de Segurança | `calçado-de-segurança` | todos os acentos |
+  | Protetor auditivo | `protetor-auditivo` | sem acento (o padrão limpo) |
+
+- **Por que é defeito e não observação:** o rótulo é texto de tela, mas o código é o dado persistido e o contrato da API (`epi` no corpo do POST e do GET). Quem consome esse dado (relatório, integração, filtro `?epi=`) precisa reproduzir o erro "oculor" para casar com o valor gravado. O `ç` num identificador exige URL-encoding e quebra comparações entre sistemas que normalizam de outro jeito. Não há regra única (sem acento, com todos os acentos, com parte deles), sinal de códigos digitados à mão. E agrupar por EPI em outro sistema que normalize acentos geraria divergência entre o que cada lado conta como o mesmo EPI.
+- **Por que Baixa:** nenhum fluxo da tela falha hoje (o select, o cadastro e a listagem funcionam com esses códigos); o risco é de integração e de qualidade do dado.
+- **Observação:** o "Calçado de Segurança" com `S` maiúsculo no rótulo continua sendo só cosmético (ver "Observações"); o defeito é o código.
+- **Fonte:** sessão exploratória do Patrick (04/11). A tabela vem do bundle servido em `/` e dos registros dele, lidos na Response do POST.
+- **Evidência:** [BUG-029](evidencias/BUG-029-codigos-epi-inconsistentes.txt)
+- **Teste automatizado:** `tests/ui/test_epi_codes.py::test_saved_epi_code_is_an_ascii_slug` (um caso por EPI; falha em 3 dos 5 e, para "Óculos de proteção", exige também o prefixo `oculos-`).
+- **Reproduzido à mão:** sim (Patrick, 04/11).
+
 ---
 
 ## Observações (não são defeitos)
@@ -395,7 +424,7 @@ Evidência: [BUG-023](evidencias/BUG-023-obrigatorios-aceitam-espacos.txt) · [p
 Itens vistos na interface que não entram como defeito: sem impacto funcional ou sem especificação para dizer o que seria o correto.
 
 - **"CONCLUIDO" sem acento:** o rótulo sob o 1º item do indicador aparece sem acento nos dois estados do switch "A etapa está concluída?". Sem impacto funcional; o enunciado não pede revisão de texto.
-- **Opções "Ativid 01" a "Ativid 05" e "Calçado de Segurança":** "Ativid 0N" é nome provisório, mas consistente (select, valor gravado e card repetem o mesmo texto). "Calçado de Segurança" tem o S maiúsculo, diferente das outras quatro opções de EPI. É só cosmético: o EPI é gravado por um código próprio (ex.: `epi: "protetor-auditivo"`, registro `QA-AUTO-P1-006c`), não pelo texto exibido, então a grafia não afeta o dado.
+- **Opções "Ativid 01" a "Ativid 05" e "Calçado de Segurança":** "Ativid 0N" é nome provisório, mas consistente (select, valor gravado e card repetem o mesmo texto). "Calçado de Segurança" tem o S maiúsculo, diferente das outras quatro opções de EPI. A caixa alta é só cosmética: o EPI é gravado por um código próprio (ex.: `epi: "protetor-auditivo"`, registro `QA-AUTO-P1-006c`), não pelo texto exibido. Já a grafia e a acentuação desses códigos são inconsistentes e entram como defeito (BUG-029).
 - **Título da aba "Vite + React + TS":** é o título do template, sem o nome do produto. Sem impacto para o usuário.
 - **Contador "Ativos X/Y" não acompanha o filtro "Ver apenas ativos":** com o filtro ligado, a lista passa de 15 para 8 cards e o contador segue "Ativos 8/15" (conta a base, não o filtro). O comportamento pretendido é desconhecido.
 - **Cadastro novo nasce inativo:** o switch "O trabalhador está ativo ou inativo?" abre mostrando "Inativo" e grava `isActive: false`, então a tela mostra o que grava. O cadastro some do filtro "Ver apenas ativos" até o usuário ligar o switch. O comportamento pretendido não é especificado: padrão "ativo" seria preferência de produto, não defeito (ex-BUG-015, decisão do Patrick em 03/11 na reprodução manual).
