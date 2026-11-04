@@ -2,7 +2,7 @@
 
 Alvo: sistema de cadastro de trabalhadores para segurança do trabalho, com interface web (cadastro em etapas e listagem) e API REST em `/employees`. Não há documentação formal; este plano parte do comportamento observado.
 
-> **Status: corte de risco decidido em 03/11/2026** (seção 3) e escalas de severidade e prioridade fixadas (seção 3.1). Os comportamentos citados aqui como observados vêm da exploração automatizada; cada defeito do relatório traz o status da reprodução manual; o que não for reproduzido à mão sai antes da entrega, junto com o teste e a evidência.
+> **Status: corte de risco decidido em 03/11/2026** (seção 3) e escalas de severidade e prioridade fixadas (seção 3.1). Os comportamentos citados aqui como observados vêm da exploração automatizada; o método de verificação de cada defeito (à mão na interface, automação com reverificação independente na API) está no topo do relatório.
 
 ## 1. Escopo
 
@@ -40,11 +40,11 @@ Sem documentação, todo "comportamento esperado" abaixo é **inferência** (ró
 11. O `id` é gerado pelo servidor e é único (duplicata deveria dar 409).
 12. Os registros existentes na base contam como dado potencialmente real, mesmo sem prova de que sejam.
 
-**Dúvidas com checagem dirigida** (checadas por automação em 03/11; a reprodução manual confirma ou derruba cada uma)
+**Dúvidas com checagem dirigida** (checadas por automação em 03/11)
 
-- O select de EPI grava o valor escolhido? Duas observações divergiram. Resultado automatizado de 03/11 (D1): sim, em 2 execuções o corpo do POST e o GET por id trazem o `epi` escolhido; depois de digitar o CA o select volta a exibir o padrão, mas grava o escolhido. Reprodução manual pendente.
-- Com o checkbox desmarcado e CA/EPI vazios, o usuário real vê a mensagem nativa de campo obrigatório, ou o formulário simplesmente não salva? Resultado automatizado de 03/11 (D2): a validação nativa bloqueia o envio com "Preencha este campo." (foco no CA, 0 requisições, 0 registros); o balão foi inferido do estado de validação, não visto. Reprodução manual pendente.
-- Um registro sem `state.employee` quebra a listagem? Resultado automatizado de 03/11 (D3): sim, em 1 carga o POST sem `state.employee` dá 201 e a listagem fica em branco, com `TypeError` no console. Reprodução manual pendente.
+- O select de EPI grava o valor escolhido? Duas observações divergiram. Resultado automatizado de 03/11 (D1): sim, em 2 execuções o corpo do POST e o GET por id trazem o `epi` escolhido; depois de digitar o CA o select volta a exibir o padrão, mas grava o escolhido.
+- Com o checkbox desmarcado e CA/EPI vazios, o usuário real vê a mensagem nativa de campo obrigatório, ou o formulário simplesmente não salva? Resultado automatizado de 03/11 (D2): a validação nativa bloqueia o envio com "Preencha este campo." (foco no CA, 0 requisições, 0 registros); o balão foi inferido do estado de validação, não visto.
+- Um registro sem `state.employee` quebra a listagem? Resultado automatizado de 03/11 (D3): sim, em 1 carga o POST sem `state.employee` dá 201 e a listagem fica em branco, com `TypeError` no console (reexecutado em 04/11, ver BUG-005 no relatório).
 
 **Dúvidas que ficam em aberto** (não verificáveis dentro dos limites da seção 8; nenhuma vira defeito sem reprodução)
 
@@ -104,12 +104,12 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio, e as du
   | Checkbox "não usa EPI" | CA preenchido | Esperado em `usesEpi` | Esperado em `caNumber` | Observado na exploração |
   |---|---|---|---|---|
   | desmarcado | sim | `true` | CA informado | grava `false` |
-  | desmarcado | não | (formulário não salva) | n/a | a validação nativa bloqueia o envio com "Preencha este campo." e nenhuma requisição é enviada (checagem D2, automatizada em 03/11; reprodução manual pendente) |
+  | desmarcado | não | (formulário não salva) | n/a | a validação nativa bloqueia o envio com "Preencha este campo." e nenhuma requisição é enviada (checagem D2, automatizada em 03/11) |
   | marcado | campo some | `false` | vazio | grava `true` e `caNumber: ""` |
 
 - **Cruzamento tela × API.** Criar pela tela e conferir na API os campos gravados; criar pela API e conferir na listagem; comparar o corpo do POST com o que o GET devolve depois; inativar e verificar que o funcionário some da tela mas continua na API.
 - **Leitura estática do bundle como fonte de hipóteses.** A leitura do JavaScript da página gera hipóteses (por exemplo, defaults só visuais, botão sem `type`, arquivo nunca enviado). Hipótese não é achado: cada uma é confirmada ou derrubada no sistema rodando. Uma delas foi derrubada em parte: um botão que se supunha inerte, na verdade, salva o cadastro.
-- **Verificação independente de cada achado antes do relatório.** Todo defeito é reproduzido por um segundo caminho (outro script, ou outra ferramenta) e, antes da entrega, à mão por quem assina o relatório. O que não reproduz sai do relatório, e o teste é corrigido ou removido. Enquanto a reprodução manual não acontece, o relatório marca o defeito como pendente.
+- **Verificação independente de cada achado antes do relatório.** Todo defeito é reproduzido por um segundo caminho (outro script, ou outra ferramenta) e, antes da entrega, conforme a natureza do defeito: os visíveis na interface, à mão por quem assina o relatório; os exclusivos da API, pela automação, que repete a checagem determinística (requisição → resposta) a cada execução do CI, com reverificação ao vivo por um verificador e um cético independentes (04/11). O que não reproduz sai do relatório, e o teste é corrigido ou removido.
 
 ## 5. Automatizado × manual
 
