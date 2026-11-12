@@ -63,7 +63,7 @@ Legenda: **testar a fundo** = vários casos e camadas (UI e API), com prioridade
 |---|---|---|---|---|---|
 | Mapeamento tela → payload no cadastro (`usesEpi`, defaults dos selects, `isActive` inicial, anexo de ASO) | Alto | Alta | Alto | testar a fundo | dado de segurança do trabalho gravado diferente do que o usuário vê, em todo cadastro; o teste compara o digitado com o GET |
 | Privacidade/LGPD: CPF completo na tela e na API, inativos servidos | Alto | Alta | Alto | testar a fundo | dado pessoal sem máscara e sem autenticação nas duas camadas |
-| Controle de acesso: escrita sem autenticação | Alto | Alta | Alto | testar leve | propriedade binária e arquitetural: 1 teste por método prova a ausência de autenticação, e mais casos não mudam a conclusão. A severidade continua Alta no relatório |
+| Controle de acesso: escrita sem autenticação | Alto | Alta | Alto | testar leve | propriedade binária e arquitetural: 1 teste por método prova a ausência de autenticação, e mais casos não mudam a conclusão. A severidade é Crítica no relatório: profundidade mede informação nova, não gravidade |
 | Validação de CPF e de data (tela e API) | Médio | Alta | Médio-alto | testar a fundo | casos-limite clássicos, baratos de parametrizar na API; o truncamento de CPF com máscara só aparece pela tela |
 | Contrato e schema da API (forma, obrigatórios, valores permitidos, campos extras) | Médio | Alta | Médio | testar leve | uma causa raiz (API sem schema): poucos casos representativos, sem dezenas de `xfail` iguais |
 | Botões do formulário ("Adicionar outra atividade", "Adicionar EPI") | Médio | Alta | Médio | testar leve | 1 teste por botão; o salvamento prematuro é observável pela rede |
@@ -84,7 +84,7 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio, e as du
 | Severidade | Critério |
 |---|---|
 | Crítica | perda ou exposição de dados em larga escala, sem pré-condição |
-| Alta | dado gravado ou exposto de forma errada em fluxo principal, ou controle de acesso ausente |
+| Alta | dado gravado ou exposto de forma errada em fluxo principal, ou controle de acesso ausente com alcance limitado |
 | Média | comportamento incorreto com contorno, ou efeito limitado a clientes da API |
 | Baixa | cosmético, usabilidade, má prática sem dano demonstrado |
 

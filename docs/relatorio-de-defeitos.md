@@ -11,7 +11,7 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio (as mesm
 | Severidade | Critério |
 |---|---|
 | Crítica | perda ou exposição de dados em larga escala, sem pré-condição |
-| Alta | dado gravado ou exposto de forma errada em fluxo principal, controle de acesso ausente, ou fluxo principal indisponível para todos |
+| Alta | dado gravado ou exposto de forma errada em fluxo principal, controle de acesso ausente com alcance limitado, ou fluxo principal indisponível para todos |
 | Média | comportamento incorreto com contorno, ou efeito limitado a clientes da API |
 | Baixa | cosmético, usabilidade, má prática sem dano demonstrado |
 
@@ -26,9 +26,9 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio (as mesm
 | ID | Título | Categoria | Severidade | Prioridade | Automatizado |
 |---|---|---|---|---|---|
 | BUG-001 | Checkbox não usa EPI grava usesEpi invertido | Funcional (tela → payload) | Alta | P1 | `tests/cross/test_ui_vs_api.py::test_uses_epi_flag_matches_checkbox` |
-| BUG-002 | API expõe CPF, RG e nascimento sem autenticação | Privacidade / LGPD | Alta | P1 | `tests/security/test_security.py::test_record_does_not_expose_full_cpf` |
+| BUG-002 | API expõe CPF, RG e nascimento sem autenticação | Privacidade / LGPD | Crítica | P1 | `tests/security/test_security.py::test_record_does_not_expose_full_cpf` |
 | BUG-003 | Listagem exibe o CPF completo no card | Privacidade / LGPD | Alta | P1 | `tests/cross/test_ui_vs_api.py::test_listing_card_masks_cpf` |
-| BUG-004 | API cria, altera e apaga registros sem autenticação | Segurança (controle de acesso) | Alta | P1 | `tests/security/test_security.py::test_create_requires_authentication` (+ `update` em PUT/PATCH e `delete`, ver seção) |
+| BUG-004 | API cria, altera e apaga registros sem autenticação | Segurança (controle de acesso) | Crítica | P1 | `tests/security/test_security.py::test_create_requires_authentication` (+ `update` em PUT/PATCH e `delete`, ver seção) |
 | BUG-005 | Registro sem state.employee deixa a listagem em branco | Funcional (listagem) | Alta | P1 | manual |
 | BUG-006 | Selects exibem padrão que não é gravado ao salvar | Funcional (tela → payload) | Média | P2 | `tests/cross/test_ui_vs_api.py::test_default_selects_are_saved_as_displayed` |
 | BUG-007 | Anexo do ASO não é enviado nem persistido | Funcional (tela → payload) | Média | P2 | `tests/cross/test_ui_vs_api.py::test_aso_file_is_persisted` |
@@ -68,14 +68,14 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 - **Obtido:** marcado grava `true` e `caNumber` vazio; desmarcado, `false`. Nenhum caminho pela tela grava o valor certo.
 - **Evidência:** [BUG-001](evidencias/BUG-001-usesepi-invertido.txt), [print](evidencias/ui/BUG-001.png), [vídeo](evidencias/ui/BUG-001.mp4). **Teste:** `test_uses_epi_flag_matches_checkbox` (os dois estados).
 
-### BUG-002 — API expõe CPF, RG e nascimento sem autenticação (Alta, P1)
+### BUG-002 — API expõe CPF, RG e nascimento sem autenticação (Crítica, P1)
 
 1. `POST /employees` com registro sintético.
 2. `GET /employees/<id>` e `GET /employees?id=<id>`, sem credencial.
 
 - **Esperado (premissa 8; o enunciado não exige autenticação):** 401/403, ou ao menos CPF mascarado ou omitido.
 - **Obtido:** 200 nas duas rotas, com CPF de 11 dígitos igual ao enviado, RG e nascimento completos.
-- **Impacto:** dado pessoal exposto a qualquer visitante, sem minimização (LGPD, art. 6º, III e VII, e art. 46); a exposição é do mecanismo (sem prova de que registros de terceiros sejam reais). Alta/P1 somada à escrita anônima (BUG-004); mesma causa do BUG-003 e do BUG-004.
+- **Impacto:** dado pessoal exposto a qualquer visitante, sem minimização (LGPD, art. 6º, III e VII, e art. 46). Crítica: sem credencial, o que vale para o registro próprio vale, por inferência, para a base inteira, que `GET /employees` devolve sem paginação. Não há prova de que registros de terceiros sejam reais, mas a gravidade vem da finalidade do sistema (`plano-de-testes.md`, seção 8, item 7). Mesma causa do BUG-003 e do BUG-004.
 - **Evidência:** [BUG-002](evidencias/BUG-002-api-expoe-pii-sem-autenticacao.txt). **Testes:** `tests/security/test_security.py::test_record_does_not_expose_full_cpf`, `::test_list_requires_authentication` (`?id=` próprio; afirma só status e contagem).
 
 ### BUG-003 — Listagem exibe o CPF completo no card (Alta, P1)
@@ -83,14 +83,15 @@ Todos os testes automatizados são `xfail(strict=True)` com o ID do defeito na r
 1. Criar um registro pela API, abrir a listagem e ler o CPF só no card próprio.
 
 - **Esperado:** CPF mascarado ou parcial. **Obtido:** os 11 dígitos, sem asterisco, iguais ao gravado; a tela mostra o CPF de todos a quem abrir a página.
+- **Impacto:** Alta e não Crítica: o defeito próprio é a falta de máscara na tela, que continuaria com autenticação; a exposição da base inteira sem pré-condição já é o BUG-002.
 - **Evidência:** [BUG-003](evidencias/BUG-003-listagem-cpf-completo.txt), [print](evidencias/ui/BUG-003.png), [vídeo](evidencias/ui/BUG-003.mp4). **Teste:** `test_listing_card_masks_cpf`.
 
-### BUG-004 — API cria, altera e apaga registros sem autenticação (Alta, P1)
+### BUG-004 — API cria, altera e apaga registros sem autenticação (Crítica, P1)
 1. Sem credencial: `POST /employees`; `PUT /employees/<id>` com outro corpo completo (e `PATCH` com uma chave); `DELETE`; ler por `?id=` após cada um.
 
 - **Esperado (premissa 8; o enunciado pede explorar segurança e privacidade da API):** 401/403 em toda escrita.
 - **Obtido:** 201 no POST, 200 no PUT, PATCH e DELETE, com alteração e remoção confirmadas. Token inválido em `Authorization` não muda nada, e o preflight não lista `Authorization` em `allow-headers`. Sem noção de dono: um anônimo altera e apaga o registro de outro. Terceiros não foram tocados; o alcance sobre eles é inferência.
-- **Impacto:** integridade e disponibilidade dos dados pessoais sem controle (LGPD, art. 46); pré-condição do BUG-005.
+- **Impacto:** integridade e disponibilidade dos dados pessoais sem controle (LGPD, art. 46); pré-condição do BUG-005. Crítica: basta a URL para alterar ou apagar, e sem noção de dono o alcance se estende, por inferência, aos registros de terceiros.
 - **Evidência:** [BUG-004](evidencias/BUG-004-escrita-sem-autenticacao.txt). **Testes:** `test_create_requires_authentication`, `test_update_requires_authentication`, `test_delete_requires_authentication` (só status; persistência confirmada pelo script).
 
 ### BUG-005 — Registro sem state.employee deixa a listagem em branco (Alta, P1)
