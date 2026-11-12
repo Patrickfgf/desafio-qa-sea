@@ -84,7 +84,7 @@ Severidade é o impacto técnico; prioridade é a urgência de negócio, e as du
 | Severidade | Critério |
 |---|---|
 | Crítica | perda ou exposição de dados em larga escala, sem pré-condição |
-| Alta | dado gravado ou exposto de forma errada em fluxo principal, ou controle de acesso ausente com alcance limitado |
+| Alta | dado gravado ou exposto de forma errada em fluxo principal, controle de acesso ausente com alcance limitado, ou fluxo principal indisponível para todos |
 | Média | comportamento incorreto com contorno, ou efeito limitado a clientes da API |
 | Baixa | cosmético, usabilidade, má prática sem dano demonstrado |
 
